@@ -1,0 +1,29 @@
+# Archivos de gestión interna de Claude / planificación del equipo
+PLAN.md
+AGENTS.md
+TODO.md
+CHANGELOG.md
+
+# Documentos administrativos del programa (no son material del curso)
+docs/
+
+# Configuración del IDE
+*.code-workspace
+.vscode/
+
+# Memoria interna de Claude Code (nunca al repo)
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+.venv/
+venv/
+*.ipynb_checkpoints/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
