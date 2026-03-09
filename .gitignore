@@ -23,6 +23,19 @@ __pycache__/
 venv/
 *.ipynb_checkpoints/
 
+# LaTeX — archivos auxiliares de compilación (el PDF sí va al repo)
+*.aux
+*.log
+*.bbl
+*.bcf
+*.blg
+*.out
+*.toc
+*.run.xml
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
 # Sistema operativo
 .DS_Store
 Thumbs.db
