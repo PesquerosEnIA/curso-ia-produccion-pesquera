@@ -4,44 +4,65 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage{csquotes}   % requerido por biblatex con babel
 \usepackage{lmodern}
 
 % ─── Geometría y márgenes ────────────────────────────────────────────────────
 \usepackage[
   top=2.5cm, bottom=2.5cm,
-  left=3cm,  right=2.5cm
+  left=3cm,  right=2.5cm,
+  headheight=26pt
 ]{geometry}
 
 % ─── Gráficos e imágenes ─────────────────────────────────────────────────────
 \usepackage{graphicx}
 \usepackage{float}
+\graphicspath{{./}}
 
 % ─── Color y diseño ──────────────────────────────────────────────────────────
 \usepackage[dvipsnames,table]{xcolor}
+
+% UTN institucional
 \definecolor{utnazul}{RGB}{0,70,127}
 \definecolor{utnceleste}{RGB}{0,153,204}
-\definecolor{pescagris}{RGB}{90,90,90}
+% Ariel brand  — Ocean Deep Blue / Sustainable Green / Tech Gold
+\definecolor{arielblue}{RGB}{44,95,124}
+\definecolor{arielgreen}{RGB}{64,145,108}
+\definecolor{techgold}{RGB}{212,160,23}
+% PesquerosEnIA brand — Marine Teal / Deep Ocean / Coral Warm
+\definecolor{pescateal}{RGB}{5,150,105}
+\definecolor{pescaocean}{RGB}{59,130,246}
+\definecolor{coralwarm}{RGB}{249,115,22}
+% Neutrales
+\definecolor{stgray}{RGB}{90,90,90}
+\definecolor{sandgray}{RGB}{120,113,108}
 
 % ─── Tipografía de sección ───────────────────────────────────────────────────
 \usepackage{titlesec}
 \titleformat{\section}
   {\large\bfseries\color{utnazul}}
-  {\thesection.}{0.8em}{}[\titlerule]
+  {\thesection.}{0.8em}{}[\color{utnazul}\titlerule]
 \titleformat{\subsection}
-  {\normalsize\bfseries\color{utnazul!80}}
+  {\normalsize\bfseries\color{arielblue}}
   {\thesubsection.}{0.6em}{}
 \titleformat{\subsubsection}
-  {\normalsize\itshape\color{pescagris}}
+  {\normalsize\bfseries\color{stgray}}
   {}{0em}{}
 
 % ─── Encabezado y pie de página ──────────────────────────────────────────────
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small\color{pescagris} UTN Facultad Regional Chubut --- PesquerosEnIA}
-\fancyhead[R]{\small\color{pescagris} Propuesta de Curso de Extensión 2026}
-\fancyfoot[C]{\small\thepage}
+\fancyhead[L]{%
+  \raisebox{-3pt}{\includegraphics[height=14pt]{logo_utn_frch_negro.png}}%
+  \hspace{6pt}\small\color{stgray} UTN Facultad Regional Chubut}
+\fancyhead[R]{%
+  \small\color{stgray} Propuesta de Extensión 2026%
+  \hspace{6pt}\raisebox{-3pt}{\includegraphics[height=14pt]{logo_pesqueros_symbol.pdf}}}
+\fancyfoot[C]{\small\color{stgray}\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{%
+  \hbox to\headwidth{\color{utnazul}\leaders\hrule height\headrulewidth\hfill}}
 
 % ─── Tablas ──────────────────────────────────────────────────────────────────
 \usepackage{booktabs}
@@ -55,30 +76,55 @@
 \setlist[enumerate]{leftmargin=1.5em, itemsep=2pt}
 
 % ─── Cajas / recuadros ───────────────────────────────────────────────────────
+\usepackage{caption}   % debe cargarse antes de tcolorbox/skins
 \usepackage{tcolorbox}
 \tcbuselibrary{skins,breakable}
 
+% Caja para cada clase del programa
 \newtcolorbox{clasebox}[2][]{
-  colback=utnazul!5,
-  colframe=utnazul,
-  fonttitle=\bfseries\small,
+  enhanced,
+  colback=utnazul!4,
+  colframe=utnazul!50,
+  fonttitle=\bfseries\small\color{white},
+  coltitle=white,
+  attach boxed title to top left={yshift=-2mm, xshift=4mm},
+  boxed title style={colback=utnazul, colframe=utnazul},
   title={#2},
+  left=6pt, right=6pt, top=10pt, bottom=6pt,
   #1
 }
 
+% Caja de datos de portada
 \newtcolorbox{infobox}{
-  colback=utnceleste!10,
-  colframe=utnceleste,
+  enhanced,
+  colback=utnceleste!8,
+  colframe=utnceleste!50,
   boxrule=0.8pt,
-  left=6pt, right=6pt, top=4pt, bottom=4pt
+  left=8pt, right=8pt, top=6pt, bottom=6pt
+}
+
+% Caja para cada docente (color como argumento)
+\newtcolorbox{docentebox}[2][]{
+  enhanced,
+  colback=white,
+  colframe=#1!60,
+  coltitle=white,
+  fonttitle=\bfseries\normalsize,
+  attach boxed title to top left={yshift=-2mm, xshift=4mm},
+  boxed title style={colback=#1, colframe=#1},
+  title={#2},
+  borderline west={3.5pt}{0pt}{#1},
+  left=10pt, right=8pt, top=10pt, bottom=8pt,
+  boxrule=0.4pt,
+  breakable
 }
 
 % ─── Hipervínculos ───────────────────────────────────────────────────────────
 \usepackage[
   colorlinks=true,
   linkcolor=utnazul,
-  urlcolor=utnceleste,
-  citecolor=utnazul
+  urlcolor=pescateal,
+  citecolor=arielblue
 ]{hyperref}
 
 % ─── Bibliografía ────────────────────────────────────────────────────────────
@@ -100,53 +146,90 @@
 % ═══════════════════════════════════════════════════════════════
 \begin{titlepage}
   \centering
+  \thispagestyle{empty}
 
-  % Logo UTN FRCh — reemplazar con archivo local si disponible
-  % \includegraphics[width=4cm]{logo_utn_frch.png}\\[0.5cm]
+  % ── Logos institucionales (UTN FRCh izq · PesquerosEnIA der) ─
+  \noindent
+  \begin{minipage}[c]{0.48\linewidth}
+    \centering
+    \includegraphics[height=2.2cm]{logo_utn_frch_negro.png}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}[c]{0.48\linewidth}
+    \centering
+    \includegraphics[height=1.9cm]{logo_pesqueros_full.pdf}
+  \end{minipage}
 
-  \textcolor{utnazul}{\rule{\linewidth}{2pt}}\\[0.3cm]
+  \vspace{0.4cm}
+  \textcolor{utnazul}{\rule{\linewidth}{2pt}}\\[0.2cm]
 
-  {\Large\bfseries\color{utnazul}
-    Universidad Tecnológica Nacional\\
-    Facultad Regional Chubut}\\[0.2cm]
-  {\normalsize\color{pescagris} Departamento de Ingeniería Pesquera}\\[0.1cm]
-  {\normalsize\color{utnceleste} \url{https://www.frch.utn.edu.ar}}
+  {\large\bfseries\color{utnazul}
+    Universidad Tecnológica Nacional · Facultad Regional Chubut}\\[0.1cm]
+  {\normalsize\color{stgray} Departamento de Ingeniería Pesquera}\\[0.05cm]
+  {\small\color{utnceleste}
+    \href{https://www.frch.utn.edu.ar}{www.frch.utn.edu.ar}}
+
+  \vspace{0.5cm}
+  \textcolor{utnazul}{\rule{\linewidth}{0.8pt}}\\[0.9cm]
+
+  % ── Título ──────────────────────────────────────────────────
+  {\fontsize{22}{28}\selectfont\bfseries\color{utnazul}
+    Inteligencia Artificial}\\[0.2cm]
+  {\fontsize{22}{28}\selectfont\bfseries\color{pescateal}
+    Aplicada a la Producción Pesquera}\\[0.45cm]
+
+  {\large\itshape\color{stgray}
+    Propuesta de Curso de Extensión Universitaria}\\[0.25cm]
+  {\normalsize\color{sandgray}
+    \textit{``Inteligencia Artificial para el Mar del Mañana''} --- PesquerosEnIA}
 
   \vspace{0.6cm}
-  \textcolor{utnazul}{\rule{\linewidth}{0.8pt}}\\[1.2cm]
 
-  {\LARGE\bfseries\color{utnazul}
-    Inteligencia Artificial Aplicada\\[0.2cm]
-    a la Producción Pesquera}\\[0.5cm]
-
-  {\large\itshape\color{pescagris}
-    Propuesta de Curso de Extensión Universitaria}\\[1.2cm]
-
+  % ── Ficha técnica ───────────────────────────────────────────
   \begin{infobox}
     \centering\small
-    \begin{tabular}{ll}
-      \textbf{Modalidad}       & Semipresencial / Virtual sincrónica \\
-      \textbf{Carga horaria}   & 20 horas (10 clases de 2 horas) \\
-      \textbf{Nivel}           & Básico--Intermedio \\
-      \textbf{Organiza}        & UTN Facultad Regional Chubut \\
-      \textbf{Comunidad}       & PesquerosEnIA \\
-      \textbf{Edición}         & 2026 \\
+    \begin{tabular}{ll@{\hspace{1.5cm}}ll}
+      \textbf{Modalidad}     & Semipresencial / Virtual  & \textbf{Nivel}     & Básico--Intermedio \\
+      \textbf{Carga horaria} & 20\,h (10 clases × 2\,h)  & \textbf{Edición}   & 2026 \\
+      \textbf{Organiza}      & UTN Facultad Regional Chubut & \textbf{Comunidad} & PesquerosEnIA \\
     \end{tabular}
   \end{infobox}
 
   \vfill
 
-  {\normalsize\color{pescagris}
-    \textbf{Equipo docente}\\[0.3cm]
-    Ariel Luján Giamportone \textbullet\ Soraya Corvalán \textbullet\ Damian Adolfo Giacone}
+  % ── Equipo docente ──────────────────────────────────────────
+  {\normalsize\color{stgray}\textbf{Equipo docente}}\\[0.5cm]
 
-  \vspace{0.4cm}
-  {\small\color{pescagris}
-    Material disponible bajo licencia \textbf{GPL-3.0} · \textit{Acceso abierto}}\\
-  {\small\color{utnceleste}
+  \begin{minipage}[t]{0.30\linewidth}\centering
+    \textcolor{arielblue}{\rule{1.8cm}{1.5pt}}\\[4pt]
+    \includegraphics[height=0.65cm]{logo_ariel_symbol.pdf}\\[4pt]
+    {\small\bfseries Ariel Luján Giamportone}\\
+    {\footnotesize\color{stgray} Ing. Pesquero · Data Science · IA}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.30\linewidth}\centering
+    \textcolor{pescateal}{\rule{1.8cm}{1.5pt}}\\[4pt]
+    \vspace{0.65cm}%
+    {\small\bfseries Soraya Corvalán}\\
+    {\footnotesize\color{stgray} Ing. Pesquera · Gestión · Sostenibilidad}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.30\linewidth}\centering
+    \textcolor{pescaocean}{\rule{1.8cm}{1.5pt}}\\[4pt]
+    \vspace{0.65cm}%
+    {\small\bfseries Damian Adolfo Giacone}\\
+    {\footnotesize\color{stgray} IA · Tecnología · Automatización}
+  \end{minipage}
+
+  \vspace{0.55cm}
+  \textcolor{utnazul}{\rule{\linewidth}{0.5pt}}\\[0.25cm]
+
+  {\small\color{stgray}
+    Material de acceso abierto bajo licencia \textbf{GPL-3.0}}\\
+  {\small\color{pescateal}
     \url{https://github.com/PesquerosEnIA/curso-ia-produccion-pesquera}}
 
-  \vspace{0.4cm}
+  \vspace{0.2cm}
   \textcolor{utnazul}{\rule{\linewidth}{2pt}}
 \end{titlepage}
 
@@ -177,9 +260,9 @@ A nivel global, la Organización de las Naciones Unidas para la Alimentación y 
 
 \subsection{La inteligencia artificial como herramienta sectorial}
 
-La IA no es una tecnología abstracta: sus aplicaciones concretas en el sector pesquero van desde la predicción de zonas de pesca mediante análisis de variables oceanográficas, hasta el control de calidad en planta por visión artificial, pasando por la optimización de rutas de flota y la automatización de informes regulatorios. Investigaciones recientes demuestran que el uso de modelos de aprendizaje automático para predecir la distribución de especies puede reducir significativamente el esfuerzo de pesca y los costos operativos, contribuyendo simultáneamente a la sostenibilidad del recurso \parencite{Kroodsma2018}.
+La IA no es una tecnología abstracta: sus aplicaciones concretas en el sector pesquero van desde la predicción de zonas de pesca mediante análisis de variables oceanográficas, hasta el control de calidad en planta por visión artificial, pasando por la optimización de rutas de flota y la automatización de informes regulatorios. Investigaciones recientes demuestran que el uso de modelos de aprendizaje automático puede reducir significativamente el esfuerzo de pesca y los costos operativos \parencite{Kroodsma2018}.
 
-Iniciativas análogas en rubros afines demuestran la viabilidad y alta demanda de este tipo de formación para sectores productivos primarios en Argentina. El curso \textit{``IA Aplicada al Agro: Big Data, Automatización y Decisiones Inteligentes''} del Centro de Profesionales en Informática Aplicada (CPIA) constituye un antecedente directo de este modelo formativo para el sector agropecuario \parencite{CPIA2026}. El sector pesquero, con sus particularidades de datos masivos ---oceanográficos, satelitales, de captura---, puede beneficiarse de una propuesta equivalente y específicamente adaptada a sus necesidades.
+Iniciativas análogas en rubros afines demuestran la viabilidad y alta demanda de este tipo de formación para sectores productivos primarios en Argentina. El curso \textit{``IA Aplicada al Agro: Big Data, Automatización y Decisiones Inteligentes''} del Centro de Profesionales en Informática Aplicada (CPIA) constituye un antecedente directo de este modelo formativo \parencite{CPIA2026}. El sector pesquero, con sus particularidades de datos masivos ---oceanográficos, satelitales, de captura---, puede beneficiarse de una propuesta equivalente y adaptada a sus necesidades.
 
 \subsection{La brecha de capacitación en el sector}
 
@@ -196,7 +279,7 @@ Este curso aborda directamente esa brecha, ofreciendo formación práctica, cont
 
 En el marco del \textbf{Congreso Nacional de Ingeniería Pesquera (CONIPE 2025)}, celebrado en Puerto Madryn, la comunidad PesquerosEnIA impartió el curso \textbf{``Alfabetización en Ciencia de Datos e Inteligencia Artificial para Profesionales del Sector Pesquero y Acuícola''} \parencite{PesquerosEnIA2025}. Estructurado en 8 módulos, cubrió desde fundamentos de Python y manipulación de datos hasta introducción a modelos de machine learning aplicados a pesquerías.
 
-La experiencia permitió validar la demanda de capacitación en el sector y ajustar los contenidos a las necesidades reales de los participantes, sentando las bases metodológicas y didácticas del presente curso. El material se encuentra disponible en acceso abierto en:
+La experiencia permitió validar la demanda de capacitación en el sector y ajustar los contenidos a las necesidades reales de los participantes, sentando las bases metodológicas y didácticas del presente curso. Material disponible en acceso abierto:
 \begin{center}
   \url{https://github.com/PesquerosEnIA/curso_alfabetizacion_CONIPE25}
 \end{center}
@@ -210,10 +293,10 @@ La comunidad PesquerosEnIA publica en acceso abierto el compendio \textbf{``Mach
 Los integrantes del equipo docente acumulan experiencia concreta en el desarrollo de modelos computacionales aplicados al sector:
 
 \begin{itemize}
-  \item \textbf{Modelo hidrodinámico para redes de acuicultura:} modelo predictivo de fuerzas hidrodinámicas sobre estructuras de cultivo, con variables ambientales reales (temperatura, corrientes, profundidad).\\
+  \item \textbf{Modelo hidrodinámico para redes de acuicultura:} modelo predictivo de fuerzas hidrodinámicas sobre estructuras de cultivo, con variables ambientales reales.\\
         \url{https://github.com/arielgiamportone/Hydrodinamic_model_Aquaculture_nets}
 
-  \item \textbf{Modelo de red de arrastre en el canal Beagle:} análisis de selectividad y optimización de artes de pesca para especies del Atlántico Sur mediante modelado en Excel con Solver.\\
+  \item \textbf{Modelo de red de arrastre en el canal Beagle:} análisis de selectividad y optimización de artes de pesca para especies del Atlántico Sur.\\
         \url{https://github.com/arielgiamportone/Trawl_net_model_in_Advanced_Excel}
 
   \item \textbf{Selectividad de artes de pesca:} análisis estadístico avanzado (MLE) de selectividad para gestión pesquera sostenible.\\
@@ -270,52 +353,52 @@ El curso se organiza en \textbf{10 clases de 2 horas} (20 horas totales).
 
 \begin{clasebox}{Clase 1 — Estrategia y Transformación Digital en el Sector Pesquero}
   \textit{Docentes: Ariel Giamportone · Soraya Corvalán}\\[4pt]
-  Panorama de la transformación digital global y en el sector pesquero argentino. Concepto de \textit{Smart Fisheries}. Casos de uso de inteligencia artificial en barcos pesqueros, monitoreo del mar y plantas de procesamiento. Desafíos del sector: sostenibilidad, eficiencia de flotas, trazabilidad y control de calidad. Barreras para la adopción tecnológica y oportunidades en la Patagonia.
+  Panorama de la transformación digital global y en el sector pesquero argentino. Concepto de \textit{Smart Fisheries}. Casos de uso de IA en barcos pesqueros, monitoreo del mar y plantas de procesamiento. Desafíos del sector: sostenibilidad, eficiencia de flotas, trazabilidad y control de calidad.
 \end{clasebox}
 
 \begin{clasebox}{Clase 2 — Fundamentos de IA y Modelos de Lenguaje (LLMs)}
   \textit{Docente: Damian Adolfo Giacone}\\[4pt]
-  Diferencia entre IA tradicional y generativa. Funcionamiento conceptual de los modelos generativos. Capacidades actuales de los LLMs. Aplicaciones en el sector pesquero: análisis de reportes de captura, generación de informes técnicos, asistencia para cumplimiento normativo. Limitaciones y uso responsable de la IA.
+  Diferencia entre IA tradicional y generativa. Funcionamiento conceptual de los modelos generativos. Aplicaciones en el sector: análisis de reportes de captura, generación de informes técnicos, asistencia para cumplimiento normativo. Limitaciones y uso responsable.
 \end{clasebox}
 
 \begin{clasebox}{Clase 3 — Prompting y Diseño de Asistentes de IA}
   \textit{Docente: Damian Adolfo Giacone}\\[4pt]
-  Concepto de \textit{prompt} como interfaz. Componentes de un buen prompt: instrucción, contexto, formato y restricciones. Técnicas: prompt directo, con contexto, iterativo, CAR (Contexto--Acción--Rol), \textit{Chain of Thought} y \textit{Few-Shot Prompting}. Diseño de asistentes de IA para análisis de capturas, normativa pesquera y reportes de producción.
+  Concepto de \textit{prompt} como interfaz. Técnicas: prompt directo, con contexto, iterativo, CAR (Contexto--Acción--Rol), \textit{Chain of Thought} y \textit{Few-Shot Prompting}. Diseño de asistentes para análisis de capturas, normativa pesquera y reportes de producción.
 \end{clasebox}
 
 \begin{clasebox}{Clase 4 — Datos y Sensores del Dominio Pesquero}
   \textit{Docentes: Ariel Giamportone · Soraya Corvalán}\\[4pt]
-  Fuentes de datos en la actividad pesquera: sensores oceanográficos, datos satelitales, sistemas AIS/VMS, GPS y registros de captura. Concepto de \textit{Small Data} operativo versus \textit{Big Data} sectorial. Variables ambientales clave: temperatura superficial del mar (SST), corrientes, profundidad y clorofila. Plataformas de datos abiertos: INIDEP, Copernicus, NOAA y Global Fishing Watch. Ejercicio práctico con dataset oceanográfico real.
+  Fuentes de datos en la actividad pesquera: oceanográficos, satelitales, AIS/VMS, GPS y registros de captura. Variables ambientales clave: temperatura superficial del mar (SST), corrientes, profundidad y clorofila. Plataformas de datos abiertos: INIDEP, Copernicus, NOAA y Global Fishing Watch. Ejercicio práctico con dataset oceanográfico real.
 \end{clasebox}
 
 \begin{clasebox}{Clase 5 — Arquitectura de Datos y Big Data en Pesca}
   \textit{Docente: Damian Adolfo Giacone}\\[4pt]
-  Arquitecturas de datos para el sector pesquero: integración de sensores, plataformas de datos y almacenamiento en la nube. Procesamiento de grandes volúmenes de información oceanográfica y de capturas. Aplicación de modelos analíticos para predicción de zonas de pesca y monitoreo de operaciones.
+  Arquitecturas de datos para el sector pesquero: integración de sensores, plataformas en la nube y procesamiento masivo. Aplicación de modelos analíticos para predicción de zonas de pesca y monitoreo de operaciones.
 \end{clasebox}
 
 \begin{clasebox}{Clase 6 — Machine Learning y Modelos Predictivos en Pesca}
   \textit{Docentes: Damian Adolfo Giacone · Ariel Giamportone}\\[4pt]
-  Conceptos básicos de aprendizaje automático aplicados a la actividad pesquera. Modelos de predicción para identificar zonas de pesca, estimar abundancia de especies y analizar patrones de captura. Uso de variables ambientales para construir modelos predictivos. Evaluación de modelos y métricas relevantes para el sector. Ejercicio práctico: predicción de zonas óptimas de pesca con datos reales.
+  Aprendizaje automático aplicado a la actividad pesquera. Modelos predictivos para identificar zonas de pesca, estimar abundancia de especies y analizar patrones de captura. Evaluación con métricas relevantes para el sector. Ejercicio práctico con datos reales.
 \end{clasebox}
 
 \begin{clasebox}{Clase 7 — Visión Artificial en Plantas Pesqueras}
   \textit{Docentes: Damian Adolfo Giacone · Soraya Corvalán}\\[4pt]
-  Introducción a visión por computadora y análisis de imágenes. Aplicaciones en la industria pesquera: clasificación automática de especies, conteo de peces, medición de talla y detección de defectos en plantas de procesamiento. Integración de cámaras y sistemas de visión artificial en líneas de producción.
+  Visión por computadora y análisis de imágenes. Aplicaciones: clasificación automática de especies, conteo de peces, medición de talla y detección de defectos en plantas procesadoras. Integración de sistemas de visión artificial en líneas de producción.
 \end{clasebox}
 
 \begin{clasebox}{Clase 8 — Optimización de Operaciones y Agentes de IA}
   \textit{Docentes: Damian Adolfo Giacone · Ariel Giamportone}\\[4pt]
-  Uso de IA para mejorar la eficiencia de flotas pesqueras: optimización de rutas, reducción del consumo de combustible y planificación de campañas. Mantenimiento predictivo de embarcaciones. Agentes de IA para monitoreo autónomo de flotas y plantas.
+  Optimización de rutas de barcos, reducción del consumo de combustible y planificación de campañas pesqueras. Mantenimiento predictivo de embarcaciones. Agentes de IA para monitoreo autónomo de flotas y plantas.
 \end{clasebox}
 
 \begin{clasebox}{Clase 9 — Visualización y Dashboards para la Toma de Decisiones}
   \textit{Docente: Damian Adolfo Giacone}\\[4pt]
-  Transformación de datos pesqueros en información accionable. Construcción de \textit{dashboards} para monitoreo de capturas, rendimiento de flotas y eficiencia de procesamiento. Herramientas: Excel avanzado, Tableau y Power BI. Trazabilidad digital del producto desde la captura hasta el consumidor.
+  De datos pesqueros a información accionable. \textit{Dashboards} para monitoreo de capturas, rendimiento de flotas y eficiencia de procesamiento. Herramientas: Excel avanzado, Tableau y Power BI. Trazabilidad digital del producto.
 \end{clasebox}
 
 \begin{clasebox}{Clase 10 — Cierre, Conclusiones y Hoja de Ruta}
   \textit{Docentes: Soraya Corvalán · Ariel Giamportone}\\[4pt]
-  Síntesis del recorrido: de los datos a las decisiones en el sector pesquero. Hoja de ruta personal para continuar aprendiendo IA en el sector. Presentación de recursos abiertos de la comunidad PesquerosEnIA. Próximos cursos y espacios de colaboración. Preguntas y cierre institucional UTN FRCh.
+  Síntesis del recorrido: de los datos a las decisiones en el sector pesquero. Hoja de ruta personal para continuar aprendiendo IA en el sector. Presentación de recursos abiertos de la comunidad PesquerosEnIA y próximos espacios de colaboración.
 \end{clasebox}
 
 % ═══════════════════════════════════════════════════════════════
@@ -323,21 +406,20 @@ El curso se organiza en \textbf{10 clases de 2 horas} (20 horas totales).
 % ═══════════════════════════════════════════════════════════════
 \section{Metodología}
 
-El curso adopta un enfoque de \textbf{aprendizaje basado en problemas del dominio} (\textit{problem-based learning}), con las siguientes características:
+El curso adopta un enfoque de \textbf{aprendizaje basado en problemas del dominio} (\textit{problem-based learning}):
 
 \begin{itemize}
-  \item Clases sincrónicas de 2 horas con exposición teórica (40\,\%) y ejercicios prácticos (60\,\%).
+  \item Clases sincrónicas de 2 horas: exposición teórica (40\,\%) y ejercicios prácticos (60\,\%).
   \item Notebooks Jupyter interactivos disponibles en repositorio público, ejecutables sin instalación mediante Google Colab.
   \item Datasets reales y abiertos del sector: INIDEP, Copernicus Marine Service, NOAA, Global Fishing Watch.
   \item Ejemplos contextualizados al sector pesquero argentino en todos los módulos.
-  \item Material completamente en español, adaptado al nivel y perfil de la audiencia objetivo.
-  \item Repositorio público en GitHub bajo la organización PesquerosEnIA, con licencia GPL-3.0.
+  \item Material completamente en español. Repositorio público bajo licencia GPL-3.0.
 \end{itemize}
 
 \begin{table}[H]
   \centering
   \caption{Herramientas y plataformas del curso}
-  \begin{tabularx}{\linewidth}{lX}
+  \begin{tabular}{@{}ll@{}}
     \toprule
     \textbf{Herramienta} & \textbf{Uso} \\
     \midrule
@@ -347,7 +429,7 @@ El curso adopta un enfoque de \textbf{aprendizaje basado en problemas del domini
     GitHub & Repositorio de materiales \\
     Plataforma de videoconferencia & Clases sincrónicas \\
     \bottomrule
-  \end{tabularx}
+  \end{tabular}
 \end{table}
 
 % ═══════════════════════════════════════════════════════════════
@@ -366,30 +448,61 @@ El curso adopta un enfoque de \textbf{aprendizaje basado en problemas del domini
 % ═══════════════════════════════════════════════════════════════
 \section{Equipo Docente}
 
-\subsubsection*{Ariel Luján Giamportone}
-{\small\color{pescagris}\textit{Ingeniería Pesquera · Data Science · IA Aplicada}}
-
-Ingeniero pesquero con especialización en ciencia de datos, inteligencia artificial y optimización de sistemas pesqueros y acuícolas. Investigador y docente en UTN, con experiencia en modelado hidrodinámico de estructuras de acuicultura, selectividad de artes de pesca y machine learning para el sector pesquero. Fundador y colaborador activo de la comunidad PesquerosEnIA.
-
-ORCID: \href{https://orcid.org/0009-0000-1607-9743}{0009-0000-1607-9743} ·
-GitHub: \href{https://github.com/arielgiamportone}{arielgiamportone} ·
-LinkedIn: \href{https://www.linkedin.com/in/agiamportone/}{linkedin.com/in/agiamportone}
+% ── Ariel Giamportone ────────────────────────────────────────
+\begin{docentebox}[arielblue]{Ariel Luján Giamportone — Ing. Pesquero · Data Science · IA}
+  \begin{minipage}[t]{0.76\linewidth}
+    {\small\itshape\color{arielblue}
+      Ingeniero Pesquero $|$ Data Science \& IA para Desarrollo Sostenible}\\[5pt]
+    Ingeniero pesquero con especialización en ciencia de datos, inteligencia artificial
+    y optimización de sistemas pesqueros y acuícolas. Investigador y docente en UTN,
+    con experiencia en modelado hidrodinámico de estructuras de acuicultura, selectividad
+    de artes de pesca y machine learning para el sector pesquero. Fundador y colaborador
+    activo de la comunidad PesquerosEnIA.\\[7pt]
+    \begin{tabular}{@{}ll}
+      \textbf{ORCID:}    & \href{https://orcid.org/0009-0000-1607-9743}{0009-0000-1607-9743} \\
+      \textbf{GitHub:}   & \href{https://github.com/arielgiamportone}{github.com/arielgiamportone} \\
+      \textbf{LinkedIn:} & \href{https://www.linkedin.com/in/agiamportone/}{linkedin.com/in/agiamportone} \\
+    \end{tabular}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}[t]{0.20\linewidth}
+    \centering\vspace{4pt}
+    \includegraphics[width=\linewidth]{logo_ariel_symbol.pdf}
+  \end{minipage}
+\end{docentebox}
 
 \medskip
-\subsubsection*{Soraya Corvalán}
-{\small\color{pescagris}\textit{Ingeniería Pesquera · Gestión y Sostenibilidad}}
 
-Ingeniera pesquera con trayectoria en gestión de recursos pesqueros, sostenibilidad y procesos productivos del sector. Docente y profesional con experiencia en la articulación entre el conocimiento técnico-científico y las necesidades operativas del sector pesquero y acuícola argentino. Colaboradora activa de la comunidad PesquerosEnIA.
-
-LinkedIn: \href{https://www.linkedin.com/in/fishingengineer/}{linkedin.com/in/fishingengineer}
+% ── Soraya Corvalán ──────────────────────────────────────────
+\begin{docentebox}[pescateal]{Soraya Corvalán — Ing. Pesquera · Gestión · Sostenibilidad}
+  {\small\itshape\color{pescateal}
+    Ingeniería Pesquera $|$ Gestión de Recursos $|$ Sostenibilidad}\\[5pt]
+  Ingeniera pesquera con trayectoria en gestión de recursos pesqueros, sostenibilidad
+  y procesos productivos del sector. Docente y profesional con experiencia en la
+  articulación entre el conocimiento técnico-científico y las necesidades operativas
+  del sector pesquero y acuícola argentino. Colaboradora activa de la comunidad
+  PesquerosEnIA.\\[7pt]
+  \begin{tabular}{@{}ll}
+    \textbf{LinkedIn:} & \href{https://www.linkedin.com/in/fishingengineer/}{linkedin.com/in/fishingengineer} \\
+    \textbf{Empresa:}  & \href{https://www.linkedin.com/company/soraya-corvalan/}{linkedin.com/company/soraya-corvalan} \\
+  \end{tabular}
+\end{docentebox}
 
 \medskip
-\subsubsection*{Damian Adolfo Giacone}
-{\small\color{pescagris}\textit{Inteligencia Artificial · Tecnología · Automatización}}
 
-Profesional en tecnología e inteligencia artificial con experiencia en el desarrollo y aplicación de soluciones basadas en modelos de lenguaje, automatización de procesos y sistemas de datos. Especialista en \textit{prompting}, diseño de asistentes de IA y arquitecturas de datos para entornos productivos. Colaborador de la comunidad PesquerosEnIA.
-
-LinkedIn: \href{https://www.linkedin.com/in/damian-adolfo-giacone/}{linkedin.com/in/damian-adolfo-giacone}
+% ── Damian Adolfo Giacone ─────────────────────────────────────
+\begin{docentebox}[pescaocean]{Damian Adolfo Giacone — IA · Tecnología · Automatización}
+  {\small\itshape\color{pescaocean}
+    Inteligencia Artificial $|$ Tecnología $|$ Automatización de Procesos}\\[5pt]
+  Profesional en tecnología e inteligencia artificial con experiencia en el desarrollo
+  y aplicación de soluciones basadas en modelos de lenguaje, automatización de procesos
+  y sistemas de datos. Especialista en \textit{prompting}, diseño de asistentes de IA
+  y arquitecturas de datos para entornos productivos. Colaborador de la comunidad
+  PesquerosEnIA.\\[7pt]
+  \begin{tabular}{@{}ll}
+    \textbf{LinkedIn:} & \href{https://www.linkedin.com/in/damian-adolfo-giacone/}{linkedin.com/in/damian-adolfo-giacone} \\
+  \end{tabular}
+\end{docentebox}
 
 % ═══════════════════════════════════════════════════════════════
 %  10. BIBLIOGRAFÍA
@@ -397,32 +510,13 @@ LinkedIn: \href{https://www.linkedin.com/in/damian-adolfo-giacone/}{linkedin.com
 \newpage
 \printbibliography[title={Referencias Bibliográficas}]
 
-% Fallback manual si no se usa biber:
-\iffalse
-\section*{Referencias Bibliográficas}
-\begin{itemize}[leftmargin=2em]
-  \small
-  \item BID. (2020). \textit{La adopción digital en el sector agropecuario y rural de América Latina y el Caribe}. Banco Interamericano de Desarrollo. \url{https://doi.org/10.18235/0002623}
-  \item CEPAL. (2021). \textit{Tecnologías digitales para la transformación productiva: oportunidades y desafíos para América Latina y el Caribe}. Naciones Unidas.
-  \item FAO. (2020). \textit{The State of World Fisheries and Aquaculture 2020}. FAO. \url{https://doi.org/10.4060/ca9229en}
-  \item FAO. (2022). \textit{The State of World Fisheries and Aquaculture 2022}. FAO. \url{https://doi.org/10.4060/cc0461en}
-  \item FAO. (2024). \textit{The State of World Fisheries and Aquaculture 2024}. FAO. \url{https://doi.org/10.4060/cd0683en}
-  \item Global Fishing Watch. (2023). \textit{Global Fishing Watch Data and Methods}. \url{https://globalfishingwatch.org/}
-  \item Kroodsma, D.\,A., et al. (2018). Tracking the global footprint of fisheries. \textit{Science}, \textit{359}(6378), 904--908. \url{https://doi.org/10.1126/science.aao5646}
-  \item OECD. (2021). \textit{OECD Digital Economy Outlook 2021}. OECD Publishing. \url{https://doi.org/10.1787/eaaa831a-en}
-  \item PesquerosEnIA. (2025). \textit{Alfabetización en Ciencia de Datos e IA — CONIPE 2025}. GitHub. \url{https://github.com/PesquerosEnIA/curso_alfabetizacion_CONIPE25}
-  \item PesquerosEnIA. (2024). \textit{ML and DL for Fisheries Engineers}. GitHub. \url{https://github.com/PesquerosEnIA/ML_DL_FisheriesEngineers}
-  \item Simmonds, E.\,J., \& MacLennan, D.\,N. (2005). \textit{Fisheries Acoustics: Theory and Practice} (2nd ed.). Blackwell Science.
-  \item Subsecretaría de Pesca y Acuicultura. (2023). \textit{Informe de la actividad pesquera nacional}. Ministerio de Agricultura, Ganadería y Pesca de la Nación.
-\end{itemize}
-\fi
-
 \vfill
 \begin{center}
-  \small\color{pescagris}
+  \includegraphics[height=1.0cm]{logo_pesqueros_full.pdf}\\[6pt]
+  \small\color{stgray}
   \textit{Propuesta elaborada por el equipo docente PesquerosEnIA --- UTN FRCh, 2026.}\\
-  Material disponible bajo licencia GPL-3.0 · Acceso abierto.\\
-  \url{https://github.com/PesquerosEnIA/curso-ia-produccion-pesquera}
+  Material de acceso abierto bajo licencia GPL-3.0.\\[3pt]
+  {\color{pescateal}\url{https://github.com/PesquerosEnIA/curso-ia-produccion-pesquera}}
 \end{center}
 
 \end{document}
