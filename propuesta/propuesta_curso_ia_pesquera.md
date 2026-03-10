@@ -60,7 +60,29 @@ Este curso busca abordar directamente esa brecha, ofreciendo formación práctic
 
 ## 3. Antecedentes y Experiencia Acumulada
 
-### 3.1. CONIPE 2025 — Puerto Madryn
+### 3.1. I CONIPE 2019 — Minicurso "Industria 4.0: ¿es posible?"
+
+En el marco del **I Congreso Nacional de Ingeniería Pesquera (CONIPE 2019)**, celebrado en la UTN FRCh los días 29 y 30 de noviembre de 2019, el equipo dictó el minicurso **"Industria 4.0: ¿es posible?: el desafío de la adopción de la tecnología en el proceso productivo pesquero"** (8 horas de duración).
+
+**Docentes:** Giacone, D.; Corvalán, S.; González, C.
+
+Este minicurso constituyó uno de los primeros antecedentes sistemáticos de formación en transformación digital dirigida específicamente a profesionales del sector pesquero argentino en el ámbito de la UTN, abordando la brecha tecnológica y las condiciones de adopción de la Industria 4.0 en el proceso productivo pesquero.
+
+---
+
+### 3.2. I CONIPE 2019 — Mesa redonda "Industria 4.0 en el sector pesquero"
+
+En el mismo evento, se coordinó la mesa redonda **"Industria 4.0 en el sector pesquero: la nueva revolución digital"**, con participación interdisciplinaria de referentes académicos y profesionales del sector.
+
+**Coordinadora:** Corvalán, S.
+**Ponentes:** Dra. Zanfrillo, A.; Lic. Giacone, D.; Ing. Fábrega, A.; Ing. Giamportone, A. L.
+
+La presentación se encuentra publicada en el Anuario de Jornadas, Encuentros y Actividades de la UTN (AJEA):
+[https://rtyc.utn.edu.ar/index.php/ajea/article/view/873/792](https://rtyc.utn.edu.ar/index.php/ajea/article/view/873/792)
+
+---
+
+### 3.3. CONIPE 2025 — Puerto Madryn
 
 En el marco del **Congreso Nacional de Ingeniería Pesquera (CONIPE 2025)**, celebrado en Puerto Madryn, la comunidad PesquerosEnIA impartió el curso **"Alfabetización en Ciencia de Datos e Inteligencia Artificial para Profesionales del Sector Pesquero y Acuícola"**. Dicho curso, estructurado en 8 módulos, cubrió desde fundamentos de Python y manipulación de datos hasta introducción a modelos de machine learning aplicados a pesquerías.
 
@@ -69,13 +91,13 @@ El material de este curso se encuentra disponible en acceso abierto en el reposi
 
 La experiencia permitió validar la demanda de capacitación en el sector y ajustar los contenidos a las necesidades reales de los participantes —ingenieros pesqueros, biólogos marinos y técnicos de planta—, sentando las bases metodológicas y didácticas del presente curso.
 
-### 3.2. ML & Deep Learning for Fisheries Engineers (PesquerosEnIA)
+### 3.4. ML & Deep Learning for Fisheries Engineers (PesquerosEnIA)
 
 La comunidad PesquerosEnIA ha desarrollado y publica en acceso abierto el compendio **"Machine Learning and Deep Learning for Fisheries Engineers"**, una colección de notebooks Jupyter con aplicaciones de ML/DL contextualizadas al sector pesquero argentino: predicción de zonas de pesca, estimación de abundancia de especies, clasificación automática por visión artificial y optimización de operaciones de flota.
 
 Repositorio: [https://github.com/PesquerosEnIA/ML_DL_FisheriesEngineers](https://github.com/PesquerosEnIA/ML_DL_FisheriesEngineers)
 
-### 3.3. Trabajos previos del equipo docente
+### 3.5. Trabajos previos del equipo docente
 
 Los integrantes del equipo docente acumulan experiencia en el desarrollo de modelos computacionales aplicados al sector:
 
@@ -227,13 +249,14 @@ El curso adopta un enfoque **aprendizaje basado en problemas del dominio** (*pro
 ## 9. Equipo Docente
 
 ### Ariel Luján Giamportone
-**Ingeniería Pesquera · Data Science · IA Aplicada**
+**Ingeniería Pesquera · Data Science · IA Aplicada · Industria 4.0**
 
-Ingeniero pesquero con especialización en ciencia de datos, inteligencia artificial y optimización de sistemas pesqueros y acuícolas. Investigador y docente en UTN, con experiencia en modelado hidrodinámico de estructuras de acuicultura, selectividad de artes de pesca y machine learning para el sector pesquero. Fundador y colaborador activo de la comunidad PesquerosEnIA.
+Ingeniero pesquero con especialización en ciencia de datos, inteligencia artificial y optimización de sistemas pesqueros y acuícolas. Máster en Industria 4.0: Robótica, RPA, IoT & IA (IEBS School). Investigador y docente en UTN, con experiencia en modelado hidrodinámico de estructuras de acuicultura, selectividad de artes de pesca y machine learning para el sector pesquero. Fundador y colaborador activo de la comunidad PesquerosEnIA.
 
 - ORCID: [0009-0000-1607-9743](https://orcid.org/0009-0000-1607-9743)
 - GitHub: [arielgiamportone](https://github.com/arielgiamportone)
 - LinkedIn: [linkedin.com/in/agiamportone](https://www.linkedin.com/in/agiamportone/)
+- Máster: [IEBS School — Industria 4.0](https://www.iebschool.com/)
 
 ---
 
@@ -247,9 +270,9 @@ Ingeniera pesquera con trayectoria en gestión de recursos pesqueros, sostenibil
 ---
 
 ### Damian Adolfo Giacone
-**Inteligencia Artificial · Tecnología · Automatización**
+**Lic. en Sistemas · Inteligencia Artificial · Automatización**
 
-Profesional en tecnología e inteligencia artificial con experiencia en el desarrollo y aplicación de soluciones basadas en modelos de lenguaje, automatización de procesos y sistemas de datos. Especialista en *prompting*, diseño de asistentes de IA y arquitecturas de datos para entornos productivos. Colaborador de la comunidad PesquerosEnIA.
+Licenciado en Sistemas con experiencia en el desarrollo y aplicación de soluciones basadas en inteligencia artificial, modelos de lenguaje y automatización de procesos. Especialista en *prompting*, diseño de asistentes de IA y arquitecturas de datos para entornos productivos. Docente con trayectoria en formación tecnológica para el sector pesquero desde el I CONIPE 2019. Colaborador de la comunidad PesquerosEnIA.
 
 - LinkedIn: [linkedin.com/in/damian-adolfo-giacone](https://www.linkedin.com/in/damian-adolfo-giacone/)
 
@@ -274,6 +297,10 @@ Profesional en tecnología e inteligencia artificial con experiencia en el desar
 - Muñoz-Mas, R., Marcos-García, P., Martínez-Capel, F., & Alcaraz-Hernández, J. D. (2020). Combining generalized additive models and random forests to characterize riverine thermal regimes. *Computers & Geosciences*, 134, 104356.
 
 - OECD. (2021). *OECD Digital Economy Outlook 2021*. OECD Publishing. https://doi.org/10.1787/eaaa831a-en
+
+- Corvalán, S., Zanfrillo, A., Giacone, D., Fábrega, A., & Giamportone, A. L. (2019). Industria 4.0 en el sector pesquero: la nueva revolución digital [Mesa redonda]. *AJEA — Anuario de Jornadas, Encuentros y Actividades de la UTN*. I Congreso Nacional de Ingeniería Pesquera (CONIPE 2019), UTN FRCh. https://rtyc.utn.edu.ar/index.php/ajea/article/view/873/792
+
+- Giacone, D., Corvalán, S., & González, C. (2019). *Industria 4.0: ¿es posible?: el desafío de la adopción de la tecnología en el proceso productivo pesquero* [Minicurso, 8 h]. I Congreso Nacional de Ingeniería Pesquera (CONIPE 2019), UTN FRCh, Rawson, 29–30 de noviembre de 2019.
 
 - PesquerosEnIA. (2025). *Alfabetización en Ciencia de Datos e IA para Profesionales del Sector Pesquero y Acuícola — CONIPE 2025*. GitHub. https://github.com/PesquerosEnIA/curso_alfabetizacion_CONIPE25
 
