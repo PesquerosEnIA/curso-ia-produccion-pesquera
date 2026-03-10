@@ -17,7 +17,7 @@
 | | |
 |---|---|
 | **Modalidad** | Semipresencial / Virtual sincrónica |
-| **Carga horaria** | 20 horas (10 clases de 2 horas) |
+| **Carga horaria** | 23 horas (10 clases de 2 h + 2 charlas complementarias de 1,5 h) |
 | **Nivel** | Básico–Intermedio |
 | **Destinatarios** | Profesionales del sector pesquero y acuícola |
 | **Organiza** | UTN Facultad Regional Chubut |
@@ -141,7 +141,7 @@ El curso está dirigido a:
 
 ## 6. Programa de Contenidos
 
-El curso se organiza en **10 clases de 2 horas** (20 horas totales), con la siguiente estructura:
+El curso se organiza en **10 clases de 2 horas** (20 horas) más **2 charlas complementarias de 1,5 horas** a cargo del Dr. Juan Domingo González (**23 horas totales**):
 
 ---
 
@@ -215,6 +215,25 @@ Síntesis del recorrido: de los datos a las decisiones en el sector pesquero. Ho
 
 ---
 
+### Charlas Complementarias — Dr. Juan Domingo González *(Docente Invitado)*
+**2 sesiones · 1,5 horas cada una · 3 horas adicionales**
+
+---
+
+#### Charla A — Acústica Computacional e IA aplicada a la Detección de Cardúmenes
+**Docente:** Dr. Juan Domingo González (SENASA / DIIV-ARA-CONICET / UBA)
+
+Fundamentos de acústica submarina aplicada a la detección de recursos pesqueros. Modelos computacionales de dispersión acústica para estimación de biomasa de anchoíta (*Engraulis anchoita*) y otras especies pelágicas de la Plataforma Continental Argentina. Aplicaciones de machine learning en el análisis de señales de ecosonda y SONAR. Articulación entre los modelos acústicos y los sistemas de monitoreo y gestión del recurso pesquero.
+
+---
+
+#### Charla B — Clustering Robusto y Estadística Computacional aplicada a Datos Pesqueros
+**Docente:** Dr. Juan Domingo González (UBA / Universidad Nacional Guillermo Brown)
+
+Métodos de clustering robusto para clasificación de zonas de pesca, análisis de comportamiento de cardúmenes y patrones oceanográficos. Introducción a los paquetes RMBC y ktaucenters (CRAN-R). Detección de valores atípicos en series de captura y datos ambientales. Aplicaciones prácticas para el análisis estadístico riguroso de datos pesqueros en contextos de investigación y gestión.
+
+---
+
 ## 7. Metodología
 
 El curso adopta un enfoque **aprendizaje basado en problemas del dominio** (*problem-based learning*), con las siguientes características:
@@ -249,32 +268,42 @@ El curso adopta un enfoque **aprendizaje basado en problemas del dominio** (*pro
 ## 9. Equipo Docente
 
 ### Ariel Luján Giamportone
-**Ingeniería Pesquera · Data Science · IA Aplicada · Industria 4.0**
+**Ingeniero Pesquero · Data Science · IA · MBA Logística y Operaciones**
 
-Ingeniero pesquero con especialización en ciencia de datos, inteligencia artificial y optimización de sistemas pesqueros y acuícolas. Máster en Industria 4.0: Robótica, RPA, IoT & IA (IEBS School). Investigador y docente en UTN, con experiencia en modelado hidrodinámico de estructuras de acuicultura, selectividad de artes de pesca y machine learning para el sector pesquero. Fundador y colaborador activo de la comunidad PesquerosEnIA.
+Ingeniero Pesquero (UTN FRCh, 2016) especializado en ciencia de datos, analítica e IA aplicada a sectores productivos. MBA en Dirección Logística y Operaciones (Tech Universidad Tecnológica, 2024), con tesis en *Machine Learning para la Optimización de Operaciones Logísticas y Sostenibilidad*. Más de 10 años de experiencia en análisis de datos y modelado predictivo aplicado a los sectores pesquero, acuícola, logístico y científico. Vinculador Tecnológico en CADIC-CONICET (2019–2021). Actualmente Especialista en Estrategia de Datos y Transformación Digital (Intervalor Data, Madrid). Fundador y colaborador activo de la comunidad PesquerosEnIA.
 
 - ORCID: [0009-0000-1607-9743](https://orcid.org/0009-0000-1607-9743)
 - GitHub: [arielgiamportone](https://github.com/arielgiamportone)
 - LinkedIn: [linkedin.com/in/agiamportone](https://www.linkedin.com/in/agiamportone/)
-- Máster: [IEBS School — Industria 4.0](https://www.iebschool.com/)
 
 ---
 
 ### Soraya Corvalán
-**Ingeniería Pesquera · Gestión y Sostenibilidad**
+**Ingeniería Pesquera · Gestión Tecnológica · Investigación · Docencia UTN · FAO**
 
-Ingeniera pesquera con trayectoria en gestión de recursos pesqueros, sostenibilidad y procesos productivos del sector. Docente y profesional con experiencia en la articulación entre el conocimiento técnico-científico y las necesidades operativas del sector pesquero y acuícola argentino. Colaboradora activa de la comunidad PesquerosEnIA.
+Primera graduada de Ingeniería Pesquera de Argentina (UTN FRCh, 2001). Especialista en Management Tecnológico (UTN FRCh, 2015) y Diplomada como Educadora Internacional de Ingeniería (PCEII–IGIP). Investigadora en el Instituto Nacional de Investigación y Desarrollo Pesquero (INIDEP, 2014–2020) y ex Directora General de Coordinación Pesquera y Acuicultura de la Provincia del Chubut (2013–2014). Experta nacional en el Proyecto FAO TCP/ARG/4001D sobre diagnóstico integral de puertos marítimo-pesqueros (2025–act.). Directora de Tecnología de la Red Panamericana de Inspección y Control de Calidad de Productos Pesqueros y Acuicultura (REDPAN, 2015–act.). Consejera ad-honorem del Consejo Asesor Tecnológico de la Iniciativa Pampa Azul (MINCyT). Profesora Asociada Concursada en UTN FRCh (Tecnología del Producto Pesquero III, desde 2023). Más de 25 años de trayectoria en la industria pesquera argentina. Colaboradora activa de la comunidad PesquerosEnIA.
 
 - LinkedIn: [linkedin.com/in/fishingengineer](https://www.linkedin.com/in/fishingengineer/)
+- Portfolio: [bulbapp.com/SorayaCorvalan](https://www.bulbapp.com/SorayaCorvalan/portfolio)
 
 ---
 
 ### Damian Adolfo Giacone
-**Lic. en Sistemas · Inteligencia Artificial · Automatización**
+**Lic. en Sistemas y Computación · Máster Industria 4.0 (IEBS) · IA · Ciberseguridad Industrial**
 
-Licenciado en Sistemas con experiencia en el desarrollo y aplicación de soluciones basadas en inteligencia artificial, modelos de lenguaje y automatización de procesos. Especialista en *prompting*, diseño de asistentes de IA y arquitecturas de datos para entornos productivos. Docente con trayectoria en formación tecnológica para el sector pesquero desde el I CONIPE 2019. Colaborador de la comunidad PesquerosEnIA.
+Licenciado en Sistemas y Computación (Pontificia Universidad Católica Argentina) con Máster en Industria 4.0: Robótica, RPA, IoT & IA (IEBS School, España). Más de 20 años de experiencia en manufactura, tecnología de la información y automatización industrial. Especialista en Industria 4.0, analítica de datos, ciberseguridad IT/OT y arquitectura de software. Technology and Cybersecurity Officer en Legal-Hub. Docente Titular en la Universidad del Gran Rosario (Infraestructuras Críticas; Gestión de la Continuidad del Negocio). Ex Coordinador de IT y docente en UTN FRCh (2016–2022). Experiencia en el sector pesquero patagónico como Líder IT en Alpesca S.A., Puerto Madryn (2003–2010). Docente del equipo PesquerosEnIA desde el I CONIPE 2019.
 
 - LinkedIn: [linkedin.com/in/damian-adolfo-giacone](https://www.linkedin.com/in/damian-adolfo-giacone/)
+- Máster: [IEBS School — Industria 4.0](https://www.iebschool.com/)
+
+---
+
+### Juan Domingo González *(Docente Invitado)*
+**Dr. en Matemática Aplicada (UBA) · IA · Estadística Computacional · Acústica Pesquera · SENASA**
+
+Doctor en Matemática Aplicada (Universidad de Buenos Aires, 2019), tesis *"Métodos de Clustering Robustos"* (calificación Sobresaliente). Licenciado en Ciencias Matemáticas con orientación Aplicada (UBA, 2011). Actualmente Consultor en Inteligencia Artificial en la Dirección de Tecnologías de la Información del SENASA (2023–act.) y Director de Proyectos en la División de Sistemas Acústicos del DIIV-ARA/CONICET/MINDEF, con investigaciones en modelos acústicos computacionales aplicados a la detección submarina y a pesquerías en la Plataforma Continental Argentina. Profesor Adjunto en la Facultad de Ingeniería de la UBA (Probabilidad, Estadística y Tópicos de Machine Learning, 2022–act.) y en la Universidad Nacional Guillermo Brown (Licenciatura en Ciencia de Datos, 2020–act.). Autor de más de 10 publicaciones en revistas indexadas con referato, incluyendo trabajos sobre estimación de *target strength* acústico de anchoíta (*Engraulis anchoita*) en el Mar Argentino. Creador de los paquetes R `RMBC` y `ktaucenters` para clustering robusto, disponibles en CRAN.
+
+- Email: juanrst@hotmail.com
 
 ---
 
