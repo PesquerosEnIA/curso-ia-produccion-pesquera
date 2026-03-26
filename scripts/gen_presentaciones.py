@@ -33,8 +33,12 @@ W = Inches(13.33)
 H = Inches(7.5)
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LOGO_UTN = os.path.join(BASE, "propuesta", "logo_utn_frch_negro.png")
-LOGO_UTN_40 = os.path.join(BASE, "propuesta", "logo_utn_frch_40aniv.png")
+LOGO_UTN          = os.path.join(BASE, "propuesta", "logo_utn_frch_negro.png")
+LOGO_UTN_40       = os.path.join(BASE, "propuesta", "logo_utn_frch_40aniv.png")
+LOGO_PESQUEROS    = os.path.join(BASE, "propuesta", "logo_pesqueros_full.png")
+LOGO_PESQ_SYMBOL  = os.path.join(BASE, "propuesta", "logo_pesqueros_symbol.png")
+LOGO_ARIEL_FULL   = os.path.join(BASE, "propuesta", "logo_ariel_full.png")
+LOGO_ARIEL_SYMBOL = os.path.join(BASE, "propuesta", "logo_ariel_symbol.png")
 
 
 # ── Primitivas de dibujo ──────────────────────────────────────────────────────
@@ -157,53 +161,92 @@ def divider_line(slide, x, y, w, color=UTNCELESTE, thickness=Pt(1.5)):
 # ── Layouts de slides ─────────────────────────────────────────────────────────
 
 def make_cover_slide(prs, title, subtitle, docentes, clase_num, accent=UTNAZUL):
-    """Slide de portada con fondo azul, logos y datos del docente."""
+    """Slide de portada con fondo azul, logos reales y datos del docente."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank
-    slide.shapes.title if hasattr(slide.shapes, 'title') else None
 
-    # Fondo completo en azul UTN
+    # ── Fondo ────────────────────────────────────────────────────────────────
     add_rect(slide, 0, 0, W, H, accent)
 
-    # Franja decorativa inferior en celeste
-    add_rect(slide, 0, H - Inches(1.2), W, Inches(1.2), UTNCELESTE)
+    # Franja diagonal decorativa (rectángulo rotado simulado con dos rectángulos)
+    # Banda de acento en diagonal — simulada con un bloque semitransparente
+    dark_accent = RGBColor(
+        max(0, accent[0] - 30),
+        max(0, accent[1] - 10),
+        max(0, accent[2] - 20)
+    )
+    add_rect(slide, W - Inches(4.5), 0, Inches(4.5), H, dark_accent)
 
-    # Franja superior delgada (dorada)
-    add_rect(slide, 0, 0, W, Inches(0.12), TECHGOLD)
+    # Franja dorada superior
+    add_rect(slide, 0, 0, W, Inches(0.10), TECHGOLD)
+    # Franja dorada inferior
+    add_rect(slide, 0, H - Inches(0.10), W, Inches(0.10), TECHGOLD)
 
-    # Logo UTN FRCh (superior izquierdo, invertido sobre fondo oscuro)
-    # Usamos logo 40 aniversario que puede tener mejor contraste
-    logo_y = Inches(0.18)
-    logo_h = Inches(0.85)
+    # ── Franja inferior para datos del curso ─────────────────────────────────
+    add_rect(slide, 0, H - Inches(1.15), W, Inches(1.05),
+             RGBColor(0, 0, 0))  # negro semitransparente
+    # Superponer un rect con el color de acento a menor opacidad
+    strip = add_rect(slide, 0, H - Inches(1.15), W, Inches(1.05),
+                     RGBColor(max(0, accent[0]-15), max(0, accent[1]+20), min(255, accent[2]+40)))
+
+    # ── Logos en la franja superior ──────────────────────────────────────────
+    logo_y  = Inches(0.17)
+    logo_h  = Inches(0.80)
+
+    # Logo UTN FRCh (izquierda)
     if os.path.exists(LOGO_UTN):
-        add_logo(slide, LOGO_UTN, Inches(0.45), logo_y, Emu(int(logo_h)))
+        add_logo(slide, LOGO_UTN, Inches(0.40), logo_y, Emu(int(logo_h)))
 
-    # Badge "PesquerosEnIA" (placeholder — PDF no compatible)
-    add_logo_placeholder(slide, "PesquerosEnIA", W - Inches(2.1), logo_y, Inches(1.85), logo_h, PESCATEAL)
+    # Logo PesquerosEnIA (derecha) — ahora con PNG real
+    if os.path.exists(LOGO_PESQUEROS):
+        pesq_h = Inches(0.65)
+        pic = add_logo(slide, LOGO_PESQUEROS, W - Inches(3.6), logo_y + Inches(0.08), Emu(int(pesq_h)))
+    else:
+        add_logo_placeholder(slide, "PesquerosEnIA",
+                             W - Inches(2.2), logo_y, Inches(2.0), logo_h, PESCATEAL)
 
-    # Línea separadora en celeste
-    add_rect(slide, Inches(0.45), Inches(1.35), W - Inches(0.9), Inches(0.04), UTNCELESTE)
+    # Logo Ariel (símbolo pequeño, junto al de Pesqueros)
+    if os.path.exists(LOGO_ARIEL_SYMBOL):
+        ariel_h = Inches(0.65)
+        add_logo(slide, LOGO_ARIEL_SYMBOL, W - Inches(1.2), logo_y + Inches(0.08), Emu(int(ariel_h)))
 
-    # Número de clase (pequeño, celeste claro)
-    add_textbox(slide, f"CLASE {clase_num}", Inches(0.45), Inches(1.55), Inches(5), Inches(0.5),
-                size=13, color=UTNCELESTE, bold=True, font="Calibri")
+    # ── Separador bajo logos ──────────────────────────────────────────────────
+    add_rect(slide, Inches(0.40), Inches(1.18), W - Inches(0.80), Inches(0.035), UTNCELESTE)
 
-    # Título principal
-    add_textbox(slide, title, Inches(0.45), Inches(2.0), W - Inches(0.9), Inches(2.2),
-                size=36, color=WHITE, bold=True, font="Calibri", align=PP_ALIGN.LEFT)
+    # ── Número de clase ───────────────────────────────────────────────────────
+    add_textbox(slide, f"CLASE {clase_num}",
+                Inches(0.45), Inches(1.35), Inches(4), Inches(0.42),
+                size=12, color=UTNCELESTE, bold=True, font="Calibri")
 
-    # Subtítulo
-    add_textbox(slide, subtitle, Inches(0.45), Inches(4.1), W - Inches(0.9), Inches(0.8),
-                size=19, color=UTNCELESTE, bold=False, font="Calibri", align=PP_ALIGN.LEFT)
+    # ── Título principal ──────────────────────────────────────────────────────
+    add_textbox(slide, title,
+                Inches(0.45), Inches(1.75), W - Inches(5.2), Inches(2.5),
+                size=34, color=WHITE, bold=True, font="Calibri", align=PP_ALIGN.LEFT)
 
-    # Docentes (sobre franja inferior celeste)
-    add_textbox(slide, f"Docentes: {docentes}", Inches(0.45), H - Inches(1.1), Inches(8), Inches(0.5),
-                size=14, color=WHITE, bold=False, font="Calibri")
+    # ── Subtítulo ─────────────────────────────────────────────────────────────
+    add_textbox(slide, subtitle,
+                Inches(0.45), Inches(4.15), W - Inches(5.2), Inches(0.75),
+                size=17, color=UTNCELESTE, bold=False, font="Calibri", align=PP_ALIGN.LEFT)
 
-    # Curso (sobre franja inferior)
+    # ── Decoración lateral derecha (área oscura) ──────────────────────────────
+    add_textbox(slide, "IA · Pesca · Datos",
+                W - Inches(4.2), Inches(2.5), Inches(3.8), Inches(1.0),
+                size=22, color=RGBColor(180, 210, 240), bold=False,
+                font="Calibri", align=PP_ALIGN.CENTER, italic=True)
+
+    add_textbox(slide, "UTN FRCh + PesquerosEnIA",
+                W - Inches(4.2), Inches(3.4), Inches(3.8), Inches(0.6),
+                size=13, color=RGBColor(150, 190, 230), bold=False,
+                font="Calibri", align=PP_ALIGN.CENTER)
+
+    # ── Datos en franja inferior ──────────────────────────────────────────────
+    add_textbox(slide, f"Docentes: {docentes}",
+                Inches(0.45), H - Inches(1.05), Inches(9), Inches(0.48),
+                size=14, color=WHITE, bold=True, font="Calibri")
+
     add_textbox(slide,
-                "Inteligencia Artificial Aplicada a la Producción Pesquera · UTN FRCh · 2026",
-                Inches(0.45), H - Inches(0.65), W - Inches(0.9), Inches(0.5),
-                size=11, color=RGBColor(200, 230, 255), bold=False, font="Calibri",
+                "Inteligencia Artificial Aplicada a la Produccion Pesquera  |  UTN FRCh  |  2026",
+                Inches(0.45), H - Inches(0.60), W - Inches(0.9), Inches(0.45),
+                size=10, color=RGBColor(190, 220, 250), bold=False, font="Calibri",
                 align=PP_ALIGN.LEFT)
 
     return slide
@@ -398,48 +441,72 @@ def make_two_col_slide(prs, title, subtitle_note, left_content, right_content,
 
 
 def make_closing_slide(prs, title, subtitle, repo, clase_siguiente="", accent=UTNAZUL):
-    """Slide de cierre."""
+    """Slide de cierre con logos reales."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     add_rect(slide, 0, 0, W, H, accent)
-    add_rect(slide, 0, 0, W, Inches(0.12), TECHGOLD)
-    add_rect(slide, 0, H - Inches(0.12), W, Inches(0.12), TECHGOLD)
 
+    # Panel oscuro decorativo derecho
+    dark_accent = RGBColor(max(0,accent[0]-30), max(0,accent[1]-10), max(0,accent[2]-20))
+    add_rect(slide, W - Inches(3.8), 0, Inches(3.8), H, dark_accent)
+
+    add_rect(slide, 0, 0, W, Inches(0.10), TECHGOLD)
+    add_rect(slide, 0, H - Inches(0.10), W, Inches(0.10), TECHGOLD)
+
+    # Logos alineados arriba
+    logo_h = Inches(0.80)
     if os.path.exists(LOGO_UTN):
-        add_logo(slide, LOGO_UTN, Inches(0.4), Inches(0.25), Emu(int(Inches(0.9))))
+        add_logo(slide, LOGO_UTN, Inches(0.40), Inches(0.17), Emu(int(logo_h)))
 
-    add_logo_placeholder(slide, "PesquerosEnIA", W - Inches(2.2), Inches(0.22), Inches(2.0), Inches(0.9), PESCATEAL)
+    if os.path.exists(LOGO_PESQUEROS):
+        add_logo(slide, LOGO_PESQUEROS, Inches(3.2), Inches(0.22), Emu(int(Inches(0.65))))
 
-    add_rect(slide, Inches(0.4), Inches(1.4), W - Inches(0.8), Inches(0.04), UTNCELESTE)
+    if os.path.exists(LOGO_ARIEL_SYMBOL):
+        add_logo(slide, LOGO_ARIEL_SYMBOL, Inches(5.6), Inches(0.22), Emu(int(Inches(0.65))))
 
-    add_textbox(slide, title, Inches(0.4), Inches(1.6), W - Inches(0.8), Inches(1.8),
-                size=34, color=WHITE, bold=True, font="Calibri", align=PP_ALIGN.CENTER)
+    add_rect(slide, Inches(0.40), Inches(1.18), W - Inches(4.2), Inches(0.035), UTNCELESTE)
 
-    add_textbox(slide, subtitle, Inches(0.4), Inches(3.3), W - Inches(0.8), Inches(0.8),
-                size=19, color=UTNCELESTE, bold=False, font="Calibri", align=PP_ALIGN.CENTER)
+    add_textbox(slide, title, Inches(0.40), Inches(1.40), W - Inches(4.5), Inches(1.8),
+                size=32, color=WHITE, bold=True, font="Calibri", align=PP_ALIGN.LEFT)
 
-    add_rect(slide, Inches(2), Inches(4.3), W - Inches(4), Inches(0.04), TECHGOLD)
+    add_textbox(slide, subtitle, Inches(0.40), Inches(3.15), W - Inches(4.5), Inches(0.75),
+                size=16, color=UTNCELESTE, bold=False, font="Calibri", align=PP_ALIGN.LEFT)
 
-    add_textbox(slide, repo, Inches(0.4), Inches(4.5), W - Inches(0.8), Inches(0.6),
-                size=16, color=UTNCELESTE, bold=False, font="Consolas", align=PP_ALIGN.CENTER)
+    add_rect(slide, Inches(0.40), Inches(4.05), Inches(5.5), Inches(0.035), TECHGOLD)
+
+    add_textbox(slide, repo, Inches(0.40), Inches(4.15), Inches(8.5), Inches(0.55),
+                size=14, color=RGBColor(190, 225, 255), bold=False, font="Consolas",
+                align=PP_ALIGN.LEFT)
 
     if clase_siguiente:
-        add_textbox(slide, clase_siguiente, Inches(0.4), Inches(5.3), W - Inches(0.8), Inches(0.8),
-                    size=15, color=RGBColor(200, 230, 255), bold=False,
-                    font="Calibri", align=PP_ALIGN.CENTER)
+        add_rect(slide, Inches(0.40), Inches(4.85), Inches(8.5), Inches(0.90),
+                 RGBColor(max(0,accent[0]-20), min(255,accent[1]+30), min(255,accent[2]+50)))
+        add_textbox(slide, clase_siguiente, Inches(0.55), Inches(4.90), Inches(8.2), Inches(0.80),
+                    size=13, color=WHITE, bold=False, font="Calibri", align=PP_ALIGN.LEFT)
 
-    add_textbox(slide, "UTN FRCh · PesquerosEnIA · 2026",
-                Inches(0.4), H - Inches(0.85), W - Inches(0.8), Inches(0.5),
-                size=13, color=UTNCELESTE, bold=False, font="Calibri", align=PP_ALIGN.CENTER)
+    # Panel lateral derecho
+    add_textbox(slide, "github.com/\nPesquerosEnIA",
+                W - Inches(3.5), Inches(2.2), Inches(3.2), Inches(1.4),
+                size=16, color=RGBColor(180, 215, 255), bold=False,
+                font="Consolas", align=PP_ALIGN.CENTER)
+
+    add_textbox(slide, "UTN FRCh  |  PesquerosEnIA  |  2026",
+                Inches(0.40), H - Inches(0.52), W - Inches(4.5), Inches(0.42),
+                size=11, color=RGBColor(160, 200, 240), bold=False, font="Calibri",
+                align=PP_ALIGN.LEFT)
 
     return slide
 
 
 def _add_footer(slide, accent=UTNAZUL):
-    """Footer con nombre del curso y línea de color."""
-    add_rect(slide, 0, H - Inches(0.45), W, Inches(0.45), accent)
+    """Footer con nombre del curso, logo símbolo y línea de color."""
+    add_rect(slide, 0, H - Inches(0.48), W, Inches(0.48), accent)
+    # Logo símbolo PesquerosEnIA en el footer (izquierda)
+    if os.path.exists(LOGO_PESQ_SYMBOL):
+        add_logo(slide, LOGO_PESQ_SYMBOL,
+                 Inches(0.15), H - Inches(0.44), Emu(int(Inches(0.38))))
     add_textbox(slide,
-                "Inteligencia Artificial Aplicada a la Producción Pesquera  ·  UTN FRCh  ·  PesquerosEnIA  ·  2026",
-                Inches(0.3), H - Inches(0.42), W - Inches(0.6), Inches(0.38),
+                "IA Aplicada a la Produccion Pesquera  |  UTN FRCh  |  PesquerosEnIA  |  2026",
+                Inches(0.65), H - Inches(0.44), W - Inches(0.8), Inches(0.38),
                 size=10, color=UTNCELESTE, bold=False, font="Calibri", align=PP_ALIGN.CENTER)
 
 
