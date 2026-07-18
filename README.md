@@ -37,16 +37,16 @@ El curso está orientado a **profesionales del sector pesquero y acuícola argen
 
 | # | Clase | Docente(s) | Material |
 |---|-------|-----------|----------|
-| 1 | Estrategia y Transformación Digital en el Sector Pesquero | Ariel · Soraya · Reussi · Gurisich | [Slides](clase_01_estrategia_transformacion/slides/) · [Guía](clase_01_estrategia_transformacion/guia_pdf/) |
+| 1 | Estrategia y Transformación Digital en el Sector Pesquero | Ariel · Soraya · Reussi · Gurisich | [Slides](clase_01_estrategia_transformacion/slides/) · [Guía](clase_01_estrategia_transformacion/guia_pdf/) · **3 niveles 🟢🟡🔴** |
 | 2 | Fundamentos de IA y Modelos de Lenguaje (LLMs) | Damian | — |
 | 3 | Prompting y Diseño de Asistentes de IA | Damian | — |
 | 4 | Datos y Sensores del Dominio Pesquero | Ariel · Soraya | [Slides](clase_04_datos_sensores/slides/) · [Guía](clase_04_datos_sensores/guia_pdf/) · [Notebook](clase_04_datos_sensores/notebooks/) · **3 niveles 🟢🟡🔴** |
 | 5 | Arquitectura de Datos y Big Data en Pesca | Damian | — |
-| 6 | Machine Learning y Modelos Predictivos | Ariel · Damian | [Notebook](clase_06_ml_modelos_predictivos/notebooks/) |
+| 6 | Machine Learning y Modelos Predictivos | Ariel · Damian | [Notebook](clase_06_ml_modelos_predictivos/notebooks/) · **3 niveles 🟢🟡🔴** |
 | 7 | Visión Artificial en Plantas Pesqueras | Damian · Soraya · Dr. González · Errázquin | [Notebook](clase_07_vision_artificial/notebooks/) |
-| 8 | Optimización de Operaciones y Agentes de IA | Ariel · Damian | [Notebook](clase_08_optimizacion_agentes/notebooks/) |
+| 8 | Optimización de Operaciones y Agentes de IA | Ariel · Damian | [Notebook](clase_08_optimizacion_agentes/notebooks/) · **3 niveles 🟢🟡🔴** |
 | 9 | Visualización y Dashboards para Decisiones | Damian | [Notebook](clase_09_visualizacion_dashboards/notebooks/) |
-| 10 | Cierre, Conclusiones y Hoja de Ruta | Soraya · Ariel | [Slides](clase_10_cierre/slides/) · [Guía](clase_10_cierre/guia_pdf/) |
+| 10 | Cierre, Conclusiones y Hoja de Ruta | Soraya · Ariel | [Slides](clase_10_cierre/slides/) · [Guía](clase_10_cierre/guia_pdf/) · **3 niveles 🟢🟡🔴** |
 
 ---
 
@@ -61,8 +61,10 @@ Todos los notebooks funcionan en **Google Colab sin instalación** — hacé cli
 | 4 · 🟡 Intermedio | Exploración + ejercicios para modificar | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PesquerosEnIA/curso-ia-produccion-pesquera/blob/master/clase_04_datos_sensores/notebooks/clase04_datos_intermedio.ipynb) |
 | 4 · 🔴 Avanzado | Datos reales, frentes térmicos, feature engineering | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PesquerosEnIA/curso-ia-produccion-pesquera/blob/master/clase_04_datos_sensores/notebooks/clase04_datos_avanzado.ipynb) |
 | 6 | Predicción de zonas de pesca con ML | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PesquerosEnIA/curso-ia-produccion-pesquera/blob/master/clase_06_ml_modelos_predictivos/notebooks/clase06_prediccion_zonas_pesca.ipynb) |
+| 6 · 🟢🟡🔴 | ML por nivel (novato / intermedio / avanzado) | [🟢](https://colab.research.google.com/github/PesquerosEnIA/curso-ia-produccion-pesquera/blob/master/clase_06_ml_modelos_predictivos/notebooks/clase06_ml_novato.ipynb) · [🟡](https://colab.research.google.com/github/PesquerosEnIA/curso-ia-produccion-pesquera/blob/master/clase_06_ml_modelos_predictivos/notebooks/clase06_ml_intermedio.ipynb) · [🔴](https://colab.research.google.com/github/PesquerosEnIA/curso-ia-produccion-pesquera/blob/master/clase_06_ml_modelos_predictivos/notebooks/clase06_ml_avanzado.ipynb) |
 | 7 | Visión artificial y clasificación de calidad en planta | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PesquerosEnIA/curso-ia-produccion-pesquera/blob/master/clase_07_vision_artificial/notebooks/clase07_vision_artificial_plantas.ipynb) |
 | 8 | Optimización de rutas y operaciones de flota | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PesquerosEnIA/curso-ia-produccion-pesquera/blob/master/clase_08_optimizacion_agentes/notebooks/clase08_optimizacion_rutas_flota.ipynb) |
+| 8 · 🟢🟡🔴 | Optimización por nivel (novato / intermedio / avanzado) | [🟢](https://colab.research.google.com/github/PesquerosEnIA/curso-ia-produccion-pesquera/blob/master/clase_08_optimizacion_agentes/notebooks/clase08_optimizacion_novato.ipynb) · [🟡](https://colab.research.google.com/github/PesquerosEnIA/curso-ia-produccion-pesquera/blob/master/clase_08_optimizacion_agentes/notebooks/clase08_optimizacion_intermedio.ipynb) · [🔴](https://colab.research.google.com/github/PesquerosEnIA/curso-ia-produccion-pesquera/blob/master/clase_08_optimizacion_agentes/notebooks/clase08_optimizacion_avanzado.ipynb) |
 | 9 | Dashboard operativo de flota pesquera | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PesquerosEnIA/curso-ia-produccion-pesquera/blob/master/clase_09_visualizacion_dashboards/notebooks/clase09_dashboard_pesquero.ipynb) |
 
 ---
