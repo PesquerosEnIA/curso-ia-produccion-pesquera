@@ -29,7 +29,7 @@ Que los participantes comprendan cómo aplicar modelos de machine learning para 
 clase_06_ml_modelos_predictivos/
 ├── slides/      → (coordinar con Damian)
 ├── guia_pdf/    → Guía de casos de uso (aporte Ariel)
-├── notebooks/   → clase06_prediccion_zonas_pesca.ipynb
+├── notebooks/   → clase06_ml_novato / _intermedio / _avanzado .ipynb
 └── recursos/    → Datasets, papers de referencia
 ```
 
@@ -37,7 +37,7 @@ clase_06_ml_modelos_predictivos/
 
 ## Notebook principal
 
-**`clase06_prediccion_zonas_pesca.ipynb`**
+**Notebooks por nivel:** `clase06_ml_novato` · `clase06_ml_intermedio` · `clase06_ml_avanzado`
 - Dataset de 1.000 mareas históricas con variables oceanográficas
 - EDA: boxplots, correlaciones y distribución de variables
 - 3 modelos comparados: Regresión Logística, Random Forest, Gradient Boosting (5-fold CV)
@@ -57,6 +57,6 @@ clase_06_ml_modelos_predictivos/
 ## Estado
 
 - [ ] Coordinación con Damian (alcance de la contribución)
-- [x] Notebook: `clase06_prediccion_zonas_pesca.ipynb`
+- [x] Notebooks por nivel (novato / intermedio / avanzado)
 - [ ] Guía PDF (casos de dominio)
 - [ ] Revisión con Damian
