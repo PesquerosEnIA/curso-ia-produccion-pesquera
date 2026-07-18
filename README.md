@@ -27,7 +27,9 @@ El curso está orientado a **profesionales del sector pesquero y acuícola argen
 
 > *"No se trata de si el sector se va a digitalizar — se trata de si vamos a ser protagonistas o espectadores de esa transformación."*
 
-**23 horas** · **10 clases** · **4 docentes** · Acceso abierto (GPL-3.0)
+**10 unidades** · **Modalidad híbrida** · **Agosto 2026 – Mayo 2027** · Sede UTN FRCh, Puerto Madryn · Acceso abierto (GPL-3.0)
+
+**Dirección:** Ing. Cristina Fernández · **Co-Dirección:** Ing. Soraya Corvalán
 
 ---
 
@@ -35,18 +37,16 @@ El curso está orientado a **profesionales del sector pesquero y acuícola argen
 
 | # | Clase | Docente(s) | Material |
 |---|-------|-----------|----------|
-| 1 | Estrategia y Transformación Digital en el Sector Pesquero | Ariel · Soraya | [Slides](clase_01_estrategia_transformacion/slides/) · [Guía](clase_01_estrategia_transformacion/guia_pdf/) |
+| 1 | Estrategia y Transformación Digital en el Sector Pesquero | Ariel · Soraya · Reussi · Gurisich | [Slides](clase_01_estrategia_transformacion/slides/) · [Guía](clase_01_estrategia_transformacion/guia_pdf/) |
 | 2 | Fundamentos de IA y Modelos de Lenguaje (LLMs) | Damian | — |
 | 3 | Prompting y Diseño de Asistentes de IA | Damian | — |
 | 4 | Datos y Sensores del Dominio Pesquero | Ariel · Soraya | [Slides](clase_04_datos_sensores/slides/) · [Guía](clase_04_datos_sensores/guia_pdf/) · [Notebook](clase_04_datos_sensores/notebooks/) |
 | 5 | Arquitectura de Datos y Big Data en Pesca | Damian | — |
 | 6 | Machine Learning y Modelos Predictivos | Ariel · Damian | [Notebook](clase_06_ml_modelos_predictivos/notebooks/) |
-| 7 | Visión Artificial en Plantas Pesqueras | Damian · Soraya | [Notebook](clase_07_vision_artificial/notebooks/) |
+| 7 | Visión Artificial en Plantas Pesqueras | Damian · Soraya · Dr. González · Errázquin | [Notebook](clase_07_vision_artificial/notebooks/) |
 | 8 | Optimización de Operaciones y Agentes de IA | Ariel · Damian | [Notebook](clase_08_optimizacion_agentes/notebooks/) |
 | 9 | Visualización y Dashboards para Decisiones | Damian | [Notebook](clase_09_visualizacion_dashboards/notebooks/) |
 | 10 | Cierre, Conclusiones y Hoja de Ruta | Soraya · Ariel | [Slides](clase_10_cierre/slides/) · [Guía](clase_10_cierre/guia_pdf/) |
-| + | Charla Invitada: Acústica Pesquera e IA | Dr. J.D. González | — |
-| + | Charla Invitada: Clustering Avanzado en Pesca | Dr. J.D. González | — |
 
 ---
 
@@ -79,6 +79,8 @@ Todos los datos utilizados son **abiertos y públicos**:
 
 ## Equipo docente
 
+**Dirección:** Ing. Cristina Fernández  ·  **Co-Dirección:** Ing. Soraya Corvalán
+
 <table>
 <tr>
 <td width="25%" align="center">
@@ -100,6 +102,8 @@ Todos los datos utilizados son **abiertos y públicos**:
 </tr>
 </table>
 
+<sub>**Docentes adicionales del programa** (bios en actualización): **María Ana Reussi** y **Soledad Gurisich** (Unidad 1) · **Martín I. Errázquin** (Unidad 7).</sub>
+
 ---
 
 ## Antecedentes
@@ -108,7 +112,7 @@ Todos los datos utilizados son **abiertos y públicos**:
 |-----|--------|-------------|
 | 2019 | I CONIPE — Puerto Madryn | Minicurso Industria 4.0 (8 horas) + mesa redonda de IA en pesca |
 | 2025 | CONIPE 2025 — Puerto Madryn | Curso de alfabetización en IA (8 módulos) para el sector pesquero |
-| 2026 | Este curso — UTN FRCh | 23 horas de formación aplicada en IA para el sector pesquero |
+| 2026–2027 | Este curso — UTN FRCh | 10 unidades de formación aplicada en IA para el sector pesquero (Ago 2026 – May 2027) |
 
 ---
 
