@@ -1,0 +1,135 @@
+﻿mes,barco_nombre,especie_principal,zona,n_mareas,captura_ton,ingreso_usd,costo_combustible_usd,eficiencia_media,margen_medio
+2025-07,Atlantis,Merluza hubbsi,Zona B - Golfo San Jorge,1,107.9,205286.0,62534.0,1.47,69.5
+2025-07,Atlantis,Merluza hubbsi,Zona E - Sur Patagónico,1,146.6,247242.0,72079.0,1.73,70.8
+2025-07,Austral Sur,Calamar illex,Zona C - Banco Burdwood,1,230.4,351428.0,117098.0,1.67,66.7
+2025-07,Austral Sur,Polaca,Zona E - Sur Patagónico,1,125.0,137963.0,92533.0,1.15,32.9
+2025-07,Calamarón,Merluza hubbsi,Zona A - Norte PCA,1,88.6,170875.0,39256.0,1.92,77.0
+2025-07,Calamarón,Merluza hubbsi,Zona E - Sur Patagónico,1,245.8,444016.0,78681.0,2.66,82.3
+2025-07,Fueguino I,Merluza hubbsi,Zona C - Banco Burdwood,2,398.1,716473.0,234016.0,1.4500000000000002,67.3
+2025-07,Fueguino II,Calamar illex,Zona D - Frente Malvinas,1,171.3,248671.0,89689.0,1.62,63.9
+2025-07,Fueguino II,Merluza hubbsi,Zona E - Sur Patagónico,1,84.5,156368.0,72458.0,0.99,53.7
+2025-07,Madrynero,Calamar illex,Zona E - Sur Patagónico,1,175.2,249067.0,43969.0,3.39,82.3
+2025-07,Madrynero,Merluza hubbsi,Zona E - Sur Patagónico,1,145.8,280161.0,46462.0,2.67,83.4
+2025-07,Mar del Plata A,Merluza hubbsi,Zona C - Banco Burdwood,1,132.4,221150.0,53834.0,2.09,75.7
+2025-07,Mar del Plata A,Merluza hubbsi,Zona D - Frente Malvinas,1,160.5,287428.0,57425.0,2.38,80.0
+2025-07,Mar del Plata B,Calamar illex,Zona B - Golfo San Jorge,1,150.0,231033.0,59909.0,2.13,74.1
+2025-07,Mar del Plata B,Calamar illex,Zona D - Frente Malvinas,1,165.0,237670.0,38348.0,3.66,83.9
+2025-07,Merlusero,Calamar illex,Zona A - Norte PCA,1,234.0,358315.0,61037.0,3.26,83.0
+2025-07,Merlusero,Merluza hubbsi,Zona D - Frente Malvinas,1,199.7,353357.0,80174.0,2.12,77.3
+2025-07,Norpatagónico,Calamar illex,Zona D - Frente Malvinas,1,275.3,424356.0,77864.0,3.0,81.7
+2025-07,Norpatagónico,Merluza hubbsi,Zona E - Sur Patagónico,1,134.7,256697.0,84858.0,1.35,66.9
+2025-07,Patagónico I,Langostino patagónico,Zona C - Banco Burdwood,1,106.5,506733.0,77926.0,1.16,84.6
+2025-07,Patagónico I,Merluza hubbsi,Zona C - Banco Burdwood,1,121.7,207069.0,46573.0,2.22,77.5
+2025-07,Patagónico II,Calamar illex,Zona D - Frente Malvinas,1,171.9,240684.0,78337.0,1.87,67.5
+2025-07,Patagónico II,Merluza hubbsi,Zona B - Golfo San Jorge,1,65.2,112539.0,45623.0,1.21,59.5
+2025-07,Rioplatense,Calamar illex,Zona C - Banco Burdwood,1,196.1,313152.0,46688.0,3.57,85.1
+2025-07,Rioplatense,Langostino patagónico,Zona D - Frente Malvinas,1,101.1,410018.0,68954.0,1.25,83.2
+2025-07,Rioplatense,Merluza hubbsi,Zona E - Sur Patagónico,1,111.0,214434.0,37548.0,2.51,82.5
+2025-07,San Jorge I,Merluza hubbsi,Zona D - Frente Malvinas,1,89.8,148701.0,60514.0,1.26,59.3
+2025-07,San Jorge I,Merluza hubbsi,Zona E - Sur Patagónico,1,104.5,206223.0,60827.0,1.46,70.5
+2025-07,San Jorge II,Calamar illex,Zona A - Norte PCA,2,303.29999999999995,465182.0,140410.0,1.8599999999999999,69.55000000000001
+2025-08,Atlantis,Merluza hubbsi,Zona B - Golfo San Jorge,1,164.7,285351.0,94368.0,1.48,66.9
+2025-08,Atlantis,Merluza hubbsi,Zona C - Banco Burdwood,1,97.1,158550.0,52780.0,1.56,66.7
+2025-08,Austral Sur,Merluza hubbsi,Zona D - Frente Malvinas,1,181.9,308291.0,91925.0,1.68,70.2
+2025-08,Calamarón,Calamar illex,Zona C - Banco Burdwood,1,300.9,478232.0,76123.0,3.36,84.1
+2025-08,Fueguino I,Langostino patagónico,Zona A - Norte PCA,1,76.2,316863.0,117529.0,0.55,62.9
+2025-08,Fueguino I,Langostino patagónico,Zona E - Sur Patagónico,1,38.6,182095.0,54550.0,0.6,70.0
+2025-08,Fueguino II,Merluza hubbsi,Zona C - Banco Burdwood,1,199.3,383841.0,113466.0,1.49,70.4
+2025-08,Madrynero,Merluza hubbsi,Zona A - Norte PCA,1,104.7,175439.0,37074.0,2.4,78.9
+2025-08,Madrynero,Merluza hubbsi,Zona D - Frente Malvinas,1,233.8,383407.0,66471.0,2.99,82.7
+2025-08,Mar del Plata A,Merluza hubbsi,Zona C - Banco Burdwood,1,122.3,231965.0,51714.0,2.01,77.7
+2025-08,Mar del Plata A,Polaca,Zona E - Sur Patagónico,1,73.1,93088.0,44848.0,1.38,51.8
+2025-08,Mar del Plata B,Calamar illex,Zona E - Sur Patagónico,1,233.4,352253.0,55024.0,3.61,84.4
+2025-08,Mar del Plata B,Merluza hubbsi,Zona A - Norte PCA,1,199.9,381814.0,87510.0,1.94,77.1
+2025-08,Merlusero,Merluza hubbsi,Zona B - Golfo San Jorge,1,113.8,214093.0,63989.0,1.51,70.1
+2025-08,Norpatagónico,Castañeta,Zona B - Golfo San Jorge,1,48.4,54678.0,42393.0,0.97,22.5
+2025-08,Norpatagónico,Polaca,Zona B - Golfo San Jorge,1,113.0,138324.0,72677.0,1.32,47.5
+2025-08,Patagónico I,Calamar illex,Zona D - Frente Malvinas,1,216.8,341172.0,89958.0,2.05,73.6
+2025-08,Patagónico I,Merluza hubbsi,Zona C - Banco Burdwood,1,118.1,232547.0,45496.0,2.21,80.4
+2025-08,Patagónico II,Merluza hubbsi,Zona C - Banco Burdwood,1,118.7,197337.0,64834.0,1.56,67.1
+2025-08,Patagónico II,Merluza hubbsi,Zona D - Frente Malvinas,1,85.5,159978.0,44024.0,1.65,72.5
+2025-08,Rioplatense,Calamar illex,Zona C - Banco Burdwood,1,245.7,394613.0,52361.0,3.99,86.7
+2025-08,San Jorge I,Calamar illex,Zona D - Frente Malvinas,1,219.4,352650.0,95581.0,1.95,72.9
+2025-08,San Jorge I,Merluza hubbsi,Zona C - Banco Burdwood,1,129.5,229167.0,99677.0,1.1,56.5
+2025-08,San Jorge II,Calamar illex,Zona D - Frente Malvinas,1,305.0,445010.0,97650.0,2.65,78.1
+2025-09,Atlantis,Merluza hubbsi,Zona A - Norte PCA,1,88.9,153706.0,41391.0,1.83,73.1
+2025-09,Austral Sur,Merluza hubbsi,Zona B - Golfo San Jorge,1,248.5,439604.0,103508.0,2.04,76.5
+2025-09,Calamarón,Merluza hubbsi,Zona A - Norte PCA,1,195.7,367771.0,59917.0,2.78,83.7
+2025-09,Calamarón,Merluza hubbsi,Zona D - Frente Malvinas,1,185.1,362252.0,79350.0,1.98,78.1
+2025-09,Fueguino I,Polaca,Zona A - Norte PCA,1,112.2,131614.0,84420.0,1.13,35.9
+2025-09,Fueguino II,Merluza hubbsi,Zona B - Golfo San Jorge,2,203.39999999999998,374671.0,149309.0,1.175,60.349999999999994
+2025-09,Madrynero,Merluza hubbsi,Zona B - Golfo San Jorge,1,129.9,256294.0,53128.0,2.08,79.3
+2025-09,Mar del Plata A,Polaca,Zona B - Golfo San Jorge,1,130.2,145815.0,87770.0,1.26,39.8
+2025-09,Mar del Plata B,Langostino patagónico,Zona D - Frente Malvinas,1,89.2,413490.0,73404.0,1.03,82.2
+2025-09,Merlusero,Calamar illex,Zona E - Sur Patagónico,1,183.3,285562.0,67340.0,2.31,76.4
+2025-09,Norpatagónico,Polaca,Zona C - Banco Burdwood,1,136.9,162573.0,61584.0,1.89,62.1
+2025-09,Patagónico I,Merluza hubbsi,Zona E - Sur Patagónico,1,110.0,197047.0,54440.0,1.72,72.4
+2025-09,Patagónico II,Polaca,Zona C - Banco Burdwood,1,169.9,201843.0,107143.0,1.35,46.9
+2025-09,Rioplatense,Langostino patagónico,Zona B - Golfo San Jorge,1,79.7,386449.0,52896.0,1.28,86.3
+2025-09,San Jorge I,Merluza hubbsi,Zona C - Banco Burdwood,1,105.9,207713.0,57015.0,1.58,72.6
+2025-09,San Jorge II,Calamar illex,Zona E - Sur Patagónico,1,337.1,551278.0,109547.0,2.62,80.1
+2025-09,San Jorge II,Merluza hubbsi,Zona E - Sur Patagónico,1,109.9,199864.0,68011.0,1.37,66.0
+2025-10,Atlantis,Calamar illex,Zona A - Norte PCA,1,116.3,174127.0,62785.0,1.57,63.9
+2025-10,Atlantis,Calamar illex,Zona B - Golfo San Jorge,1,98.9,140662.0,42716.0,1.97,69.6
+2025-10,Austral Sur,Merluza hubbsi,Zona B - Golfo San Jorge,1,137.6,247161.0,64735.0,1.81,73.8
+2025-10,Austral Sur,Merluza hubbsi,Zona C - Banco Burdwood,1,119.8,217056.0,51490.0,1.98,76.3
+2025-10,Calamarón,Merluza hubbsi,Zona C - Banco Burdwood,1,124.9,233075.0,56518.0,1.88,75.8
+2025-10,Fueguino I,Merluza hubbsi,Zona D - Frente Malvinas,1,152.2,292314.0,109990.0,1.18,62.4
+2025-10,Fueguino II,Merluza hubbsi,Zona A - Norte PCA,1,164.5,294759.0,91529.0,1.53,68.9
+2025-10,Fueguino II,Polaca,Zona C - Banco Burdwood,1,153.0,192107.0,95004.0,1.37,50.5
+2025-10,Madrynero,Langostino patagónico,Zona B - Golfo San Jorge,1,83.3,372748.0,53080.0,1.33,85.8
+2025-10,Madrynero,Langostino patagónico,Zona C - Banco Burdwood,1,71.3,308110.0,64433.0,0.94,79.1
+2025-10,Mar del Plata A,Calamar illex,Zona E - Sur Patagónico,1,148.0,222841.0,41385.0,3.04,81.4
+2025-10,Mar del Plata A,Langostino patagónico,Zona B - Golfo San Jorge,1,53.8,230790.0,59956.0,0.76,74.0
+2025-10,Mar del Plata B,Calamar illex,Zona C - Banco Burdwood,1,314.0,430230.0,70793.0,3.77,83.5
+2025-10,Merlusero,Calamar illex,Zona A - Norte PCA,1,94.3,143920.0,46378.0,1.73,67.8
+2025-10,Merlusero,Polaca,Zona A - Norte PCA,1,71.8,87786.0,40070.0,1.52,54.4
+2025-10,Norpatagónico,Langostino patagónico,Zona B - Golfo San Jorge,1,69.6,308090.0,71961.0,0.82,76.6
+2025-10,Norpatagónico,Langostino patagónico,Zona E - Sur Patagónico,1,69.8,342361.0,57441.0,1.03,83.2
+2025-10,Patagónico I,Langostino patagónico,Zona E - Sur Patagónico,1,53.9,257183.0,55947.0,0.82,78.2
+2025-10,Patagónico I,Merluza hubbsi,Zona B - Golfo San Jorge,1,158.2,301113.0,75071.0,1.79,75.1
+2025-10,Patagónico II,Merluza hubbsi,Zona B - Golfo San Jorge,1,129.3,236386.0,82670.0,1.33,65.0
+2025-10,Patagónico II,Polaca,Zona A - Norte PCA,1,90.2,111528.0,59250.0,1.29,46.9
+2025-10,Rioplatense,Calamar illex,Zona A - Norte PCA,1,236.5,384235.0,54588.0,3.68,85.8
+2025-10,Rioplatense,Merluza hubbsi,Zona D - Frente Malvinas,1,151.5,267734.0,39905.0,3.23,85.1
+2025-10,San Jorge I,Calamar illex,Zona A - Norte PCA,1,200.2,278209.0,87614.0,1.94,68.5
+2025-10,San Jorge I,Calamar illex,Zona E - Sur Patagónico,1,242.1,385184.0,93751.0,2.19,75.7
+2025-10,San Jorge II,Polaca,Zona E - Sur Patagónico,1,89.8,106813.0,47551.0,1.61,55.5
+2025-11,Atlantis,Langostino patagónico,Zona B - Golfo San Jorge,1,48.4,226829.0,66453.0,0.62,70.7
+2025-11,Atlantis,Merluza hubbsi,Zona A - Norte PCA,1,71.0,115891.0,49411.0,1.22,57.4
+2025-11,Austral Sur,Calamar illex,Zona C - Banco Burdwood,1,168.9,252401.0,89896.0,1.6,64.4
+2025-11,Austral Sur,Merluza hubbsi,Zona B - Golfo San Jorge,1,156.7,305607.0,101758.0,1.31,66.7
+2025-11,Calamarón,Calamar illex,Zona A - Norte PCA,1,218.1,357182.0,80814.0,2.29,77.4
+2025-11,Calamarón,Castañeta,Zona D - Frente Malvinas,1,106.2,109833.0,51053.0,1.77,53.5
+2025-11,Fueguino I,Calamar illex,Zona B - Golfo San Jorge,1,254.8,350139.0,116981.0,1.85,66.6
+2025-11,Fueguino II,Calamar illex,Zona C - Banco Burdwood,1,276.1,433507.0,99712.0,2.35,77.0
+2025-11,Madrynero,Merluza hubbsi,Zona A - Norte PCA,1,103.5,191278.0,38478.0,2.29,79.9
+2025-11,Mar del Plata A,Merluza hubbsi,Zona A - Norte PCA,1,150.7,291524.0,80955.0,1.58,72.2
+2025-11,Mar del Plata B,Merluza hubbsi,Zona C - Banco Burdwood,2,217.4,380737.0,110784.0,1.705,71.0
+2025-11,Merlusero,Calamar illex,Zona A - Norte PCA,1,185.7,292911.0,54443.0,2.9,81.4
+2025-11,Merlusero,Langostino patagónico,Zona B - Golfo San Jorge,1,55.2,267215.0,42169.0,1.11,84.2
+2025-11,Norpatagónico,Calamar illex,Zona D - Frente Malvinas,1,126.5,196129.0,50004.0,2.15,74.5
+2025-11,Norpatagónico,Langostino patagónico,Zona B - Golfo San Jorge,1,96.6,412880.0,86439.0,0.95,79.1
+2025-11,Patagónico I,Langostino patagónico,Zona B - Golfo San Jorge,1,68.5,318427.0,65817.0,0.88,79.3
+2025-11,Patagónico II,Calamar illex,Zona A - Norte PCA,1,186.4,257427.0,74676.0,2.12,71.0
+2025-11,Rioplatense,Calamar illex,Zona B - Golfo San Jorge,1,287.4,465388.0,66295.0,3.69,85.8
+2025-11,Rioplatense,Merluza hubbsi,Zona A - Norte PCA,1,110.8,204718.0,51998.0,1.81,74.6
+2025-11,San Jorge I,Merluza hubbsi,Zona D - Frente Malvinas,1,207.9,408626.0,95472.0,1.85,76.6
+2025-11,San Jorge II,Castañeta,Zona A - Norte PCA,1,50.6,57528.0,61303.0,0.7,-6.6
+2025-11,San Jorge II,Merluza hubbsi,Zona E - Sur Patagónico,1,145.0,275763.0,98474.0,1.25,64.3
+2025-12,Atlantis,Langostino patagónico,Zona C - Banco Burdwood,1,55.6,267767.0,42976.0,1.1,84.0
+2025-12,Austral Sur,Langostino patagónico,Zona B - Golfo San Jorge,1,53.7,265433.0,49396.0,0.92,81.4
+2025-12,Calamarón,Calamar illex,Zona E - Sur Patagónico,1,266.7,432229.0,72082.0,3.15,83.3
+2025-12,Fueguino I,Calamar illex,Zona D - Frente Malvinas,1,206.9,282070.0,126525.0,1.39,55.1
+2025-12,Fueguino II,Merluza hubbsi,Zona A - Norte PCA,1,146.2,261369.0,112323.0,1.11,57.0
+2025-12,Madrynero,Calamar illex,Zona B - Golfo San Jorge,1,164.0,237004.0,38875.0,3.59,83.6
+2025-12,Madrynero,Calamar illex,Zona E - Sur Patagónico,1,145.3,216769.0,46620.0,2.65,78.5
+2025-12,Mar del Plata A,Merluza hubbsi,Zona A - Norte PCA,2,201.5,335176.0,80209.0,2.14,76.05
+2025-12,Mar del Plata B,Merluza hubbsi,Zona D - Frente Malvinas,1,182.7,298879.0,68685.0,2.26,77.0
+2025-12,Merlusero,Calamar illex,Zona E - Sur Patagónico,1,265.7,391268.0,74495.0,3.03,81.0
+2025-12,Norpatagónico,Merluza hubbsi,Zona D - Frente Malvinas,1,165.2,321709.0,97256.0,1.44,69.8
+2025-12,Patagónico I,Calamar illex,Zona C - Banco Burdwood,1,232.8,335495.0,74145.0,2.67,77.9
+2025-12,Patagónico II,Merluza hubbsi,Zona B - Golfo San Jorge,1,152.4,299457.0,72112.0,1.8,75.9
+2025-12,Rioplatense,Merluza hubbsi,Zona E - Sur Patagónico,1,125.4,216595.0,43760.0,2.44,79.8
+2025-12,San Jorge I,Calamar illex,Zona C - Banco Burdwood,1,186.8,257451.0,97433.0,1.63,62.2
+2025-12,San Jorge II,Merluza hubbsi,Zona D - Frente Malvinas,1,85.4,162200.0,49373.0,1.47,69.6
