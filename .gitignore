@@ -7,6 +7,19 @@ CHANGELOG.md
 # Documentos administrativos del programa (no son material del curso)
 docs/
 
+# Material NO orientado a la formación del alumno — solo local / DEV privado.
+# Se mantiene en el workspace local; fuera del repo público de alumnos (PROD).
+# (los comentarios van en su propia línea: gitignore no soporta comentarios en línea)
+# Tooling: generadores de pptx, etc.
+scripts/
+# Marketing / difusión
+flyer_curso.html
+flyer_curso_standalone.html
+# Banner y flyer PDF (marketing)
+assets/
+# Propuesta institucional CFP (los 3 logos del README viven ahora en logos/)
+propuesta/
+
 # Configuración del IDE
 *.code-workspace
 .vscode/

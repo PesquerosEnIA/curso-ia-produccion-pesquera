@@ -1,10 +1,10 @@
 <div align="center">
 
-<img src="propuesta/logo_utn_frch_negro.png" height="60" alt="UTN FRCh"/>
+<img src="logos/logo_utn_frch_negro.png" height="60" alt="UTN FRCh"/>
 &nbsp;&nbsp;&nbsp;&nbsp;
-<img src="propuesta/logo_pesqueros_full.png" height="55" alt="PesquerosEnIA"/>
+<img src="logos/logo_pesqueros_full.png" height="55" alt="PesquerosEnIA"/>
 &nbsp;&nbsp;&nbsp;&nbsp;
-<img src="propuesta/logo_ariel_full.png" height="55" alt="Ariel Giamportone"/>
+<img src="logos/logo_ariel_full.png" height="55" alt="Ariel Giamportone"/>
 
 # Inteligencia Artificial Aplicada a la Producción Pesquera
 
