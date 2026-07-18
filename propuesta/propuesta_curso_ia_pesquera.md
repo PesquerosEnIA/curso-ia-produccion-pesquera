@@ -16,13 +16,16 @@
 
 | | |
 |---|---|
-| **Modalidad** | Semipresencial / Virtual sincrónica |
-| **Carga horaria** | 23 horas (10 clases de 2 h + 2 charlas complementarias de 1,5 h) |
+| **Período** | Agosto 2026 – Mayo 2027 |
+| **Modalidad** | Híbrida (presencial + virtual sincrónica) |
+| **Localización** | Sede UTN FRCh, Puerto Madryn, Chubut |
+| **Estructura** | 10 unidades |
+| **Dirección** | Ing. Cristina Fernández |
+| **Co-Dirección** | Ing. Soraya Corvalán |
 | **Nivel** | Básico–Intermedio |
 | **Destinatarios** | Profesionales del sector pesquero y acuícola |
 | **Organiza** | UTN Facultad Regional Chubut |
 | **Comunidad** | PesquerosEnIA |
-| **Edición** | 2026 |
 
 ---
 
@@ -141,12 +144,12 @@ El curso está dirigido a:
 
 ## 6. Programa de Contenidos
 
-El curso se organiza en **10 clases de 2 horas** (20 horas) más **2 charlas complementarias de 1,5 horas** a cargo del Dr. Juan Domingo González (**23 horas totales**):
+El curso se organiza en **10 unidades**, con los contenidos mínimos aprobados por el Consejo Federal Pesquero, en modalidad híbrida (Agosto 2026 – Mayo 2027):
 
 ---
 
 ### Clase 1 — Estrategia y Transformación Digital en el Sector Pesquero
-**Docentes:** Ariel Giamportone · Soraya Corvalán
+**Docentes:** Ariel Giamportone · Soraya Corvalán · María Ana Reussi · Soledad Gurisich
 
 Panorama de la transformación digital global y en el sector pesquero argentino. Concepto de *Smart Fisheries*: sensores, conectividad, datos y decisiones inteligentes. Casos de uso de inteligencia artificial en barcos pesqueros, monitoreo del mar y plantas de procesamiento. Desafíos del sector: sostenibilidad, eficiencia de flotas, trazabilidad y control de calidad. Barreras para la adopción tecnológica y oportunidades de innovación en la Patagonia.
 
@@ -188,7 +191,7 @@ Conceptos básicos de aprendizaje automático aplicados a la actividad pesquera.
 ---
 
 ### Clase 7 — Visión Artificial en Plantas Pesqueras
-**Docentes:** Damian Adolfo Giacone · Soraya Corvalán
+**Docentes:** Damian Adolfo Giacone · Soraya Corvalán · Dr. Juan D. González · Martín I. Errázquin
 
 Introducción a visión por computadora y análisis de imágenes. Aplicaciones en la industria pesquera: clasificación automática de especies, conteo de peces, medición de talla y detección de defectos en plantas de procesamiento. Integración de cámaras y sistemas de visión artificial en líneas de producción.
 
@@ -212,25 +215,6 @@ Transformación de datos pesqueros en información accionable. Construcción de 
 **Docentes:** Soraya Corvalán · Ariel Giamportone
 
 Síntesis del recorrido: de los datos a las decisiones en el sector pesquero. Hoja de ruta personal para continuar aprendiendo IA en el sector. Presentación de recursos abiertos de la comunidad PesquerosEnIA. Próximos cursos, repositorios y espacios de colaboración. Preguntas y cierre institucional UTN FRCh.
-
----
-
-### Charlas Complementarias — Dr. Juan Domingo González *(Docente Invitado)*
-**2 sesiones · 1,5 horas cada una · 3 horas adicionales**
-
----
-
-#### Charla A — Acústica Computacional e IA aplicada a la Detección de Cardúmenes
-**Docente:** Dr. Juan Domingo González (SENASA / DIIV-ARA-CONICET / UBA)
-
-Fundamentos de acústica submarina aplicada a la detección de recursos pesqueros. Modelos computacionales de dispersión acústica para estimación de biomasa de anchoíta (*Engraulis anchoita*) y otras especies pelágicas de la Plataforma Continental Argentina. Aplicaciones de machine learning en el análisis de señales de ecosonda y SONAR. Articulación entre los modelos acústicos y los sistemas de monitoreo y gestión del recurso pesquero.
-
----
-
-#### Charla B — Clustering Robusto y Estadística Computacional aplicada a Datos Pesqueros
-**Docente:** Dr. Juan Domingo González (UBA / Universidad Nacional Guillermo Brown)
-
-Métodos de clustering robusto para clasificación de zonas de pesca, análisis de comportamiento de cardúmenes y patrones oceanográficos. Introducción a los paquetes RMBC y ktaucenters (CRAN-R). Detección de valores atípicos en series de captura y datos ambientales. Aplicaciones prácticas para el análisis estadístico riguroso de datos pesqueros en contextos de investigación y gestión.
 
 ---
 
@@ -266,6 +250,10 @@ El curso adopta un enfoque **aprendizaje basado en problemas del dominio** (*pro
 ---
 
 ## 9. Equipo Docente
+
+**Dirección del curso:** Ing. Cristina Fernández  ·  **Co-Dirección:** Ing. Soraya Corvalán
+
+---
 
 ### Ariel Luján Giamportone
 **Ingeniero Pesquero · Data Science · IA · MBA Logística y Operaciones**
@@ -304,6 +292,17 @@ Licenciado en Sistemas y Computación (Pontificia Universidad Católica Argentin
 Doctor en Matemática Aplicada (Universidad de Buenos Aires, 2019), tesis *"Métodos de Clustering Robustos"* (calificación Sobresaliente). Licenciado en Ciencias Matemáticas con orientación Aplicada (UBA, 2011). Actualmente Consultor en Inteligencia Artificial en la Dirección de Tecnologías de la Información del SENASA (2023–act.) y Director de Proyectos en la División de Sistemas Acústicos del DIIV-ARA/CONICET/MINDEF, con investigaciones en modelos acústicos computacionales aplicados a la detección submarina y a pesquerías en la Plataforma Continental Argentina. Profesor Adjunto en la Facultad de Ingeniería de la UBA (Probabilidad, Estadística y Tópicos de Machine Learning, 2022–act.) y en la Universidad Nacional Guillermo Brown (Licenciatura en Ciencia de Datos, 2020–act.). Autor de más de 10 publicaciones en revistas indexadas con referato, incluyendo trabajos sobre estimación de *target strength* acústico de anchoíta (*Engraulis anchoita*) en el Mar Argentino. Creador de los paquetes R `RMBC` y `ktaucenters` para clustering robusto, disponibles en CRAN.
 
 - Email: juanrst@hotmail.com
+
+---
+
+### Docentes adicionales del programa *(bios en actualización)*
+
+- **Ing. Cristina Fernández** — Dirección del curso
+- **María Ana Reussi** — Docente, Unidad 1 (Estrategia y Transformación Digital)
+- **Soledad Gurisich** — Docente, Unidad 1 (Estrategia y Transformación Digital)
+- **Martín I. Errázquin** — Docente, Unidad 7 (Visión Artificial)
+
+*Las biografías completas de estos integrantes se incorporarán al confirmarse sus CVs.*
 
 ---
 
