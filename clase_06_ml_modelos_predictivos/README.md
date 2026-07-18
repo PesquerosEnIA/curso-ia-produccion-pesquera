@@ -29,7 +29,7 @@ Que los participantes comprendan cómo aplicar modelos de machine learning para 
 clase_06_ml_modelos_predictivos/
 ├── slides/      → (coordinar con Damian)
 ├── guia_pdf/    → Guía de casos de uso (aporte Ariel)
-├── notebooks/   → clase_06_prediccion_captura_variables_ambientales.ipynb
+├── notebooks/   → clase06_prediccion_zonas_pesca.ipynb
 └── recursos/    → Datasets, papers de referencia
 ```
 
@@ -37,11 +37,12 @@ clase_06_ml_modelos_predictivos/
 
 ## Notebook principal
 
-**`clase_06_prediccion_captura_variables_ambientales.ipynb`**
-- Carga del dataset preparado en Clase 4
-- Modelo de regresión/clasificación para predicción de zona óptima de pesca
-- Validación y visualización de resultados en mapa
-- Discusión de limitaciones y aplicaciones reales
+**`clase06_prediccion_zonas_pesca.ipynb`**
+- Dataset de 1.000 mareas históricas con variables oceanográficas
+- EDA: boxplots, correlaciones y distribución de variables
+- 3 modelos comparados: Regresión Logística, Random Forest, Gradient Boosting (5-fold CV)
+- Evaluación completa: curva ROC, matriz de confusión, importancia de variables
+- Recomendación de zona óptima al capitán + reflexión ética y de sostenibilidad
 
 ---
 
@@ -56,6 +57,6 @@ clase_06_ml_modelos_predictivos/
 ## Estado
 
 - [ ] Coordinación con Damian (alcance de la contribución)
-- [ ] Notebook: `clase_06_prediccion_captura_variables_ambientales.ipynb`
+- [x] Notebook: `clase06_prediccion_zonas_pesca.ipynb`
 - [ ] Guía PDF (casos de dominio)
 - [ ] Revisión con Damian
