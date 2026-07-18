@@ -28,7 +28,7 @@ Que los participantes identifiquen y comprendan los tipos de datos disponibles e
 clase_04_datos_sensores/
 ├── slides/      → Presentación principal
 ├── guia_pdf/    → Guía teórica para participantes
-├── notebooks/   → clase_04_exploracion_datos_oceanograficos.ipynb
+├── notebooks/   → clase04_datos_novato / _intermedio / _avanzado .ipynb
 └── recursos/    → Datasets de ejemplo, esquemas de arquitectura
 ```
 
@@ -36,7 +36,7 @@ clase_04_datos_sensores/
 
 ## Notebook principal
 
-**`clase_04_exploracion_datos_oceanograficos.ipynb`**
+**Notebooks por nivel:** `clase04_datos_novato` · `clase04_datos_intermedio` · `clase04_datos_avanzado`
 - Carga de datos SST desde Copernicus o NOAA (dato abierto)
 - Exploración visual de variables ambientales por zona de pesca
 - Introducción a registros de captura como tabla estructurada
@@ -57,5 +57,5 @@ clase_04_datos_sensores/
 - [ ] Coordinación con Soraya (división de contenido)
 - [ ] Slides
 - [ ] Guía PDF
-- [ ] Notebook: `clase_04_exploracion_datos_oceanograficos.ipynb`
+- [x] Notebooks por nivel (novato / intermedio / avanzado)
 - [ ] Revisión conjunta

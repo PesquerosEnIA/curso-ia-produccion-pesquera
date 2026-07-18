@@ -30,7 +30,7 @@ Que los participantes comprendan cómo la IA puede optimizar operaciones pesquer
 clase_08_optimizacion_agentes/
 ├── slides/      → (coordinar con Damian)
 ├── guia_pdf/    → Guía de casos de optimización (aporte Ariel)
-├── notebooks/   → clase_08_optimizacion_rutas_flota.ipynb
+├── notebooks/   → clase08_optimizacion_novato / _intermedio / _avanzado .ipynb
 └── recursos/    → Datasets, esquemas de agentes, casos reales
 ```
 
@@ -38,7 +38,7 @@ clase_08_optimizacion_agentes/
 
 ## Notebook principal
 
-**`clase_08_optimizacion_rutas_flota.ipynb`**
+**Notebooks por nivel:** `clase08_optimizacion_novato` · `clase08_optimizacion_intermedio` · `clase08_optimizacion_avanzado`
 - Modelado de rutas de flota como problema de optimización
 - Aplicación de algoritmos de optimización (greedy, heurísticas, ML)
 - Visualización de rutas optimizadas vs. rutas históricas
@@ -56,6 +56,6 @@ clase_08_optimizacion_agentes/
 ## Estado
 
 - [ ] Coordinación con Damian (alcance de la contribución)
-- [ ] Notebook: `clase_08_optimizacion_rutas_flota.ipynb`
+- [x] Notebooks por nivel (novato / intermedio / avanzado)
 - [ ] Guía PDF (casos de optimización)
 - [ ] Revisión con Damian
