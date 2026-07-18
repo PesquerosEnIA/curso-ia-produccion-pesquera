@@ -49,14 +49,25 @@ body {
 
 /* ── HEADER ────────────────────────────────────────────────────────────── */
 .header {
-  background:
-    url('assets/bannerAIpesca.png') right center / auto 115% no-repeat,
-    var(--utnazul);
+  background: var(--utnazul);
   position: relative;
   overflow: hidden;
   padding: 22px 26px 18px;
 }
 
+/* Imagen banner — posicionada vía <img class="header-banner"> en el HTML */
+.header-banner {
+  position: absolute;
+  top: 0; right: 0;
+  height: 115%;
+  width: auto;
+  object-fit: cover;
+  object-position: left center;
+  display: block;
+  z-index: 0;
+}
+
+/* Overlay degradado encima del banner, debajo del texto */
 .header::before {
   content: '';
   position: absolute;
@@ -66,10 +77,11 @@ body {
   background: linear-gradient(
     90deg,
     var(--utnazul) 0%,
-    var(--utnazul) 52%,
-    rgba(0,30,70,0.78) 72%,
-    rgba(0,20,50,0.30) 100%
+    var(--utnazul) 50%,
+    rgba(0,30,70,0.82) 70%,
+    rgba(0,20,50,0.28) 100%
   );
+  z-index: 1;
 }
 
 .header::after {
@@ -85,6 +97,8 @@ body {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
+  position: relative;
+  z-index: 2;
 }
 
 .logos {
@@ -567,6 +581,7 @@ body {
 
   <!-- ══ HEADER ═══════════════════════════════════════════════════════════ -->
   <header class="header">
+    <img class="header-banner" src="assets/bannerAIpesca.png" alt="">
     <div class="header-top">
       <div class="logos">
         <img src="propuesta/logo_utn_frch_negro.png" alt="UTN FRCh">
