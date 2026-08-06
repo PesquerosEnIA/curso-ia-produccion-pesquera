@@ -26,7 +26,7 @@ Trayectorias **sintéticas y verosímiles** (`ESTIMADO`, formato tipo Global Fis
 
 ## Huecos declarados
 
-- Número de ley AMERP en Argentina: **HUECO** — confirmar en Boletín Oficial.
+- Número de ley AMERP en Argentina: **CONFIRMADO** — **Ley 27.815** (aprueba la adhesión de Argentina al AMERP; sancionada 24-jun-2026, promulgada y publicada en el Boletín Oficial en julio de 2026).
 - Token de la GFW API: **HUECO** — gratuito, se solicita en globalfishingwatch.org.
 
 ## Resultado de referencia
