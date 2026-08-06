@@ -18,15 +18,15 @@ La CITC es un instrumento legítimo; su *aplicación* puede concentrar la renta 
 |---|---|
 | 🟢 Novato | Participaciones, CR3, lectura intuitiva de HHI y Gini, curva de Lorenz |
 | 🟡 Intermedio | Gini y HHI desde cero, umbrales de política, ejercicios (fusión, redistribución) |
-| 🔴 Avanzado | Bootstrap sobre datos REFERENCIALES (IC 95 %), contrafáctico de redistribución, desafío |
+| 🔴 Avanzado | Análisis de sensibilidad (dato CONFIRMADO), dos universos de medición, contrafáctico de nuevos entrantes, desafío |
 
 ## Datos
 
-Participaciones en la CMP de merluza negra: Estremar ~37,83 %, Argenova ~23,02 %, Pesantar ~19,94 % (**REFERENCIAL**, DT-009). La cola de operadores menores es **ESTIMADO / ilustrativa** (para el ejercicio distributivo, no es una afirmación sobre firmas concretas). **Cerrar antes de publicar:** acto de asignación de CITC del CFP.
+Participaciones en la CMP de merluza negra: **Estremar/San Arawa 37,83 %, Argenova 23,02 %, Pesantar 19,94 %** — **CONFIRMADO** (Resolución CFP 4/2024, Anexo IF-2024-00000277-CFP-CFP, Acta CFP 15/2024, BO 10-sep-2024). Las tres empresas concentran el **80,80 % de la CMP = el 100 % de la CITC** asignada; el resto es **Reserva de Administración (18,80 %) + Fondo de Reasignación (0,40 %)**, que no son empresas (no hay "operadores menores").
 
 ## Resultado de referencia
 
-CR3 ≈ 80,8 % · HHI ≈ 2440 (moderada bajo guía 2010 / **alta** bajo guía 2023) · Gini ≈ 0,55. Bajar el HHI a 1800 exigiría "achatar" ~82 % a los tres grandes.
+Sobre la CMP (incluye la reserva estatal): **CR3 ≈ 80,8 %** · **HHI ≈ 2712** (alta bajo ambas guías) · **Gini ≈ 0,32**. Sobre la CITC asignada (3 empresas = 100 %): **HHI ≈ 3614**, CR3 = 100 %. Con solo 3 titulares el HHI no puede bajar de 3.333: **desconcentrar exige incorporar nuevos actores** — la Reserva de Administración, hoy repartida entre los mismos 3, no alcanza.
 
 ## Estructura
 
