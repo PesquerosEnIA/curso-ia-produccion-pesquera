@@ -26,11 +26,22 @@ Integrar los aprendizajes del curso, presentar una hoja de ruta personal para se
 
 ```
 clase_10_cierre/
-├── slides/          → Presentación de cierre
-├── guia_pdf/        → (no aplica)
+├── slides/          → Presentación de cierre (3 niveles 🟢🟡🔴)
+├── guia_pdf/        → Guía de cierre (3 niveles 🟢🟡🔴)
 ├── notebooks/       → (no aplica)
-└── recursos/        → Lista curada de recursos, links de comunidad
+└── recursos/        → rubrica_proyecto_integrador.md · lista de recursos de comunidad
 ```
+
+---
+
+## Evaluación — Proyecto Integrador
+
+La acreditación del curso requiere **asistencia ≥ 75 %** y la entrega/presentación del
+**Proyecto Integrador** (caso de uso de IA aplicado al sector del propio participante).
+
+- **Rúbrica imprimible:** [`recursos/rubrica_proyecto_integrador.md`](recursos/rubrica_proyecto_integrador.md)
+  — 4 criterios × 25 pts (Relevancia · Factibilidad técnica · Conocimiento del dominio · Claridad),
+  con niveles de desempeño, planilla de puntaje y adaptación por perfil.
 
 ---
 
