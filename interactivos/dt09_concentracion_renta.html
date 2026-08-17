@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · Concentración de la renta (Gini/HHI) — Caso DT-009</title>
+<style>
+  :root{
+    --azul:#08519c; --azul2:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --rojo:#a50f15; --verde:#1f9d6b; --ambar:#e6a417; --reserva:#9aa7ae;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 16px;max-width:74ch}
+  .lead b{color:var(--tinta)}
+  .grid{display:flex;flex-wrap:wrap;gap:16px}
+  .col{flex:1 1 360px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 12px;font-weight:800}
+  .op{margin:0 0 11px}
+  .op .top{display:flex;justify-content:space-between;font-size:13px;margin:0 0 3px}
+  .op .top .n{font-weight:700}
+  .op .top .s{font-weight:800;font-variant-numeric:tabular-nums;color:var(--azul)}
+  input[type=range]{width:100%;accent-color:var(--azul);height:22px}
+  .presets{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .presets button{flex:1 1 auto;border:1px solid var(--linea);background:var(--fondo);border-radius:9px;padding:8px 8px;
+    font-size:12px;font-weight:700;color:var(--azul-osc);cursor:pointer}
+  .presets button:hover{border-color:var(--azul);color:var(--azul)}
+  .idx{display:flex;gap:12px;flex-wrap:wrap}
+  .card{flex:1 1 120px;background:var(--fondo);border:1px solid var(--linea);border-radius:12px;padding:12px 14px}
+  .card .k{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--gris)}
+  .card .v{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+  .card .b{font-size:12px;font-weight:700;margin-top:2px}
+  canvas{width:100%;height:auto;display:block;margin-top:4px}
+  .note{font-size:12px;color:var(--gris);margin-top:8px}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🎛️ Caso DT-009 · Simulador interactivo</div>
+  <h1>¿Qué tan concentrada está la renta?</h1>
+  <p class="lead">Repartí la <b>Cuota Máxima de Captura</b> de merluza negra entre los operadores y mirá cómo
+  responden tres medidas de concentración: la <b>curva de Lorenz</b>, el <b>Gini</b> y el <b>HHI</b>. Empezá por
+  el reparto <b>real</b> (Res. CFP 4/2024) y después simulá una fusión o un nuevo entrante.</p>
+
+  <div class="grid">
+    <div class="col">
+      <div class="panel">
+        <h2>Reparto de la cuota (%)</h2>
+        <div id="ops"></div>
+        <p class="note">🏢 = empresas (titulares de CITC) · 🏛️ = reserva del Estado. Se normaliza a 100 % para calcular los índices.</p>
+        <div class="presets">
+          <button data-p="real">Real · CFP 4/2024</button>
+          <button data-p="fusion">Fusión Argenova+Pesantar</button>
+          <button data-p="igual">Reparto igualitario</button>
+          <button data-p="monopolio">Casi monopolio</button>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <h2>Índices de concentración</h2>
+        <div class="idx">
+          <div class="card"><div class="k">Gini</div><div class="v" id="vGini"></div><div class="b" id="bGini"></div></div>
+          <div class="card"><div class="k">HHI</div><div class="v" id="vHHI"></div><div class="b" id="bHHI"></div></div>
+          <div class="card"><div class="k">CR3 (top 3)</div><div class="v" id="vCR3"></div><div class="b">de la cuota</div></div>
+        </div>
+        <canvas id="lorenz" width="360" height="300" aria-label="Curva de Lorenz"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Fórmulas y datos del notebook <b>caso_dt09_concentracion</b> (serie DT-ALGP): reparto real <b>CONFIRMADO</b>
+    (Res. CFP 4/2024, Anexo IF-2024-00000277-CFP-CFP, BO 10-sep-2024). HHI = Σ(participación&nbsp;%)²; Gini y Lorenz
+    desde cero. Umbrales HHI: 1500/2500 (guía 2010). Curso <b>IA Aplicada a la Producción Pesquera</b> ·
+    UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+const OPS=[
+  {n:'Estremar / San Arawa',tipo:'e'},
+  {n:'Argenova',tipo:'e'},
+  {n:'Pesantar',tipo:'e'},
+  {n:'Reserva de Administración',tipo:'r'},
+  {n:'Fondo de Reasignación',tipo:'r'}
+];
+const PRESETS={
+  real:[37.83,23.02,19.94,18.80,0.40],
+  fusion:[37.83,42.96,0.0,18.80,0.40],
+  igual:[20,20,20,20,20],
+  monopolio:[80,8,6,5,1]
+};
+let raw=[...PRESETS.real];
+
+const opsDiv=document.getElementById('ops');
+raw.forEach((val,i)=>{
+  const d=document.createElement('div');d.className='op';
+  d.innerHTML='<div class="top"><span class="n">'+(OPS[i].tipo==='e'?'🏢 ':'🏛️ ')+OPS[i].n+'</span><span class="s" id="sh'+i+'"></span></div>';
+  const inp=document.createElement('input');inp.type='range';inp.min=0;inp.max=80;inp.step=0.5;inp.value=val;inp.id='r'+i;
+  inp.addEventListener('input',()=>{raw[i]=+inp.value;render();});
+  d.appendChild(inp);opsDiv.appendChild(d);
+});
+
+function shares(){const tot=raw.reduce((a,b)=>a+b,0)||1;return raw.map(v=>v/tot);}// fracciones 0..1 suman 1
+function gini(s){const a=[...s].sort((x,y)=>x-y);const n=a.length;const sum=a.reduce((x,y)=>x+y,0)||1;
+  let acc=0;for(let i=0;i<n;i++)acc+=(2*(i+1)-n-1)*a[i];return acc/(n*sum);}
+function hhi(s){return s.reduce((x,y)=>x+Math.pow(y*100,2),0);}// 0..10000
+function cr(s,k){return [...s].sort((a,b)=>b-a).slice(0,k).reduce((a,b)=>a+b,0)*100;}
+
+function bandaHHI(v){if(v<1500)return['no concentrado','#1f9d6b'];if(v<2500)return['concentración moderada','#e6a417'];return['concentración alta','#a50f15'];}
+function bandaGini(v){if(v<0.3)return['baja','#1f9d6b'];if(v<0.5)return['media','#e6a417'];return['alta','#a50f15'];}
+
+const $=id=>document.getElementById(id);
+function render(){
+  const s=shares();
+  raw.forEach((v,i)=>$('sh'+i).textContent=(s[i]*100).toFixed(1)+'%');
+  const G=gini(s),H=hhi(s),C=cr(s,3);
+  $('vGini').textContent=G.toFixed(3);const bg=bandaGini(G);$('bGini').textContent=bg[0];$('bGini').style.color=bg[1];
+  $('vHHI').textContent=Math.round(H).toLocaleString('es-AR');const bh=bandaHHI(H);$('bHHI').textContent=bh[0];$('bHHI').style.color=bh[1];
+  $('vCR3').textContent=C.toFixed(1)+'%';
+  drawLorenz(s,G);
+}
+
+function drawLorenz(s,G){
+  const cv=$('lorenz'),dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.parentElement.clientWidth,h=Math.min(w,320);
+  cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+  const m=38,pw=w-m-14,ph=h-m-24,ox=m,oy=h-m;
+  const X=v=>ox+v*pw, Y=v=>oy-v*ph;
+  // marco
+  ctx.strokeStyle='#d9e4e9';ctx.strokeRect(ox,oy-ph,pw,ph);
+  ctx.fillStyle='#3f5a68';ctx.font='11px Segoe UI,Arial';ctx.textAlign='center';
+  ctx.fillText('proporción acumulada de operadores',ox+pw/2,h-6);
+  ctx.save();ctx.translate(12,oy-ph/2);ctx.rotate(-Math.PI/2);ctx.fillText('proporción acumulada de la cuota',0,0);ctx.restore();
+  // igualdad
+  ctx.strokeStyle='#c7d5db';ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(X(0),Y(0));ctx.lineTo(X(1),Y(1));ctx.stroke();ctx.setLineDash([]);
+  // lorenz (orden ascendente)
+  const a=[...s].sort((x,y)=>x-y);const n=a.length;
+  const xs=[0],ys=[0];let cum=0;for(let i=0;i<n;i++){cum+=a[i];xs.push((i+1)/n);ys.push(cum);}
+  ctx.fillStyle='rgba(165,15,21,.10)';ctx.beginPath();ctx.moveTo(X(0),Y(0));
+  for(let i=0;i<xs.length;i++)ctx.lineTo(X(xs[i]),Y(ys[i]));ctx.lineTo(X(1),Y(0));ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#a50f15';ctx.lineWidth=2.4;ctx.beginPath();
+  for(let i=0;i<xs.length;i++){const px=X(xs[i]),py=Y(ys[i]);i?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.stroke();
+  for(let i=0;i<xs.length;i++){ctx.fillStyle='#a50f15';ctx.beginPath();ctx.arc(X(xs[i]),Y(ys[i]),3.2,0,7);ctx.fill();}
+  ctx.fillStyle='#a50f15';ctx.font='bold 12px Segoe UI,Arial';ctx.textAlign='left';
+  ctx.fillText('Gini = '+G.toFixed(3),X(0.06),Y(0.9));
+}
+
+document.querySelectorAll('.presets button').forEach(b=>b.addEventListener('click',()=>{
+  raw=[...PRESETS[b.dataset.p]];raw.forEach((v,i)=>$('r'+i).value=v);render();}));
+window.addEventListener('resize',render);
+render();
+</script>
+</body>
+</html>

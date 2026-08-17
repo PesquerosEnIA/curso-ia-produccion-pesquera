@@ -10,6 +10,9 @@ Cada archivo es 100% autocontenido (HTML+CSS+JS inline): se puede abrir con dobl
 | `c6_umbral_decision.html` | 6 | El umbral de decisión como decisión económica (matriz de confusión + costo en $) |
 | `c6_zona_pesca.html` | 6 | ¿A qué zona voy? Sliders SST/clorofila/profundidad → prob. de éxito + kg + por qué |
 | `c8_velocidad_optima.html` | 8 | Velocidad óptima de crucero (ley cúbica: combustible vs. tiempo → costo mínimo) |
+| `c6_sobreajuste.html` | 6 | Sobreajuste (overfitting): grado del polinomio → error train vs. test (escala log) |
+| `dt09_concentracion_renta.html` | Caso DT-009 | Concentración de renta: reparto de cuota → Lorenz + Gini + HHI (datos CFP 4/2024) |
+| `dt11_ais_esfuerzo.html` | Caso DT-011 | Rastro AIS: clasificación por velocidad + apagón de transpondedor (PSMA) |
 
 ## Cómo se sirven (una sola vez)
 Estos archivos deben estar **públicos** y servidos por **GitHub Pages** del repo `PesquerosEnIA/curso-ia-produccion-pesquera`.

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · Rastro AIS y esfuerzo pesquero — Caso DT-011</title>
+<style>
+  :root{
+    --azul:#08519c; --azul2:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --pesca:#a50f15; --transito:#08519c; --puerto:#005a32; --naranja:#cc6600;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 16px;max-width:74ch}
+  .lead b{color:var(--tinta)}
+  .grid{display:flex;flex-wrap:wrap;gap:16px}
+  .colmap{flex:1 1 460px;min-width:0}
+  .colside{flex:1 1 280px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 12px;font-weight:800}
+  canvas{width:100%;height:auto;display:block;border-radius:8px}
+  .leg{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--gris);margin-top:8px}
+  .dotc{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  label.field{display:block;font-size:13.5px;font-weight:700;margin:0 0 4px}
+  .fieldval{font-weight:800;color:var(--azul)}
+  input[type=range]{width:100%;accent-color:var(--azul);height:24px}
+  .hint{font-size:12px;color:var(--gris);margin:2px 0 10px}
+  .toggle{display:flex;align-items:center;gap:10px;margin:12px 0 4px;cursor:pointer;font-size:13.5px;font-weight:700}
+  .toggle input{width:42px;height:22px;accent-color:var(--pesca)}
+  .stat{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px dashed var(--linea);font-size:13.5px}
+  .stat:last-child{border-bottom:0}
+  .stat .k{color:var(--gris)}
+  .stat .v{font-weight:800;font-variant-numeric:tabular-nums}
+  .alert{margin-top:12px;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:600;
+    background:#fdeceb;border:1px solid #f3c6c3;color:#8a2a26;display:none}
+  .alert.show{display:block}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🎛️ Caso DT-011 · Simulador interactivo</div>
+  <h1>El rastro digital de un barco</h1>
+  <p class="lead">Cada barco deja una huella <b>AIS</b>: posición y velocidad, hora tras hora. Con una regla simple
+  de velocidad se puede distinguir cuándo <b>navega</b>, cuándo <b>pesca</b> y cuándo está en <b>puerto</b>. Movés el
+  umbral y contás las horas de pesca. Y si el barco <b>apaga el transpondedor</b> en alta mar… aparece un hueco.</p>
+
+  <div class="grid">
+    <div class="colmap">
+      <div class="panel">
+        <h2>Trayectoria AIS (Mar Argentino · sur)</h2>
+        <canvas id="map" width="520" height="420" aria-label="Mapa de la trayectoria del barco"></canvas>
+        <div class="leg">
+          <span><span class="dotc" style="background:var(--pesca)"></span>Pesca (lento)</span>
+          <span><span class="dotc" style="background:var(--transito)"></span>Tránsito (rápido)</span>
+          <span><span class="dotc" style="background:var(--puerto)"></span>Puerto</span>
+          <span><span class="dotc" style="background:var(--naranja)"></span>Borde ZEE (ilustrativo)</span>
+        </div>
+      </div>
+    </div>
+    <div class="colside">
+      <div class="panel">
+        <h2>Regla de detección</h2>
+        <label class="field">Velocidad máx. considerada “pesca”: <span class="fieldval" id="thVal"></span> kn</label>
+        <input type="range" id="th" min="2" max="7" step="0.5" value="5">
+        <p class="hint">Regla tipo Global Fishing Watch: &lt;1 kn = puerto · 1–<span id="thT"></span> kn = pesca · más = tránsito.</p>
+
+        <div class="toggle"><input type="checkbox" id="off"><span>🔕 Apagar transpondedor en alta mar</span></div>
+
+        <div style="margin-top:8px">
+          <div class="stat"><span class="k">🎣 Horas de pesca detectadas</span><span class="v" id="hPesca"></span></div>
+          <div class="stat"><span class="k">🚢 Horas de tránsito</span><span class="v" id="hTran"></span></div>
+          <div class="stat"><span class="k">⚓ Horas en puerto</span><span class="v" id="hPuerto"></span></div>
+          <div class="stat"><span class="k">📏 Distancia recorrida</span><span class="v" id="dist"></span></div>
+        </div>
+        <div class="alert" id="alert"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Método del notebook <b>caso_dt11_ais_psma</b>: trayectorias AIS sintéticas (tipo Global Fishing Watch),
+    clasificación por velocidad (&lt;1 puerto · 1–5 pesca · &gt;5 tránsito) y distancia por <b>haversine</b>. El “apagón”
+    (gap AIS) es una señal de posible actividad no declarada, clave para verificar el <b>PSMA</b>. Borde ZEE ilustrativo.
+    Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const rng=mulberry32(7);
+function gauss(m,s){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return m+s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const USHUAIA={lat:-54.81,lon:-68.30}, ZEE_LON=-62.5;
+
+// ── Generar trayectoria por tramos (lat,lon,vel,comportamiento base, offshore?) ──
+function seg(la0,lo0,la1,lo1,n,comp,offshore){
+  const out=[];for(let i=0;i<n;i++){
+    const t=i/(n-1);let la=la0+(la1-la0)*t, lo=lo0+(lo1-lo0)*t, spd;
+    if(comp==='pesca'){la+=gauss(0,0.05);lo+=gauss(0,0.05);spd=Math.abs(gauss(3.0,1.0));}
+    else if(comp==='transito'){spd=Math.abs(gauss(10.5,1.2));}
+    else{spd=Math.abs(gauss(0.3,0.2));}
+    out.push({lat:la,lon:lo,spd,offshore:!!offshore});
+  }
+  return out;
+}
+const track=[].concat(
+  seg(-54.81,-68.30,-54.75,-67.9,4,'puerto',false),
+  seg(-54.75,-67.9,-54.5,-64.5,7,'transito',false),
+  seg(-54.5,-64.5,-54.2,-63.4,9,'pesca',false),
+  seg(-54.2,-63.4,-53.9,-62.0,5,'transito',false),
+  seg(-53.9,-62.0,-53.6,-60.8,8,'pesca',true),     // <-- alta mar (más allá del borde ZEE)
+  seg(-53.6,-60.8,-54.4,-65.0,7,'transito',false),
+  seg(-54.4,-65.0,-54.81,-68.30,5,'puerto',false)
+);
+// límites
+const lats=track.map(p=>p.lat),lons=track.map(p=>p.lon);
+const LA={min:Math.min(...lats)-0.15,max:Math.max(...lats)+0.15};
+const LO={min:Math.min(...lons)-0.2,max:Math.max(...lons)+0.2};
+
+function clasif(spd,th){if(spd<1)return'puerto';if(spd<=th)return'pesca';return'transito';}
+function haversine(a,b){const R=6371,p1=a.lat*Math.PI/180,p2=b.lat*Math.PI/180,
+  dp=(b.lat-a.lat)*Math.PI/180,dl=(b.lon-a.lon)*Math.PI/180;
+  const x=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
+
+const COL={pesca:'#a50f15',transito:'#08519c',puerto:'#005a32'};
+const $=id=>document.getElementById(id);
+const th=$('th'),off=$('off');
+
+function render(){
+  const T=+th.value;$('thVal').textContent=T.toFixed(1);$('thT').textContent=T.toFixed(1);
+  const hidden=off.checked;
+  // puntos visibles (si apaga transpondedor, se ocultan los offshore)
+  const vis=track.map(p=>({...p,comp:clasif(p.spd,T)})).filter(p=>!(hidden&&p.offshore));
+  let hP=0,hT=0,hPu=0;
+  vis.forEach(p=>{if(p.comp==='pesca')hP++;else if(p.comp==='transito')hT++;else hPu++;});
+  // distancia visible
+  let dist=0;for(let i=1;i<vis.length;i++)dist+=haversine(vis[i-1],vis[i]);
+  $('hPesca').textContent=hP+' h';$('hTran').textContent=hT+' h';$('hPuerto').textContent=hPu+' h';
+  $('dist').textContent=Math.round(dist).toLocaleString('es-AR')+' km';
+  const ocultas=track.filter(p=>p.offshore&&clasif(p.spd,T)==='pesca').length;
+  const al=$('alert');
+  if(hidden){al.classList.add('show');
+    al.innerHTML='🔕 <b>Hueco AIS en alta mar.</b> Hay ~'+ocultas+' h de posible pesca sin registrar entre los dos extremos del apagón. En una inspección PSMA, ese silencio es una <b>señal de alerta</b>: el barco desaparece justo en la zona de pesca.';}
+  else al.classList.remove('show');
+  drawMap(vis,hidden);
+}
+
+function drawMap(vis,hidden){
+  const cv=$('map'),dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.parentElement.clientWidth,h=Math.round(w*0.8);
+  cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle='#eaf1f5';ctx.fillRect(0,0,w,h);
+  const m=14,pw=w-2*m,ph=h-2*m;
+  const X=lon=>m+(lon-LO.min)/(LO.max-LO.min)*pw;
+  const Y=lat=>m+(LA.max-lat)/(LA.max-LA.min)*ph;   // lat mayor arriba
+  // borde ZEE
+  ctx.strokeStyle='#cc6600';ctx.lineWidth=1.8;ctx.setLineDash([6,4]);
+  ctx.beginPath();ctx.moveTo(X(ZEE_LON),m);ctx.lineTo(X(ZEE_LON),m+ph);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#cc6600';ctx.font='10px Segoe UI,Arial';ctx.textAlign='left';ctx.fillText('borde ZEE',X(ZEE_LON)+4,m+12);
+  // línea de ruta (conecta puntos visibles; si hay apagón, línea punteada en el hueco)
+  ctx.strokeStyle='#b8c6cf';ctx.lineWidth=1.3;ctx.beginPath();
+  vis.forEach((p,i)=>{const x=X(p.lon),y=Y(p.lat);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+  if(hidden){
+    // dibujar el gap: unir el último punto antes del offshore con el primero después
+    const idx=track.findIndex(p=>p.offshore);
+    const before=track[idx-1], after=track.slice(idx).find(p=>!p.offshore);
+    if(before&&after){ctx.strokeStyle='#a50f15';ctx.lineWidth=1.8;ctx.setLineDash([3,4]);
+      ctx.beginPath();ctx.moveTo(X(before.lon),Y(before.lat));ctx.lineTo(X(after.lon),Y(after.lat));ctx.stroke();ctx.setLineDash([]);
+      const mx=(X(before.lon)+X(after.lon))/2, my=(Y(before.lat)+Y(after.lat))/2;
+      ctx.fillStyle='#a50f15';ctx.font='bold 11px Segoe UI,Arial';ctx.textAlign='center';ctx.fillText('⚠ sin señal',mx,my-6);}
+  }
+  // puntos
+  vis.forEach(p=>{ctx.fillStyle=COL[p.comp];ctx.beginPath();ctx.arc(X(p.lon),Y(p.lat),4,0,7);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=1;ctx.stroke();});
+  // Ushuaia
+  ctx.fillStyle='#0e2a38';ctx.font='16px Segoe UI,Arial';ctx.textAlign='center';ctx.fillText('★',X(USHUAIA.lon),Y(USHUAIA.lat)+5);
+  ctx.font='10px Segoe UI,Arial';ctx.fillText('Ushuaia',X(USHUAIA.lon),Y(USHUAIA.lat)+18);
+}
+
+[th,off].forEach(el=>el.addEventListener('input',render));
+off.addEventListener('change',render);
+window.addEventListener('resize',render);
+render();
+</script>
+</body>
+</html>

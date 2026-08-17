@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · Sobreajuste (overfitting) — Clase 6</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --rojo:#d9534f; --ambar:#e6a417;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 16px;max-width:72ch}
+  .lead b{color:var(--tinta)}
+  .grid{display:flex;flex-wrap:wrap;gap:16px}
+  .col{flex:1 1 340px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 12px;font-weight:800}
+  label.field{display:block;font-size:13.5px;font-weight:700;margin:0 0 4px}
+  .fieldval{font-weight:800;color:var(--azul)}
+  input[type=range]{width:100%;accent-color:var(--azul);height:26px}
+  .hint{font-size:12px;color:var(--gris);margin:2px 0 0}
+  .metrics{display:flex;gap:12px;margin-top:6px}
+  .metric{flex:1;background:var(--fondo);border:1px solid var(--linea);border-radius:10px;padding:10px 12px}
+  .metric .k{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--gris)}
+  .metric .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+  .metric.train .v{color:var(--azul)}.metric.test .v{color:var(--rojo)}
+  .verdict{margin-top:12px;border-radius:10px;padding:11px 13px;font-size:13.5px;font-weight:600}
+  .verdict b{font-weight:800}
+  .quick{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .quick button{flex:1 1 auto;border:1px solid var(--linea);background:var(--fondo);border-radius:9px;padding:8px 6px;
+    font-size:12px;font-weight:700;color:var(--azul-osc);cursor:pointer}
+  .quick button:hover{border-color:var(--azul);color:var(--azul)}
+  canvas{width:100%;height:auto;display:block;margin-top:6px}
+  .leg{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--gris);margin-top:8px}
+  .dotc{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🎛️ Clase 6 · Simulador interactivo</div>
+  <h1>Sobreajuste: cuando el modelo <span style="color:var(--rojo)">memoriza</span></h1>
+  <p class="lead">Subí la <b>complejidad</b> del modelo (grado del polinomio) y mirá dos cosas a la vez: cómo se
+  pega a los datos de <b>entrenamiento</b> y cómo le va con datos <b>nuevos</b> (test). El error de entrenamiento
+  siempre baja; el de test baja… hasta que el modelo empieza a <b>memorizar el ruido</b> y vuelve a subir. Ese es
+  el <b>sobreajuste</b>.</p>
+
+  <div class="grid">
+    <div class="col">
+      <div class="panel">
+        <h2>Complejidad del modelo</h2>
+        <label class="field">Grado del polinomio: <span class="fieldval" id="dVal"></span></label>
+        <input type="range" id="deg" min="1" max="12" step="1" value="3">
+        <p class="hint">1 = una recta (muy simple) · 12 = curva muy flexible.</p>
+        <div class="metrics">
+          <div class="metric train"><div class="k">Error entrenamiento</div><div class="v" id="mTrain"></div></div>
+          <div class="metric test"><div class="k">Error en test (nuevo)</div><div class="v" id="mTest"></div></div>
+        </div>
+        <div class="verdict" id="verdict"></div>
+        <div class="quick">
+          <button data-d="1">Subajuste (1)</button>
+          <button data-d="4">Punto justo</button>
+          <button data-d="12">Sobreajuste (12)</button>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <h2>El modelo sobre los datos</h2>
+        <canvas id="fit" width="440" height="300" aria-label="Ajuste del modelo a los datos"></canvas>
+        <div class="leg">
+          <span><span class="dotc" style="background:var(--azul)"></span>Datos de entrenamiento</span>
+          <span><span class="dotc" style="background:var(--rojo)"></span>Datos de test</span>
+          <span><span class="dotc" style="background:#0e2a38"></span>Modelo</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <h2>Error según la complejidad — el corazón del sobreajuste</h2>
+    <canvas id="err" width="900" height="280" aria-label="Error de entrenamiento y test según el grado"></canvas>
+    <div class="leg">
+      <span><span class="dotc" style="background:var(--azul)"></span>Error de entrenamiento (siempre baja)</span>
+      <span><span class="dotc" style="background:var(--rojo)"></span>Error de test (tiene un mínimo)</span>
+      <span><span class="dotc" style="background:var(--verde)"></span>Complejidad óptima</span>
+    </div>
+  </div>
+
+  <footer>
+    Datos: relación captura↔temperatura con óptimo ~10&nbsp;°C (misma lógica que la Clase 6) más ruido operativo;
+    ajuste por mínimos cuadrados sobre entrenamiento, evaluado en test no visto. Es la versión visual de la
+    <b>validación</b> y el <b>overfitting</b> del notebook. Curso <b>IA Aplicada a la Producción Pesquera</b> ·
+    UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+// ── RNG determinista ─────────────────────────────────────────────────────────
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const rng=mulberry32(11);
+function gauss(m,s){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return m+s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+// función "verdadera": captura vs SST (óptimo ~10°C)
+const XMIN=4,XMAX=18;
+const norm=x=>(x-11)/7;               // escala a ~[-1,1] para estabilidad numérica
+function fTrue(x){return 100*Math.exp(-Math.pow(x-10,2)/18);}
+// dataset
+const train=[],test=[];
+for(let i=0;i<14;i++){const x=XMIN+rng()*(XMAX-XMIN);train.push({x,y:fTrue(x)+gauss(0,9)});}
+for(let i=0;i<40;i++){const x=XMIN+rng()*(XMAX-XMIN);test.push({x,y:fTrue(x)+gauss(0,9)});}
+
+// ── Ajuste polinómico por mínimos cuadrados (normal equations + Gauss) ────────
+function fit(points,d){
+  const n=d+1;
+  const A=Array.from({length:n},()=>new Array(n).fill(0));
+  const b=new Array(n).fill(0);
+  for(const p of points){
+    const z=norm(p.x);const pw=[];let v=1;for(let k=0;k<=2*d;k++){pw.push(v);v*=z;}
+    for(let i=0;i<n;i++){b[i]+=pw[i]*p.y;for(let j=0;j<n;j++)A[i][j]+=pw[i+j];}
+  }
+  return solve(A,b);
+}
+function solve(A,b){
+  const n=b.length;const M=A.map((r,i)=>[...r,b[i]]);
+  for(let c=0;c<n;c++){
+    let piv=c;for(let r=c+1;r<n;r++)if(Math.abs(M[r][c])>Math.abs(M[piv][c]))piv=r;
+    [M[c],M[piv]]=[M[piv],M[c]];
+    const d=M[c][c]||1e-9;
+    for(let r=0;r<n;r++){if(r===c)continue;const f=M[r][c]/d;for(let k=c;k<=n;k++)M[r][k]-=f*M[c][k];}
+  }
+  return M.map((r,i)=>r[n]/(r[i]||1e-9));
+}
+function evalPoly(coef,x){const z=norm(x);let v=0,p=1;for(const c of coef){v+=c*p;p*=z;}return v;}
+function mse(points,coef){let s=0;for(const p of points)s+=Math.pow(p.y-evalPoly(coef,p.x),2);return s/points.length;}
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const supN=n=>String(n).split('').map(c=>SUP[c]||c).join('');
+function fmt(v){if(v>=10000){const e=Math.floor(Math.log10(v));const m=(v/Math.pow(10,e)).toFixed(1).replace('.',',');return m+'×10'+supN(e);}return Math.round(v).toLocaleString('es-AR');}
+
+// precálculo de curvas de error por grado
+const degs=[],eTr=[],eTe=[];
+for(let d=1;d<=12;d++){const c=fit(train,d);degs.push(d);eTr.push(mse(train,c));eTe.push(mse(test,c));}
+const dOpt=degs[eTe.indexOf(Math.min(...eTe))];
+
+const $=id=>document.getElementById(id);
+const deg=$('deg');
+
+function render(){
+  const d=+deg.value;$('dVal').textContent=d;
+  const coef=fit(train,d);
+  const tr=mse(train,coef),te=mse(test,coef);
+  $('mTrain').textContent=fmt(tr);$('mTest').textContent=fmt(te);
+  const v=$('verdict');
+  if(d<=2){v.style.background='#fff5e6';v.style.color='#7a5300';
+    v.innerHTML='🟡 <b>Subajuste (underfitting):</b> el modelo es demasiado simple, ni siquiera captura la forma. Alto error en todo.';}
+  else if(te<=eTe[dOpt-1]*1.15){v.style.background='#eaf6ec';v.style.color='#155e3f';
+    v.innerHTML='🟢 <b>Buen equilibrio:</b> el modelo generaliza. El error de test está cerca de su mínimo.';}
+  else{v.style.background='#fdeceb';v.style.color='#8a2a26';
+    v.innerHTML='🔴 <b>Sobreajuste (overfitting):</b> el modelo memoriza el ruido del entrenamiento. Bajísimo error de train, pero <b>peor</b> en datos nuevos.';}
+  drawFit(coef);drawErr(d);
+}
+
+function prep(cv,h){const dpr=window.devicePixelRatio||1;const w=cv.clientWidth||cv.parentElement.clientWidth;
+  cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return{ctx,w,h};}
+
+function drawFit(coef){
+  const {ctx,w,h}=prep($('fit'),300);ctx.clearRect(0,0,w,h);
+  const mL=40,mR=12,mT=12,mB=28,pw=w-mL-mR,ph=h-mT-mB;
+  const ally=[...train,...test].map(p=>p.y);let ymin=Math.min(...ally,0),ymax=Math.max(...ally,110);
+  const X=x=>mL+(x-XMIN)/(XMAX-XMIN)*pw, Y=y=>mT+ph-(y-ymin)/(ymax-ymin)*ph;
+  ctx.strokeStyle='#d9e4e9';ctx.strokeRect(mL,mT,pw,ph);
+  ctx.fillStyle='#3f5a68';ctx.font='11px Segoe UI,Arial';ctx.textAlign='center';
+  ctx.fillText('temperatura (°C)',mL+pw/2,h-8);
+  // curva modelo (si se dispara fuera del marco, se levanta la pluma → se ve que "explota")
+  ctx.strokeStyle='#0e2a38';ctx.lineWidth=2.4;ctx.beginPath();
+  let pen=false;for(let x=XMIN;x<=XMAX;x+=0.08){const yy=evalPoly(coef,x);
+    if(yy<ymin||yy>ymax){pen=false;continue;}
+    const px=X(x),py=Y(yy);if(!pen){ctx.moveTo(px,py);pen=true;}else ctx.lineTo(px,py);}ctx.stroke();
+  // puntos
+  test.forEach(p=>{ctx.fillStyle='rgba(217,83,79,.55)';ctx.beginPath();ctx.arc(X(p.x),Y(p.y),3.2,0,7);ctx.fill();});
+  train.forEach(p=>{ctx.fillStyle='#0a7fb4';ctx.beginPath();ctx.arc(X(p.x),Y(p.y),4.2,0,7);ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=1.2;ctx.stroke();});
+}
+
+function drawErr(dCur){
+  const {ctx,w,h}=prep($('err'),280);ctx.clearRect(0,0,w,h);
+  const mL=58,mR=14,mT=16,mB=30,pw=w-mL-mR,ph=h-mT-mB;
+  const L=v=>Math.log10(Math.max(v,0.3));
+  const allL=[...eTr,...eTe].map(L);
+  let ylo=Math.floor(Math.min(...allL)),yhi=Math.ceil(Math.max(...allL));
+  if(yhi-ylo<1)yhi=ylo+1;
+  const X=d=>mL+(d-1)/11*pw, Y=v=>mT+ph-(L(v)-ylo)/(yhi-ylo)*ph;
+  ctx.strokeStyle='#d9e4e9';ctx.strokeRect(mL,mT,pw,ph);
+  ctx.fillStyle='#3f5a68';ctx.font='11px Segoe UI,Arial';ctx.textAlign='center';
+  ctx.fillText('complejidad (grado del polinomio)',mL+pw/2,h-8);
+  for(let d=1;d<=12;d++){const x=X(d);ctx.fillStyle='#8aa0ab';ctx.fillText(d,x,mT+ph+16);}
+  ctx.save();ctx.translate(14,mT+ph/2);ctx.rotate(-Math.PI/2);ctx.fillText('error (MSE · escala log)',0,0);ctx.restore();
+  ctx.textAlign='right';
+  for(let e=ylo;e<=yhi;e++){const y=mT+ph-(e-ylo)/(yhi-ylo)*ph;ctx.fillStyle='#8aa0ab';
+    ctx.fillText('10'+supN(e),mL-6,y+3);
+    ctx.strokeStyle='#eef3f5';ctx.beginPath();ctx.moveTo(mL,y);ctx.lineTo(mL+pw,y);ctx.stroke();}
+  function line(arr,color){ctx.strokeStyle=color;ctx.lineWidth=2.4;ctx.beginPath();
+    degs.forEach((d,i)=>{const x=X(d),y=Y(arr[i]);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+    degs.forEach((d,i)=>{ctx.fillStyle=color;ctx.beginPath();ctx.arc(X(d),Y(arr[i]),3,0,7);ctx.fill();});}
+  line(eTr,'#0a7fb4');line(eTe,'#d9534f');
+  ctx.strokeStyle='#1f9d6b';ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(X(dOpt),mT);ctx.lineTo(X(dOpt),mT+ph);ctx.stroke();ctx.setLineDash([]);
+  ctx.strokeStyle='#00527e';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(X(dCur),mT);ctx.lineTo(X(dCur),mT+ph);ctx.stroke();
+  ctx.fillStyle='#00527e';ctx.font='bold 11px Segoe UI,Arial';ctx.textAlign='center';ctx.fillText('vos',X(dCur),mT+8);
+}
+
+document.querySelectorAll('.quick button').forEach(b=>b.addEventListener('click',()=>{
+  deg.value=b.dataset.d==='4'?dOpt:b.dataset.d;render();}));
+deg.addEventListener('input',render);
+window.addEventListener('resize',render);
+render();
+</script>
+</body>
+</html>
