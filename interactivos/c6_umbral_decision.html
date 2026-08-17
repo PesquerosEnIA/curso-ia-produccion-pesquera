@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · El umbral es una decisión económica — Clase 6</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --rojo:#d9534f; --ambar:#e6a417;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);
+    text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px;color:var(--tinta)}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 18px;max-width:70ch}
+  .grid{display:flex;flex-wrap:wrap;gap:16px}
+  .col{flex:1 1 380px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;
+    padding:16px 16px 14px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--azul-txt);margin:0 0 12px;font-weight:800}
+  label.field{display:block;font-size:13.5px;font-weight:700;color:var(--tinta);margin:14px 0 4px}
+  label.field:first-of-type{margin-top:0}
+  .fieldval{font-weight:800;color:var(--azul)}
+  input[type=range]{width:100%;accent-color:var(--azul);height:26px}
+  .hint{font-size:12px;color:var(--gris);margin:2px 0 0}
+  .btn{margin-top:14px;width:100%;border:0;border-radius:10px;background:var(--azul);
+    color:#fff;font-weight:800;font-size:14px;padding:11px 14px;cursor:pointer}
+  .btn:hover{background:var(--azul-osc)}
+  /* matriz */
+  .cm{display:grid;grid-template-columns:auto 1fr 1fr;grid-template-rows:auto 1fr 1fr;
+    gap:6px;margin-top:4px}
+  .cm .lbl{display:flex;align-items:center;justify-content:center;font-size:11.5px;
+    font-weight:700;color:var(--gris);text-align:center;padding:2px}
+  .cm .cell{border-radius:10px;padding:10px 8px;color:#fff;min-height:74px;
+    display:flex;flex-direction:column;justify-content:center}
+  .cm .cell .n{font-size:26px;font-weight:800;line-height:1}
+  .cm .cell .t{font-size:11px;font-weight:600;opacity:.95;margin-top:3px}
+  .vp{background:#1f9d6b}.vn{background:#2f9ecb}.fp{background:#d9534f}.fn{background:#b5642f}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .chip{background:var(--fondo);border:1px solid var(--linea);border-radius:999px;
+    padding:5px 11px;font-size:12.5px;font-weight:700;color:var(--tinta)}
+  .chip b{color:var(--azul);font-weight:800}
+  /* costos */
+  .cost-row{display:flex;justify-content:space-between;align-items:baseline;
+    padding:7px 0;border-bottom:1px dashed var(--linea);font-size:13.5px}
+  .cost-row:last-child{border-bottom:0}
+  .cost-row .k{color:var(--gris)}
+  .cost-row .v{font-weight:800;font-variant-numeric:tabular-nums}
+  .total{margin-top:8px;background:var(--tinta);color:#fff;border-radius:10px;
+    padding:11px 14px;display:flex;justify-content:space-between;align-items:baseline}
+  .total .k{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;opacity:.85}
+  .total .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+  .opt{margin-top:10px;font-size:13px;color:var(--tinta);background:#eaf6ec;
+    border:1px solid #bfe3cb;border-radius:10px;padding:9px 12px}
+  .opt b{color:var(--verde)}
+  canvas{width:100%;height:auto;display:block}
+  .legend{font-size:12.5px;color:var(--gris);margin-top:14px;line-height:1.6}
+  .legend b.rojo{color:var(--rojo)}.legend b.marron{color:#b5642f}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);
+    padding-top:12px}
+  a{color:var(--azul)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🎛️ Clase 6 · Simulador interactivo</div>
+  <h1>El umbral es una decisión <span style="color:var(--azul)">económica</span></h1>
+  <p class="lead">Un modelo entrenado no dice “sí/no”: dice una <b>probabilidad</b>. Sos vos quien elige el
+  <b>umbral</b> a partir del cual conviene ir a pescar. Movelo y mirá cómo cambian los aciertos, los errores
+  y —sobre todo— la <b>plata</b>. No hay un umbral “correcto”: depende de tu costo de gasoil y de tu tipo de pesca.</p>
+
+  <div class="grid">
+    <!-- Controles -->
+    <div class="col">
+      <div class="panel">
+        <h2>Controles</h2>
+        <label class="field">Umbral de decisión (τ): <span class="fieldval" id="tauVal">0.50</span></label>
+        <input type="range" id="tau" min="0.05" max="0.95" step="0.01" value="0.50">
+        <p class="hint">Si la probabilidad del modelo ≥ τ → el modelo recomienda <b>IR</b>.</p>
+
+        <label class="field">Costo de un <b style="color:var(--rojo)">falso positivo</b> (marea en vano): <span class="fieldval" id="cfpVal"></span></label>
+        <input type="range" id="cfp" min="50000" max="1000000" step="10000" value="350000">
+        <p class="hint">Fuiste porque el modelo dijo “hay”, y no había: gasoil + tripulación quemados.</p>
+
+        <label class="field">Costo de un <b style="color:#b5642f">falso negativo</b> (oportunidad perdida): <span class="fieldval" id="cfnVal"></span></label>
+        <input type="range" id="cfn" min="50000" max="1000000" step="10000" value="500000">
+        <p class="hint">No fuiste porque el modelo dijo “no”, y había una zona excelente.</p>
+
+        <button class="btn" id="optBtn">⚙️ Fijar el umbral óptimo para mi costo</button>
+      </div>
+    </div>
+
+    <!-- Matriz + métricas -->
+    <div class="col">
+      <div class="panel">
+        <h2>Matriz de confusión — conjunto de prueba (n=<span id="ntest"></span>)</h2>
+        <div class="cm">
+          <div class="lbl"></div>
+          <div class="lbl">Modelo dice<br>NO ir</div>
+          <div class="lbl">Modelo dice<br>IR</div>
+          <div class="lbl" style="writing-mode:vertical-rl;transform:rotate(180deg)">Realidad: había</div>
+          <div class="cell fn"><span class="n" id="nFN">0</span><span class="t">Falso negativo</span></div>
+          <div class="cell vp"><span class="n" id="nVP">0</span><span class="t">Verdadero positivo</span></div>
+          <div class="lbl" style="writing-mode:vertical-rl;transform:rotate(180deg)">Realidad: no había</div>
+          <div class="cell vn"><span class="n" id="nVN">0</span><span class="t">Verdadero negativo</span></div>
+          <div class="cell fp"><span class="n" id="nFP">0</span><span class="t">Falso positivo</span></div>
+        </div>
+        <div class="chips">
+          <span class="chip">Precisión <b id="mPrec"></b></span>
+          <span class="chip">Sensibilidad <b id="mRec"></b></span>
+          <span class="chip">Exactitud <b id="mAcc"></b></span>
+          <span class="chip">AUC-ROC <b id="mAuc"></b></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:16px">
+    <!-- Costos -->
+    <div class="col">
+      <div class="panel">
+        <h2>¿Cuánto te cuesta este umbral?</h2>
+        <div class="cost-row"><span class="k"><b style="color:var(--rojo)">Falsos positivos</b> · <span id="qfp"></span> × <span id="ufp"></span></span><span class="v" id="totfp"></span></div>
+        <div class="cost-row"><span class="k"><b style="color:#b5642f">Falsos negativos</b> · <span id="qfn"></span> × <span id="ufn"></span></span><span class="v" id="totfn"></span></div>
+        <div class="total"><span class="k">Costo total de los errores</span><span class="v" id="totall"></span></div>
+        <div class="opt" id="optBox"></div>
+        <canvas id="costCv" width="440" height="220" aria-label="Costo total según el umbral"></canvas>
+      </div>
+    </div>
+
+    <!-- ROC -->
+    <div class="col">
+      <div class="panel">
+        <h2>Curva ROC — dónde estás parado</h2>
+        <canvas id="rocCv" width="440" height="300" aria-label="Curva ROC con el punto de operación actual"></canvas>
+        <p class="hint" style="margin-top:8px">El punto ● es tu umbral actual. Bajar τ te mueve arriba-derecha
+        (más capturas detectadas, más falsas alarmas); subirlo, abajo-izquierda (más prudente, más oportunidades perdidas).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel legend" style="margin-top:16px">
+    <b class="rojo">Falso positivo</b> = el modelo dijo “hay” y fuiste, pero no había → <b>perdés el viaje</b> (gasoil).
+    &nbsp;·&nbsp;
+    <b class="marron">Falso negativo</b> = el modelo dijo “no” y no fuiste, pero había → <b>perdés la oportunidad</b>.
+    <br>La lección de la clase: elegir τ <b>no es una decisión técnica, es de negocio</b>, y la tomás vos según qué error te duele más.
+  </div>
+
+  <footer>
+    Datos de prueba generados con la misma lógica del notebook <b>clase06_ml — Predicción de zonas de pesca</b>
+    (óptimo de SST ~10&nbsp;°C, clorofila y profundidad ~140&nbsp;m). Curso <b>IA Aplicada a la Producción Pesquera</b>
+    · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+// ── RNG determinista (mismo set para todos) ──────────────────────────────────
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const rng=mulberry32(42);
+function gauss(m,s){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return m+s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function clip(x,a,b){return Math.max(a,Math.min(b,x));}
+
+// ── Dataset de prueba (lógica del notebook C6) ───────────────────────────────
+const N=220, data=[];
+for(let i=0;i<N;i++){
+  const sst=gauss(10,4);
+  const chl=-1.8*Math.log(1-rng());               // exponential(scale=1.8)
+  const depth=50+rng()*250;
+  const prob=Math.exp(-((sst-10)**2)/32)*0.40 + clip(chl/5,0,1)*0.30 + Math.exp(-((depth-140)**2)/5000)*0.30;
+  const label=(prob+gauss(0,0.15)>0.52)?1:0;      // captura_exitosa
+  const score=clip(prob+gauss(0,0.09),0,1);       // estimación del modelo (RF)
+  data.push({label,score});
+}
+
+// ── AUC (Mann-Whitney) — fijo, no depende del umbral ─────────────────────────
+function computeAUC(){
+  const pos=data.filter(d=>d.label===1).map(d=>d.score);
+  const neg=data.filter(d=>d.label===0).map(d=>d.score);
+  let s=0;for(const p of pos)for(const n of neg){s+=(p>n)?1:(p===n?0.5:0);}
+  return s/(pos.length*neg.length);
+}
+const AUC=computeAUC();
+
+// ── Confusión para un umbral dado ────────────────────────────────────────────
+function confusion(tau){
+  let VP=0,FP=0,FN=0,VN=0;
+  for(const d of data){const pred=d.score>=tau;
+    if(d.label===1&&pred)VP++;else if(d.label===0&&pred)FP++;
+    else if(d.label===1&&!pred)FN++;else VN++;}
+  return {VP,FP,FN,VN};
+}
+function costOf(tau,cFP,cFN){const c=confusion(tau);return c.FP*cFP+c.FN*cFN;}
+function optimalTau(cFP,cFN){let best=0.05,bestC=Infinity;
+  for(let t=0.05;t<=0.95;t+=0.01){const c=costOf(t,cFP,cFN);if(c<bestC){bestC=c;best=t;}}
+  return {tau:Math.round(best*100)/100,cost:bestC};
+}
+
+// ── Formato ──────────────────────────────────────────────────────────────────
+const money=n=>'$ '+Math.round(n).toLocaleString('es-AR');
+const pct=x=>(x*100).toFixed(0)+'%';
+
+// ── Elementos ────────────────────────────────────────────────────────────────
+const $=id=>document.getElementById(id);
+const tau=$('tau'),cfp=$('cfp'),cfn=$('cfn');
+$('ntest').textContent=N;
+
+function render(){
+  const t=+tau.value, cFP=+cfp.value, cFN=+cfn.value;
+  $('tauVal').textContent=t.toFixed(2);
+  $('cfpVal').textContent=money(cFP);
+  $('cfnVal').textContent=money(cFN);
+
+  const c=confusion(t);
+  $('nVP').textContent=c.VP;$('nFP').textContent=c.FP;$('nFN').textContent=c.FN;$('nVN').textContent=c.VN;
+
+  const prec=c.VP+c.FP?c.VP/(c.VP+c.FP):0;
+  const rec=c.VP+c.FN?c.VP/(c.VP+c.FN):0;
+  const acc=(c.VP+c.VN)/N;
+  $('mPrec').textContent=pct(prec);$('mRec').textContent=pct(rec);
+  $('mAcc').textContent=pct(acc);$('mAuc').textContent=AUC.toFixed(3);
+
+  // costos
+  $('qfp').textContent=c.FP;$('ufp').textContent=money(cFP);$('totfp').textContent=money(c.FP*cFP);
+  $('qfn').textContent=c.FN;$('ufn').textContent=money(cFN);$('totfn').textContent=money(c.FN*cFN);
+  const tot=c.FP*cFP+c.FN*cFN;
+  $('totall').textContent=money(tot);
+
+  const opt=optimalTau(cFP,cFN);
+  const dif=tot-opt.cost;
+  if(Math.abs(t-opt.tau)<0.005){
+    $('optBox').innerHTML='✅ Estás en el <b>umbral óptimo</b> para tu costo ('+opt.tau.toFixed(2)+'): mínimo costo de errores.';
+  }else{
+    $('optBox').innerHTML='El umbral que <b>minimiza tu costo</b> es <b>'+opt.tau.toFixed(2)+'</b> ('+money(opt.cost)+
+      '). Con τ='+t.toFixed(2)+' estás gastando <b>'+money(dif)+' de más</b>.';
+  }
+  drawCost(t,cFP,cFN,opt.tau);
+  drawROC(t);
+}
+
+// ── Canvas helpers (nítidos en pantallas retina) ─────────────────────────────
+function prep(cv,cssH){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.parentElement.clientWidth;
+  cv.width=w*dpr;cv.height=cssH*dpr;cv.style.height=cssH+'px';
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w,h:cssH};
+}
+function drawCost(tCur,cFP,cFN,tOpt){
+  const {ctx,w,h}=prep($('costCv'),220);
+  ctx.clearRect(0,0,w,h);
+  const mL=54,mR=12,mT=12,mB=28,pw=w-mL-mR,ph=h-mT-mB;
+  const xs=[],ys=[];let ymax=0;
+  for(let t=0.05;t<=0.95001;t+=0.01){const cst=costOf(t,cFP,cFN);xs.push(t);ys.push(cst);if(cst>ymax)ymax=cst;}
+  ymax=ymax*1.1||1;
+  const X=t=>mL+(t-0.05)/0.9*pw, Y=v=>mT+ph-(v/ymax)*ph;
+  // ejes
+  ctx.strokeStyle='#d9e4e9';ctx.lineWidth=1;ctx.strokeRect(mL,mT,pw,ph);
+  ctx.fillStyle='#3f5a68';ctx.font='11px Segoe UI,Arial';
+  ctx.textAlign='center';ctx.fillText('umbral τ',mL+pw/2,h-8);
+  ctx.save();ctx.translate(14,mT+ph/2);ctx.rotate(-Math.PI/2);ctx.fillText('costo total ($)',0,0);ctx.restore();
+  ctx.textAlign='right';
+  for(let g=0;g<=2;g++){const v=ymax*g/2;const y=Y(v);ctx.fillStyle='#8aa0ab';
+    ctx.fillText('$'+(v/1e6).toFixed(1)+'M',mL-6,y+3);
+    ctx.strokeStyle='#eef3f5';ctx.beginPath();ctx.moveTo(mL,y);ctx.lineTo(mL+pw,y);ctx.stroke();}
+  // curva
+  ctx.strokeStyle='#0a7fb4';ctx.lineWidth=2.2;ctx.beginPath();
+  xs.forEach((t,i)=>{const x=X(t),y=Y(ys[i]);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+  // óptimo
+  ctx.strokeStyle='#1f9d6b';ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(X(tOpt),mT);ctx.lineTo(X(tOpt),mT+ph);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#1f9d6b';ctx.beginPath();ctx.arc(X(tOpt),Y(costOf(tOpt,cFP,cFN)),4,0,7);ctx.fill();
+  // actual
+  ctx.strokeStyle='#00527e';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(X(tCur),mT);ctx.lineTo(X(tCur),mT+ph);ctx.stroke();
+  ctx.fillStyle='#00527e';ctx.beginPath();ctx.arc(X(tCur),Y(costOf(tCur,cFP,cFN)),4.5,0,7);ctx.fill();
+}
+function drawROC(tCur){
+  const {ctx,w,h}=prep($('rocCv'),300);
+  ctx.clearRect(0,0,w,h);
+  const m=40,pw=w-m-14,ph=h-m-24;
+  const X=v=>m+v*pw, Y=v=>m/2+ph-v*ph+ (m/2);
+  const oy=h-m; // baseline
+  const px=v=>m+v*pw, py=v=>oy-v*ph;
+  // marco
+  ctx.strokeStyle='#d9e4e9';ctx.strokeRect(m,oy-ph,pw,ph);
+  ctx.fillStyle='#3f5a68';ctx.font='11px Segoe UI,Arial';ctx.textAlign='center';
+  ctx.fillText('Tasa de falsos positivos (FPR)',m+pw/2,h-6);
+  ctx.save();ctx.translate(12,oy-ph/2);ctx.rotate(-Math.PI/2);ctx.fillText('Tasa de verdaderos positivos (TPR)',0,0);ctx.restore();
+  // diagonal
+  ctx.strokeStyle='#c7d5db';ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(px(0),py(0));ctx.lineTo(px(1),py(1));ctx.stroke();ctx.setLineDash([]);
+  // curva ROC
+  const pts=[];
+  for(let t=0;t<=1.0001;t+=0.02){const c=confusion(t);
+    const P=c.VP+c.FN, Ng=c.FP+c.VN;
+    pts.push([Ng?c.FP/Ng:0, P?c.VP/P:0]);}
+  ctx.strokeStyle='#0a7fb4';ctx.lineWidth=2.2;ctx.beginPath();
+  pts.forEach((p,i)=>{const x=px(p[0]),y=py(p[1]);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+  ctx.fillStyle='rgba(10,127,180,.08)';ctx.lineTo(px(1),py(0));ctx.lineTo(px(0),py(0));ctx.closePath();ctx.fill();
+  // AUC
+  ctx.fillStyle='#00527e';ctx.font='bold 13px Segoe UI,Arial';ctx.textAlign='left';
+  ctx.fillText('AUC = '+AUC.toFixed(3),px(0.42),py(0.18));
+  // punto actual
+  const c=confusion(tCur);const P=c.VP+c.FN,Ng=c.FP+c.VN;
+  const fx=Ng?c.FP/Ng:0, ty=P?c.VP/P:0;
+  ctx.fillStyle='#d9534f';ctx.beginPath();ctx.arc(px(fx),py(ty),6,0,7);ctx.fill();
+  ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+}
+
+[tau,cfp,cfn].forEach(el=>el.addEventListener('input',render));
+$('optBtn').addEventListener('click',()=>{const o=optimalTau(+cfp.value,+cfn.value);tau.value=o.tau;render();});
+window.addEventListener('resize',render);
+render();
+</script>
+</body>
+</html>
