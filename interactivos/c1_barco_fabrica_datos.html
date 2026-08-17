@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tu barco es una fábrica de datos — Clase 1</title>
+<style>
+  :root{
+    --cian:#5fd0ff; --cian2:#37b6ee; --azul:#0a7fb4; --azul-osc:#00527e;
+    --tinta:#0e2a38; --gris:#3f5a68; --linea:#d9e4e9; --panel:#ffffff;
+    --nav0:#03222f; --nav1:#083a54; --nav2:#0a4f70;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#eef4f7;color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:14px}
+  .wrap{max-width:980px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul);
+    text-transform:uppercase;letter-spacing:.07em;margin:0 0 4px}
+  h1{font-size:26px;line-height:1.15;margin:0 0 6px}
+  h1 b{color:var(--azul)}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 14px;max-width:74ch}
+  /* escena */
+  .stage{position:relative;width:100%;padding-bottom:46.3%;border-radius:16px;overflow:hidden;
+    background:linear-gradient(180deg,var(--nav0) 0%,var(--nav1) 62%,var(--nav2) 100%);
+    box-shadow:0 8px 30px rgba(3,34,47,.28)}
+  .stage svg{position:absolute;inset:0;width:100%;height:100%}
+  .hot{position:absolute;transform:translate(-50%,-50%);width:34px;height:34px;border-radius:50%;
+    border:2px solid #fff;background:rgba(95,208,255,.92);color:#03222f;font-weight:800;font-size:14px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;
+    box-shadow:0 0 0 0 rgba(95,208,255,.7);animation:pulse 2.4s infinite}
+  .hot:hover,.hot.on{background:#fff;color:var(--azul-osc);transform:translate(-50%,-50%) scale(1.14)}
+  .hot.on{box-shadow:0 0 0 6px rgba(95,208,255,.35)}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,208,255,.55)}70%{box-shadow:0 0 0 12px rgba(95,208,255,0)}100%{box-shadow:0 0 0 0 rgba(95,208,255,0)}}
+  .tag{position:absolute;transform:translate(-50%,-140%);background:rgba(3,34,47,.82);color:#dff4ff;
+    font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;white-space:nowrap;pointer-events:none}
+  /* contador */
+  .counter{margin:12px 0 0;background:linear-gradient(90deg,#052c40,#0a5c82);color:#eaf7ff;
+    border-radius:12px;padding:12px 16px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .counter .num{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--cian)}
+  .counter .txt{font-size:13.5px;color:#bfe6f7}
+  /* panel info */
+  .grid{display:flex;flex-wrap:wrap;gap:16px;margin-top:16px}
+  .col{flex:1 1 300px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;
+    box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  #ptitle{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;margin:0 0 4px}
+  #ptitle .ico{font-size:26px}
+  #pkicker{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--azul);margin:0 0 10px}
+  .row{margin:0 0 10px}
+  .row .k{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--gris);margin:0 0 1px}
+  .row .v{font-size:14px;color:var(--tinta)}
+  .real{background:#eaf6ec;border:1px solid #bfe3cb;border-radius:10px;padding:9px 12px;font-size:13px;margin-top:6px}
+  .real b{color:#1f9d6b}
+  .clase{display:inline-block;margin-top:10px;background:#eef4f7;border:1px solid var(--linea);
+    border-radius:999px;padding:4px 11px;font-size:12.5px;font-weight:700;color:var(--azul-osc)}
+  .list{list-style:none;margin:0;padding:0}
+  .list li{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--tinta);
+    padding:7px 0;border-bottom:1px dashed var(--linea);cursor:pointer}
+  .list li:last-child{border-bottom:0}
+  .list li:hover{color:var(--azul)}
+  .list .b{width:22px;height:22px;flex:none;border-radius:6px;background:var(--azul);color:#fff;
+    font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  footer{margin-top:16px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">⚓ Clase 1 · Bienvenida</div>
+  <h1>Tu barco ya es una <b>fábrica de datos</b></h1>
+  <p class="lead">Cada sistema a bordo genera información, marea tras marea. La Inteligencia Artificial es lo que
+  convierte esos datos en <b>decisiones</b>: dónde pescar, a qué velocidad navegar, qué especie es cada pieza.
+  <b>Tocá cada punto</b> 👆 del barco y descubrí el dato que produce y lo que la IA hace con él.</p>
+
+  <div class="stage">
+    <svg viewBox="0 0 820 380" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#0c5c82"/><stop offset="1" stop-color="#063a54"/>
+        </linearGradient>
+      </defs>
+      <!-- mar -->
+      <rect x="0" y="250" width="820" height="130" fill="url(#sea)"/>
+      <path d="M0,258 Q60,250 120,258 T240,258 T360,258 T480,258 T600,258 T720,258 T840,258" fill="none" stroke="#2c86ab" stroke-width="2" opacity=".5"/>
+      <path d="M0,300 Q80,292 160,300 T320,300 T480,300 T640,300 T800,300" fill="none" stroke="#1c6d90" stroke-width="2" opacity=".4"/>
+      <!-- cono sonar -->
+      <path d="M470,255 L432,360 L512,360 Z" fill="#5fd0ff" opacity=".10"/>
+      <!-- red / arte de pesca -->
+      <path d="M182,150 Q118,196 150,252 Q168,286 214,270" fill="none" stroke="#bcdcea" stroke-width="2" stroke-dasharray="3 4" opacity=".85"/>
+      <path d="M150,252 q10,26 44,20" fill="#5fd0ff" opacity=".10" stroke="#bcdcea" stroke-width="1.5" stroke-dasharray="2 3"/>
+      <line x1="200" y1="212" x2="182" y2="150" stroke="#cfeefc" stroke-width="2"/>
+      <line x1="232" y1="212" x2="182" y2="150" stroke="#cfeefc" stroke-width="2"/>
+      <!-- casco -->
+      <path d="M170,212 L690,212 Q744,212 758,236 L744,248 Q736,255 700,255 L214,255 Q176,255 170,212 Z"
+            fill="#0a3a54" stroke="#cfeefc" stroke-width="2.5"/>
+      <line x1="176" y1="234" x2="748" y2="234" stroke="#5fd0ff" stroke-width="1.4" opacity=".5"/>
+      <!-- caseta -->
+      <rect x="360" y="158" width="122" height="54" rx="4" fill="#0e4b6b" stroke="#cfeefc" stroke-width="2.5"/>
+      <rect x="372" y="170" width="26" height="20" rx="2" fill="#9fe0ff" opacity=".8"/>
+      <rect x="406" y="170" width="26" height="20" rx="2" fill="#9fe0ff" opacity=".8"/>
+      <rect x="440" y="170" width="26" height="20" rx="2" fill="#9fe0ff" opacity=".8"/>
+      <!-- chimenea -->
+      <rect x="470" y="140" width="22" height="22" rx="2" fill="#0e4b6b" stroke="#cfeefc" stroke-width="2"/>
+      <rect x="470" y="146" width="22" height="5" fill="#5fd0ff"/>
+      <!-- mástil + antena -->
+      <line x1="410" y1="158" x2="410" y2="96" stroke="#cfeefc" stroke-width="2.5"/>
+      <line x1="390" y1="104" x2="430" y2="104" stroke="#cfeefc" stroke-width="2.5"/>
+      <rect x="402" y="118" width="16" height="8" rx="2" fill="#0e4b6b" stroke="#cfeefc" stroke-width="1.6"/>
+      <!-- proa: mástil corto -->
+      <line x1="640" y1="212" x2="640" y2="176" stroke="#cfeefc" stroke-width="2"/>
+    </svg>
+    <!-- hotspots (posición en % del viewBox) -->
+    <div id="spots"></div>
+  </div>
+
+  <div class="counter">
+    <span class="num" id="cnum">0</span>
+    <span class="txt">registros de datos que tu barco puede generar en <b>una sola marea</b> ·
+    <span style="opacity:.75">estimación ilustrativa</span></span>
+  </div>
+
+  <div class="grid">
+    <div class="col" style="flex:1 1 340px">
+      <div class="panel" id="info">
+        <div id="pkicker">Elegí un sistema del barco</div>
+        <div id="ptitle"><span class="ico">👆</span><span>Tocá un punto luminoso</span></div>
+        <p class="row"><span class="v">Cada sistema de a bordo cuenta una parte de la historia. Hacé clic en los
+        puntos del barco —o en la lista de al lado— para ver qué dato genera cada uno y cómo la IA lo aprovecha.</span></p>
+      </div>
+    </div>
+    <div class="col" style="flex:1 1 260px">
+      <div class="panel">
+        <div id="pkicker">Los 7 sistemas</div>
+        <ul class="list" id="menu"></ul>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    De la <b>Industria 4.0</b> a las <b>Smart Fisheries</b>: lo que ves acá lo vamos a trabajar clase a clase —
+    datos y sensores (C4), predicción con ML (C6), visión artificial (C7), optimización y agentes (C8), dashboards (C9).
+    Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+const SIS=[
+  {n:1,ico:'📡',t:'GPS + AIS',k:'Posicionamiento',x:50.0,y:25.3,
+   mide:'Posición, rumbo y velocidad del barco, cada pocos segundos.',
+   dato:'La huella digital de la marea: miles de puntos de navegación.',
+   ia:'Reconstruye el esfuerzo pesquero, infiere el arte por el patrón de movimiento y verifica desembarcos (PSMA).',
+   real:'El AIS reveló <b>+60.000 barcos</b> pesqueros y actividad en <b>&gt;55% del océano</b> (Kroodsma et&nbsp;al., Science 2018).',
+   clase:'Clase 4 · Caso AIS/PSMA'},
+  {n:2,ico:'🔊',t:'Ecosonda y sonar',k:'Detección',x:57.3,y:78.9,
+   mide:'Ecos acústicos del fondo y de los cardúmenes bajo el casco.',
+   dato:'Perfiles de profundidad y densidad de biomasa en tiempo real.',
+   ia:'Estima abundancia y clasifica especies por su firma acústica.',
+   real:'La acústica es la base de las campañas de evaluación de stock del <b>INIDEP</b>.',
+   clase:'Clase 6'},
+  {n:3,ico:'🌡️',t:'Sensores oceanográficos',k:'Ambiente',x:79.3,y:66.3,
+   mide:'Temperatura superficial del mar (SST); se cruza con clorofila satelital.',
+   dato:'El estado del hábitat por donde se mueve el recurso.',
+   ia:'Predice zonas de pesca probables con modelos de Machine Learning.',
+   real:'SST y clorofila son <b>las variables que más pesan</b> al predecir capturas (tu modelo de la Clase 6).',
+   clase:'Clases 4 y 6'},
+  {n:4,ico:'🕸️',t:'Sensores de red',k:'Arte de pesca',x:20.1,y:68.9,
+   mide:'Profundidad, apertura y tensión de la red; sensor de captura.',
+   dato:'La geometría del lance, lance a lance.',
+   ia:'Optimiza el calado, reduce capturas no deseadas y ahorra combustible.',
+   real:'Un arte bien calado cambia la <b>selectividad</b> y el consumo por lance.',
+   clase:'Clase 8'},
+  {n:5,ico:'⛽',t:'Motor y caudalímetro',k:'Energía',x:57.3,y:61.1,
+   mide:'Consumo de gasoil, RPM y velocidad de navegación.',
+   dato:'La curva de eficiencia del barco.',
+   ia:'Calcula la velocidad óptima y anticipa fallas (mantenimiento predictivo).',
+   real:'El combustible es el <b>20–40% del costo operativo</b> de la marea (FAO).',
+   clase:'Clase 8'},
+  {n:6,ico:'📷',t:'Cámara de cubierta',k:'Visión',x:65.9,y:53.9,
+   mide:'Imagen de cada pieza en la línea de trabajo.',
+   dato:'Miles de fotos de captura por jornada.',
+   ia:'Clasifica especie, mide talla y controla calidad automáticamente.',
+   real:'La <b>visión artificial</b> ya inspecciona en planta a velocidad industrial.',
+   clase:'Clase 7'},
+  {n:7,ico:'🧊',t:'Bodega y cadena de frío',k:'Calidad',x:35.4,y:61.1,
+   mide:'Temperatura y tiempo de conservación de la captura.',
+   dato:'La trazabilidad del producto desde que sube a bordo.',
+   ia:'Alerta desvíos de la cadena de frío y sostiene la trazabilidad (SENASA).',
+   real:'La temperatura define <b>calidad, precio y acceso a mercados</b>.',
+   clase:'Clase 9 · Trazabilidad'}
+];
+
+const spots=document.getElementById('spots');
+const menu=document.getElementById('menu');
+SIS.forEach(s=>{
+  const b=document.createElement('button');
+  b.className='hot';b.style.left=s.x+'%';b.style.top=s.y+'%';b.textContent=s.n;
+  b.setAttribute('aria-label',s.t);b.onclick=()=>select(s.n);
+  spots.appendChild(b);
+  const li=document.createElement('li');
+  li.innerHTML='<span class="b">'+s.n+'</span><span>'+s.ico+' <b>'+s.t+'</b> · '+s.k+'</span>';
+  li.onclick=()=>select(s.n);menu.appendChild(li);
+});
+
+function select(n){
+  const s=SIS.find(x=>x.n===n);
+  document.querySelectorAll('.hot').forEach((h,i)=>h.classList.toggle('on',i===n-1));
+  document.getElementById('info').innerHTML=
+    '<div id="pkicker">'+s.k+'</div>'+
+    '<div id="ptitle"><span class="ico">'+s.ico+'</span><span>'+s.t+'</span></div>'+
+    '<div class="row"><div class="k">Qué mide</div><div class="v">'+s.mide+'</div></div>'+
+    '<div class="row"><div class="k">El dato que genera</div><div class="v">'+s.dato+'</div></div>'+
+    '<div class="row"><div class="k">Qué hace la IA</div><div class="v">'+s.ia+'</div></div>'+
+    '<div class="real">📊 '+s.real+'</div>'+
+    '<span class="clase">➜ '+s.clase+'</span>';
+}
+
+// contador animado
+const target=2436000;
+const cnum=document.getElementById('cnum');
+let started=false;
+function runCounter(){
+  if(started)return;started=true;
+  const dur=1600,t0=performance.now();
+  function step(t){
+    const p=Math.min((t-t0)/dur,1);
+    const val=Math.round(target*(1-Math.pow(1-p,3)));
+    cnum.textContent=val.toLocaleString('es-AR');
+    if(p<1)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+// arranca al cargar
+runCounter();
+</script>
+</body>
+</html>

@@ -6,7 +6,10 @@ Cada archivo es 100% autocontenido (HTML+CSS+JS inline): se puede abrir con dobl
 ## Widgets
 | Archivo | Clase | Concepto |
 |---|---|---|
+| `c1_barco_fabrica_datos.html` | 1 | Barco interactivo: cada sistema genera datos y la IA los usa (hero de bienvenida) |
 | `c6_umbral_decision.html` | 6 | El umbral de decisión como decisión económica (matriz de confusión + costo en $) |
+| `c6_zona_pesca.html` | 6 | ¿A qué zona voy? Sliders SST/clorofila/profundidad → prob. de éxito + kg + por qué |
+| `c8_velocidad_optima.html` | 8 | Velocidad óptima de crucero (ley cúbica: combustible vs. tiempo → costo mínimo) |
 
 ## Cómo se sirven (una sola vez)
 Estos archivos deben estar **públicos** y servidos por **GitHub Pages** del repo `PesquerosEnIA/curso-ia-produccion-pesquera`.

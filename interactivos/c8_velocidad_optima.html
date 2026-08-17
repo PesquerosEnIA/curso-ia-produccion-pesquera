@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · Velocidad óptima de crucero — Clase 8</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --naranja:#e0752d; --gris2:#8aa0ab;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);
+    text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 16px;max-width:72ch}
+  .lead b{color:var(--tinta)}
+  .grid{display:flex;flex-wrap:wrap;gap:16px}
+  .col{flex:1 1 380px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;
+    box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);
+    margin:0 0 12px;font-weight:800}
+  label.field{display:block;font-size:13.5px;font-weight:700;margin:14px 0 4px}
+  label.field:first-of-type{margin-top:0}
+  .fieldval{font-weight:800;color:var(--azul)}
+  input[type=range]{width:100%;accent-color:var(--azul);height:26px}
+  .hint{font-size:12px;color:var(--gris);margin:2px 0 0}
+  .big{margin:0 0 2px;display:flex;align-items:baseline;justify-content:space-between}
+  .big .k{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--gris)}
+  .big .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+  .rows .r{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--linea);font-size:13.5px}
+  .rows .r:last-child{border-bottom:0}
+  .rows .r .k{color:var(--gris)}
+  .rows .r .v{font-weight:800;font-variant-numeric:tabular-nums}
+  .dotc{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .total{margin-top:10px;background:var(--tinta);color:#fff;border-radius:10px;padding:11px 14px;
+    display:flex;justify-content:space-between;align-items:baseline}
+  .total .k{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;opacity:.85}
+  .total .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+  .opt{margin-top:10px;font-size:13px;background:#eaf6ec;border:1px solid #bfe3cb;border-radius:10px;padding:9px 12px}
+  .opt b{color:var(--verde)}
+  .btn{margin-top:14px;width:100%;border:0;border-radius:10px;background:var(--azul);color:#fff;
+    font-weight:800;font-size:14px;padding:11px 14px;cursor:pointer}
+  .btn:hover{background:var(--azul-osc)}
+  canvas{width:100%;height:auto;display:block;margin-top:6px}
+  .leg{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--gris);margin-top:8px}
+  .leg span{display:flex;align-items:center}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🎛️ Clase 8 · Simulador interactivo</div>
+  <h1>La velocidad óptima de crucero</h1>
+  <p class="lead">El consumo sigue la <b>ley cúbica naval</b> (ley de Admiralty): duplicar la velocidad
+  multiplica el gasto de gasoil por <b>~8</b>. Pero ir muy lento también cuesta (más horas en el mar = más
+  tripulación y operación). Existe una <b>velocidad que minimiza el costo total</b>. Movela y encontrala.</p>
+
+  <div class="grid">
+    <div class="col">
+      <div class="panel">
+        <h2>Controles</h2>
+        <label class="field">Velocidad de crucero: <span class="fieldval" id="vVal"></span> kn</label>
+        <input type="range" id="v" min="5.5" max="13.5" step="0.1" value="10">
+        <p class="hint">Ley de Admiralty: consumo ∝ velocidad³.</p>
+
+        <label class="field">Distancia al caladero: <span class="fieldval" id="dVal"></span> km</label>
+        <input type="range" id="d" min="100" max="600" step="10" value="300">
+
+        <label class="field">Precio del gasoil: <span class="fieldval" id="pVal"></span> USD/tn</label>
+        <input type="range" id="p" min="500" max="1200" step="10" value="850">
+
+        <label class="field">Costo operativo del tiempo: <span class="fieldval" id="cVal"></span> USD/h</label>
+        <input type="range" id="c" min="600" max="2500" step="50" value="1400">
+        <p class="hint">Tripulación + charter + costos fijos por hora de navegación.</p>
+
+        <button class="btn" id="optBtn">⚙️ Fijar la velocidad óptima</button>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="panel">
+        <h2>Este viaje (ida al caladero)</h2>
+        <div class="big"><span class="k">Tiempo de navegación</span><span class="v" id="oTime"></span></div>
+        <div class="big"><span class="k">Consumo de gasoil</span><span class="v" id="oCons"></span></div>
+        <div class="rows" style="margin-top:10px">
+          <div class="r"><span class="k"><span class="dotc" style="background:var(--naranja)"></span>Costo de combustible</span><span class="v" id="oFuel"></span></div>
+          <div class="r"><span class="k"><span class="dotc" style="background:var(--gris2)"></span>Costo del tiempo</span><span class="v" id="oTimeCost"></span></div>
+        </div>
+        <div class="total"><span class="k">Costo total del viaje</span><span class="v" id="oTotal"></span></div>
+        <div class="opt" id="optBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <h2>Costo del viaje según la velocidad</h2>
+    <canvas id="cv" width="900" height="300" aria-label="Costo del viaje según la velocidad"></canvas>
+    <div class="leg">
+      <span><span class="dotc" style="background:var(--azul)"></span>Costo total</span>
+      <span><span class="dotc" style="background:var(--naranja)"></span>Combustible (∝ v³)</span>
+      <span><span class="dotc" style="background:var(--gris2)"></span>Tiempo (∝ 1/v)</span>
+      <span><span class="dotc" style="background:var(--verde)"></span>Velocidad óptima</span>
+    </div>
+  </div>
+
+  <footer>
+    Fórmulas del notebook <b>clase08_optimizacion — Parte B</b>: consumo (tn) = k·v³·(D/v<sub>km/h</sub>) con
+    k=0,003; 1&nbsp;kn=1,852&nbsp;km/h. Referencias: combustible = <b>25–40% del costo</b> de la marea; ahorro con
+    optimización 10–20% (FAO / estudios internacionales). Curso <b>IA Aplicada a la Producción Pesquera</b> ·
+    UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+const K=0.003, KMH=1.852;
+// Modelo del notebook (ida al caladero). Devuelve costos en USD y consumo en tn.
+function trip(v,D,precio,cHora){
+  const vkmh=v*KMH;
+  const tiempo=D/vkmh;                 // horas
+  const consumo=K*Math.pow(v,3)*(D/vkmh); // tn
+  const fuel=consumo*precio;
+  const timeCost=tiempo*cHora;
+  return {tiempo,consumo,fuel,timeCost,total:fuel+timeCost};
+}
+function optimal(D,precio,cHora){
+  let bv=5.5,bc=Infinity;
+  for(let v=5.5;v<=13.5001;v+=0.05){const t=trip(v,D,precio,cHora).total;if(t<bc){bc=t;bv=v;}}
+  return {v:Math.round(bv*10)/10,cost:bc};
+}
+const usd=n=>'USD '+Math.round(n).toLocaleString('es-AR');
+const $=id=>document.getElementById(id);
+const v=$('v'),d=$('d'),p=$('p'),c=$('c');
+
+function render(){
+  const V=+v.value,D=+d.value,P=+p.value,C=+c.value;
+  $('vVal').textContent=V.toFixed(1);$('dVal').textContent=D;
+  $('pVal').textContent=P;$('cVal').textContent=C.toLocaleString('es-AR');
+  const r=trip(V,D,P,C);
+  $('oTime').textContent=r.tiempo.toFixed(1)+' h';
+  $('oCons').textContent=r.consumo.toFixed(1)+' tn';
+  $('oFuel').textContent=usd(r.fuel);
+  $('oTimeCost').textContent=usd(r.timeCost);
+  $('oTotal').textContent=usd(r.total);
+  const o=optimal(D,P,C);
+  if(Math.abs(V-o.v)<0.06){
+    $('optBox').innerHTML='✅ Estás en la <b>velocidad óptima</b> ('+o.v.toFixed(1)+' kn): mínimo costo total del viaje.';
+  }else{
+    const dif=r.total-o.cost;
+    const signo=V>o.v?'Vas más rápido de lo óptimo':'Vas más lento de lo óptimo';
+    $('optBox').innerHTML=signo+'. El mínimo está en <b>'+o.v.toFixed(1)+' kn</b> ('+usd(o.cost)+
+      '). Ahora gastás <b>'+usd(dif)+' de más</b> en este viaje.';
+  }
+  draw(V,D,P,C,o.v);
+}
+
+function draw(Vc,D,P,C,Vopt){
+  const cv=$('cv'),dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.parentElement.clientWidth,h=300;
+  cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+  const mL=62,mR=14,mT=12,mB=30,pw=w-mL-mR,ph=h-mT-mB;
+  const vs=[],tot=[],fu=[],ti=[];let ymax=0;
+  for(let x=5.5;x<=13.5001;x+=0.1){const r=trip(x,D,P,C);vs.push(x);tot.push(r.total);fu.push(r.fuel);ti.push(r.timeCost);if(r.total>ymax)ymax=r.total;}
+  ymax*=1.08;
+  const X=x=>mL+(x-5.5)/8*pw, Y=y=>mT+ph-(y/ymax)*ph;
+  ctx.strokeStyle='#d9e4e9';ctx.strokeRect(mL,mT,pw,ph);
+  ctx.fillStyle='#3f5a68';ctx.font='11px Segoe UI,Arial';ctx.textAlign='center';
+  ctx.fillText('velocidad (nudos)',mL+pw/2,h-8);
+  for(let kn=6;kn<=13;kn++){const x=X(kn);ctx.fillStyle='#8aa0ab';ctx.fillText(kn,x,mT+ph+16);
+    ctx.strokeStyle='#f0f5f7';ctx.beginPath();ctx.moveTo(x,mT);ctx.lineTo(x,mT+ph);ctx.stroke();}
+  ctx.textAlign='right';
+  for(let g=0;g<=2;g++){const val=ymax*g/2,y=Y(val);ctx.fillStyle='#8aa0ab';
+    ctx.fillText('$'+Math.round(val/1000)+'k',mL-6,y+3);
+    ctx.strokeStyle='#eef3f5';ctx.beginPath();ctx.moveTo(mL,y);ctx.lineTo(mL+pw,y);ctx.stroke();}
+  function line(arr,color,wid){ctx.strokeStyle=color;ctx.lineWidth=wid;ctx.beginPath();
+    vs.forEach((x,i)=>{const px=X(x),py=Y(arr[i]);i?ctx.lineTo(px,py):ctx.moveTo(px,py);});ctx.stroke();}
+  line(fu,'#e0752d',1.8);line(ti,'#8aa0ab',1.8);line(tot,'#0a7fb4',2.6);
+  // óptimo
+  ctx.strokeStyle='#1f9d6b';ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(X(Vopt),mT);ctx.lineTo(X(Vopt),mT+ph);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#1f9d6b';ctx.beginPath();ctx.arc(X(Vopt),Y(trip(Vopt,D,P,C).total),4.5,0,7);ctx.fill();
+  // actual
+  ctx.fillStyle='#00527e';ctx.beginPath();ctx.arc(X(Vc),Y(trip(Vc,D,P,C).total),5,0,7);ctx.fill();
+  ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+}
+
+[v,d,p,c].forEach(el=>el.addEventListener('input',render));
+$('optBtn').addEventListener('click',()=>{const o=optimal(+d.value,+p.value,+c.value);v.value=o.v;render();});
+window.addEventListener('resize',render);
+render();
+</script>
+</body>
+</html>

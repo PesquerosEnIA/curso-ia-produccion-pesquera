@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · ¿A qué zona voy? — Clase 6</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --ambar:#e6a417; --rojo:#d9534f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 16px;max-width:72ch}
+  .lead b{color:var(--tinta)}
+  .grid{display:flex;flex-wrap:wrap;gap:16px}
+  .col{flex:1 1 360px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 12px;font-weight:800}
+  label.field{display:block;font-size:13.5px;font-weight:700;margin:14px 0 4px}
+  label.field:first-of-type{margin-top:0}
+  .fieldval{font-weight:800;color:var(--azul)}
+  input[type=range]{width:100%;accent-color:var(--azul);height:26px}
+  .opti{font-size:11.5px;color:var(--verde);font-weight:700;margin:2px 0 0}
+  .presets{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .presets button{flex:1 1 auto;border:1px solid var(--linea);background:var(--fondo);border-radius:9px;
+    padding:8px 10px;font-size:12.5px;font-weight:700;color:var(--azul-osc);cursor:pointer}
+  .presets button:hover{border-color:var(--azul);color:var(--azul)}
+  /* resultado */
+  .resulthead{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .gauge{width:148px;height:148px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .gauge-in{width:112px;height:112px;border-radius:50%;background:#fff;display:flex;flex-direction:column;
+    align-items:center;justify-content:center}
+  .gauge-in .pv{font-size:30px;font-weight:800;line-height:1}
+  .gauge-in small{font-size:10.5px;color:var(--gris);margin-top:2px;text-align:center}
+  .verdict{flex:1 1 160px;min-width:0}
+  .pill{display:inline-block;font-size:14px;font-weight:800;color:#fff;padding:5px 13px;border-radius:999px}
+  .kg{font-size:15px;margin-top:10px}
+  .kg b{font-size:26px;font-weight:800;color:var(--tinta);font-variant-numeric:tabular-nums}
+  .rec{font-size:13.5px;color:var(--gris);margin-top:8px}
+  /* barras contribución */
+  .bar{margin:12px 0}
+  .bar .top{display:flex;justify-content:space-between;font-size:13px;margin:0 0 4px}
+  .bar .top .n{font-weight:700}
+  .bar .top .s{font-weight:800;font-variant-numeric:tabular-nums}
+  .track{height:12px;border-radius:7px;background:#eef3f5;overflow:hidden}
+  .fill{height:100%;border-radius:7px}
+  .note{font-size:12px;color:var(--gris);margin-top:4px}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🎛️ Clase 6 · Simulador interactivo</div>
+  <h1>¿A qué zona voy mañana?</h1>
+  <p class="lead">El mismo modelo de la clase, en tus manos. Ajustá las tres variables ambientales de una zona
+  —<b>temperatura</b>, <b>clorofila</b> y <b>profundidad</b>— y mirá la <b>probabilidad de captura exitosa</b> y
+  los <b>kg estimados</b>. Abajo se ve <b>por qué</b>: cuánto aporta cada variable. Probá las 3 zonas reales.</p>
+
+  <div class="grid">
+    <div class="col">
+      <div class="panel">
+        <h2>Condiciones de la zona</h2>
+        <label class="field">Temperatura del mar (SST): <span class="fieldval" id="sstVal"></span> °C</label>
+        <input type="range" id="sst" min="4" max="20" step="0.1" value="10">
+        <p class="opti">Óptimo para merluza: ~8–12 °C</p>
+
+        <label class="field">Clorofila-a: <span class="fieldval" id="chlVal"></span> mg/m³</label>
+        <input type="range" id="chl" min="0" max="6" step="0.1" value="2">
+        <p class="opti">Más clorofila = más productividad (satura en ~5)</p>
+
+        <label class="field">Profundidad media: <span class="fieldval" id="depVal"></span> m</label>
+        <input type="range" id="dep" min="50" max="350" step="5" value="140">
+        <p class="opti">Óptimo demersal: ~140 m</p>
+
+        <div class="presets">
+          <button data-s="9.2" data-c="3.1" data-d="130">Zona A · Rawson (~43°S)</button>
+          <button data-s="14.5" data-c="0.9" data-d="75">Zona B · Norte cálida</button>
+          <button data-s="6.8" data-c="1.2" data-d="210">Zona C · Sur profunda</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="panel">
+        <h2>Recomendación del modelo</h2>
+        <div class="resulthead">
+          <div class="gauge" id="gauge"><div class="gauge-in"><span class="pv" id="pv">0%</span><small>prob. de<br>captura exitosa</small></div></div>
+          <div class="verdict">
+            <span class="pill" id="pill">—</span>
+            <div class="kg">Abundancia estimada:<br><b id="kg">0</b> kg</div>
+            <div class="rec" id="rec"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <h2>¿Por qué? Cuánto aporta cada variable</h2>
+    <div class="bar"><div class="top"><span class="n">🌡️ Temperatura (SST)</span><span class="s" id="sSST"></span></div>
+      <div class="track"><div class="fill" id="fSST" style="background:#0a7fb4"></div></div>
+      <div class="note" id="nSST"></div></div>
+    <div class="bar"><div class="top"><span class="n">🌿 Clorofila-a</span><span class="s" id="sCHL"></span></div>
+      <div class="track"><div class="fill" id="fCHL" style="background:#1f9d6b"></div></div>
+      <div class="note" id="nCHL"></div></div>
+    <div class="bar"><div class="top"><span class="n">📏 Profundidad</span><span class="s" id="sDEP"></span></div>
+      <div class="track"><div class="fill" id="fDEP" style="background:#2f9ecb"></div></div>
+      <div class="note" id="nDEP"></div></div>
+    <p class="note" style="margin-top:10px">Es la misma lógica que en la clase pesa la <b>importancia de variables</b>:
+    SST y clorofila mandan; la profundidad ajusta. Ninguna zona es buena si una variable clave está fuera de rango.</p>
+  </div>
+
+  <footer>
+    Fórmulas del notebook <b>clase06_ml</b>: prob = 0,40·e^(−(SST−10)²/32) + 0,30·min(clorofila/5, 1) +
+    0,30·e^(−(prof−140)²/5000); kg = señal de biomasa análoga (1800/1500/1200). Estimación educativa, sin ruido
+    operativo. Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const sst=$('sst'),chl=$('chl'),dep=$('dep');
+const clip=(x,a,b)=>Math.max(a,Math.min(b,x));
+
+function render(){
+  const S=+sst.value,C=+chl.value,D=+dep.value;
+  $('sstVal').textContent=S.toFixed(1);$('chlVal').textContent=C.toFixed(1);$('depVal').textContent=D;
+
+  const pS=Math.exp(-((S-10)**2)/32);      // 0..1 cercanía al óptimo térmico
+  const pC=clip(C/5,0,1);                   // 0..1 productividad
+  const pD=Math.exp(-((D-140)**2)/5000);    // 0..1 estrato
+  const contribS=0.40*pS, contribC=0.30*pC, contribD=0.30*pD;
+  const prob=contribS+contribC+contribD;    // 0..1
+  const kg=1800*pS+1500*pC+1200*pD;
+
+  const pct=Math.round(prob*100);
+  $('pv').textContent=pct+'%';
+  $('kg').textContent=Math.round(kg).toLocaleString('es-AR');
+
+  let color,label,rec;
+  if(pct>=60){color='#1f9d6b';label='✅ CONVIENE IR';rec='Buenas condiciones en las tres variables. Alta chance de marea exitosa.';}
+  else if(pct>=40){color='#e6a417';label='🟡 DUDOSO';rec='Zona en el límite. Mirá qué variable está floja antes de decidir; el costo de gasoil pesa.';}
+  else{color='#d9534f';label='🔴 NO CONVIENE';rec='Al menos una variable clave está fuera de rango. Probablemente no cubra el costo del viaje.';}
+  $('gauge').style.background='conic-gradient('+color+' '+(pct*3.6)+'deg,#e6eef2 0)';
+  $('pv').style.color=color;
+  const pill=$('pill');pill.textContent=label;pill.style.background=color;
+  $('rec').textContent=rec;
+
+  // barras (aporte a la probabilidad, sobre su máximo posible)
+  setBar('SST',contribS,0.40,pS, S,'°C');
+  setBar('CHL',contribC,0.30,pC, C,'mg/m³');
+  setBar('DEP',contribD,0.30,pD, D,'m');
+}
+function setBar(id,contrib,max,frac,val,unit){
+  $('s'+id).textContent='+'+Math.round(contrib*100)+' pts';
+  $('f'+id).style.width=Math.round(frac*100)+'%';
+  let estado;
+  if(frac>=0.8)estado='en rango óptimo';
+  else if(frac>=0.5)estado='aceptable';
+  else estado='fuera de rango';
+  $('n'+id).textContent=val+' '+unit+' — '+estado+' ('+Math.round(frac*100)+'% del ideal)';
+}
+
+document.querySelectorAll('.presets button').forEach(b=>b.addEventListener('click',()=>{
+  sst.value=b.dataset.s;chl.value=b.dataset.c;dep.value=b.dataset.d;render();
+}));
+[sst,chl,dep].forEach(el=>el.addEventListener('input',render));
+render();
+</script>
+</body>
+</html>
