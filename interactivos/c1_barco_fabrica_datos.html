@@ -3,233 +3,324 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tu barco es una fábrica de datos — Clase 1</title>
+<title>Tu operación es una fábrica de datos — Clase 1</title>
 <style>
   :root{
-    --cian:#5fd0ff; --cian2:#37b6ee; --azul:#0a7fb4; --azul-osc:#00527e;
-    --tinta:#0e2a38; --gris:#3f5a68; --linea:#d9e4e9; --panel:#ffffff;
+    --cian:#5fd0ff; --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --panel:#ffffff; --fondo:#eef4f7;
+    --verde:#1f9d6b; --ambar:#e6a417;
     --nav0:#03222f; --nav1:#083a54; --nav2:#0a4f70;
+    --plant0:#123a2a; --plant1:#0e4f4a;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:#eef4f7;color:var(--tinta);
+  body{margin:0;background:var(--fondo);color:var(--tinta);
     font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:14px}
   .wrap{max-width:980px;margin:0 auto}
-  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul);
-    text-transform:uppercase;letter-spacing:.07em;margin:0 0 4px}
-  h1{font-size:26px;line-height:1.15;margin:0 0 6px}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul);text-transform:uppercase;letter-spacing:.07em;margin:0 0 4px}
+  h1{font-size:25px;line-height:1.15;margin:0 0 6px}
   h1 b{color:var(--azul)}
-  .lead{font-size:14.5px;color:var(--gris);margin:0 0 14px;max-width:74ch}
-  /* escena */
-  .stage{position:relative;width:100%;padding-bottom:46.3%;border-radius:16px;overflow:hidden;
-    background:linear-gradient(180deg,var(--nav0) 0%,var(--nav1) 62%,var(--nav2) 100%);
-    box-shadow:0 8px 30px rgba(3,34,47,.28)}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 14px;max-width:76ch}
+  .lead b{color:var(--tinta)}
+  /* tabs */
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;border-bottom:2px solid var(--linea);padding-bottom:2px}
+  .tab{border:0;background:transparent;border-radius:10px 10px 0 0;padding:10px 14px;font-size:14px;font-weight:800;
+    color:var(--gris);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:.15s}
+  .tab:hover{color:var(--azul)}
+  .tab.on{color:var(--azul-osc);border-bottom-color:var(--azul)}
+  .tabpanel{display:none}
+  .tabpanel.on{display:block}
+  .smalltag{display:inline-block;font-size:11.5px;font-weight:800;color:#7a5300;background:#fff5e6;border:1px solid #f0d9a8;
+    border-radius:999px;padding:2px 10px;margin:0 0 10px}
+  .bigtag{display:inline-block;font-size:11.5px;font-weight:800;color:#155e3f;background:#eaf6ec;border:1px solid #bfe3cb;
+    border-radius:999px;padding:2px 10px;margin:0 0 10px}
+  /* escena diagrama */
+  .stage{position:relative;width:100%;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(3,34,47,.24)}
+  .stage.barco{padding-bottom:46.3%;background:linear-gradient(180deg,var(--nav0),var(--nav1) 62%,var(--nav2))}
+  .stage.planta{padding-bottom:36.6%;background:linear-gradient(180deg,#0c2c22,#0e4f4a)}
   .stage svg{position:absolute;inset:0;width:100%;height:100%}
-  .hot{position:absolute;transform:translate(-50%,-50%);width:34px;height:34px;border-radius:50%;
-    border:2px solid #fff;background:rgba(95,208,255,.92);color:#03222f;font-weight:800;font-size:14px;
-    display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;
-    box-shadow:0 0 0 0 rgba(95,208,255,.7);animation:pulse 2.4s infinite}
+  .hot{position:absolute;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;
+    border:2px solid #fff;background:rgba(95,208,255,.92);color:#03222f;font-weight:800;font-size:13px;
+    display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;animation:pulse 2.4s infinite}
   .hot:hover,.hot.on{background:#fff;color:var(--azul-osc);transform:translate(-50%,-50%) scale(1.14)}
   .hot.on{box-shadow:0 0 0 6px rgba(95,208,255,.35)}
-  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,208,255,.55)}70%{box-shadow:0 0 0 12px rgba(95,208,255,0)}100%{box-shadow:0 0 0 0 rgba(95,208,255,0)}}
-  .tag{position:absolute;transform:translate(-50%,-140%);background:rgba(3,34,47,.82);color:#dff4ff;
-    font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;white-space:nowrap;pointer-events:none}
-  /* contador */
-  .counter{margin:12px 0 0;background:linear-gradient(90deg,#052c40,#0a5c82);color:#eaf7ff;
-    border-radius:12px;padding:12px 16px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-  .counter .num{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--cian)}
-  .counter .txt{font-size:13.5px;color:#bfe6f7}
-  /* panel info */
-  .grid{display:flex;flex-wrap:wrap;gap:16px;margin-top:16px}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,208,255,.5)}70%{box-shadow:0 0 0 12px rgba(95,208,255,0)}100%{box-shadow:0 0 0 0 rgba(95,208,255,0)}}
+  .counter{margin:12px 0 0;background:linear-gradient(90deg,#052c40,#0a5c82);color:#eaf7ff;border-radius:12px;
+    padding:11px 15px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .counter .num{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--cian)}
+  .counter .txt{font-size:13px;color:#bfe6f7}
+  /* info + menu */
+  .grid{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px}
   .col{flex:1 1 300px;min-width:0}
-  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;
-    box-shadow:0 1px 2px rgba(14,42,56,.04)}
-  #ptitle{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;margin:0 0 4px}
-  #ptitle .ico{font-size:26px}
-  #pkicker{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--azul);margin:0 0 10px}
-  .row{margin:0 0 10px}
-  .row .k{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--gris);margin:0 0 1px}
-  .row .v{font-size:14px;color:var(--tinta)}
+  .card{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px}
+  .pkicker{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--azul);margin:0 0 6px}
+  .ptitle{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;margin:0 0 6px}
+  .ptitle .ico{font-size:24px}
+  .prow{margin:0 0 9px}
+  .prow .k{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--gris)}
+  .prow .v{font-size:14px}
   .real{background:#eaf6ec;border:1px solid #bfe3cb;border-radius:10px;padding:9px 12px;font-size:13px;margin-top:6px}
-  .real b{color:#1f9d6b}
-  .clase{display:inline-block;margin-top:10px;background:#eef4f7;border:1px solid var(--linea);
-    border-radius:999px;padding:4px 11px;font-size:12.5px;font-weight:700;color:var(--azul-osc)}
+  .real b{color:var(--verde)}
+  .clase{display:inline-block;margin-top:10px;background:var(--fondo);border:1px solid var(--linea);border-radius:999px;
+    padding:4px 11px;font-size:12.5px;font-weight:700;color:var(--azul-osc)}
   .list{list-style:none;margin:0;padding:0}
-  .list li{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--tinta);
-    padding:7px 0;border-bottom:1px dashed var(--linea);cursor:pointer}
+  .list li{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;padding:7px 0;border-bottom:1px dashed var(--linea);cursor:pointer}
   .list li:last-child{border-bottom:0}
   .list li:hover{color:var(--azul)}
-  .list .b{width:22px;height:22px;flex:none;border-radius:6px;background:var(--azul);color:#fff;
-    font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .list .b{width:22px;height:22px;flex:none;border-radius:6px;background:var(--azul);color:#fff;font-size:12px;font-weight:800;
+    display:flex;align-items:center;justify-content:center}
+  /* cadena */
+  .chain{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin:0 0 4px}
+  .node{flex:1 1 130px;min-width:120px;border:1.5px solid var(--linea);background:var(--panel);border-radius:12px;padding:12px 10px;
+    cursor:pointer;text-align:center;transition:.15s}
+  .node:hover{border-color:var(--azul);transform:translateY(-2px)}
+  .node.on{border-color:var(--azul);background:#f0f8fb;box-shadow:0 0 0 3px rgba(10,127,180,.15)}
+  .node .ico{font-size:24px}
+  .node .nm{font-size:12.5px;font-weight:800;margin-top:3px}
+  .node .kk{font-size:11px;color:var(--gris)}
+  /* big data */
+  .bd-flow{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:center;margin:6px 0 16px}
+  .bd-col{display:flex;flex-direction:column;gap:8px;flex:1 1 200px}
+  .bd-src{background:#fff5e6;border:1px solid #f0d9a8;border-radius:10px;padding:9px 12px;font-size:13px;font-weight:700;color:#7a5300}
+  .bd-core{flex:1 1 200px;background:linear-gradient(135deg,#052c40,#0a5c82);color:#eaf7ff;border-radius:14px;padding:16px;text-align:center}
+  .bd-core .t{font-size:18px;font-weight:800}.bd-core .s{font-size:12.5px;opacity:.85}
+  .bd-out{background:#eaf6ec;border:1px solid #bfe3cb;border-radius:10px;padding:9px 12px;font-size:13px;font-weight:700;color:#155e3f}
+  .vs{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0}
+  .v{flex:1 1 150px;background:var(--panel);border:1px solid var(--linea);border-radius:12px;padding:12px 14px}
+  .v .vk{font-size:12px;font-weight:800;color:var(--azul);text-transform:uppercase;letter-spacing:.04em}
+  .v .vv{font-size:13px;color:var(--gris);margin-top:2px}
+  .contrast{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+  .contrast>div{flex:1 1 240px;border-radius:12px;padding:13px 15px;font-size:13.5px}
+  .contrast .sm{background:#fff5e6;border:1px solid #f0d9a8;color:#7a5300}
+  .contrast .bg{background:#eaf6ec;border:1px solid #bfe3cb;color:#155e3f}
   footer{margin-top:16px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="eyebrow">⚓ Clase 1 · Bienvenida</div>
-  <h1>Tu barco ya es una <b>fábrica de datos</b></h1>
-  <p class="lead">Cada sistema a bordo genera información, marea tras marea. La Inteligencia Artificial es lo que
-  convierte esos datos en <b>decisiones</b>: dónde pescar, a qué velocidad navegar, qué especie es cada pieza.
-  <b>Tocá cada punto</b> 👆 del barco y descubrí el dato que produce y lo que la IA hace con él.</p>
+  <h1>Tu operación es una <b>fábrica de datos</b></h1>
+  <p class="lead">El barco, la planta y toda la cadena generan información a cada paso. Aislada, es <b>small data</b>:
+  útil pero limitada. Cuando la <b>conectás</b>, nace el <b>big data</b> y con él la Inteligencia Artificial que
+  predice, optimiza y traza. Recorré las cuatro pestañas 👇</p>
 
-  <div class="stage">
-    <svg viewBox="0 0 820 380" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <defs>
-        <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#0c5c82"/><stop offset="1" stop-color="#063a54"/>
-        </linearGradient>
-      </defs>
-      <!-- mar -->
-      <rect x="0" y="250" width="820" height="130" fill="url(#sea)"/>
-      <path d="M0,258 Q60,250 120,258 T240,258 T360,258 T480,258 T600,258 T720,258 T840,258" fill="none" stroke="#2c86ab" stroke-width="2" opacity=".5"/>
-      <path d="M0,300 Q80,292 160,300 T320,300 T480,300 T640,300 T800,300" fill="none" stroke="#1c6d90" stroke-width="2" opacity=".4"/>
-      <!-- cono sonar -->
-      <path d="M470,255 L432,360 L512,360 Z" fill="#5fd0ff" opacity=".10"/>
-      <!-- red / arte de pesca -->
-      <path d="M182,150 Q118,196 150,252 Q168,286 214,270" fill="none" stroke="#bcdcea" stroke-width="2" stroke-dasharray="3 4" opacity=".85"/>
-      <path d="M150,252 q10,26 44,20" fill="#5fd0ff" opacity=".10" stroke="#bcdcea" stroke-width="1.5" stroke-dasharray="2 3"/>
-      <line x1="200" y1="212" x2="182" y2="150" stroke="#cfeefc" stroke-width="2"/>
-      <line x1="232" y1="212" x2="182" y2="150" stroke="#cfeefc" stroke-width="2"/>
-      <!-- casco -->
-      <path d="M170,212 L690,212 Q744,212 758,236 L744,248 Q736,255 700,255 L214,255 Q176,255 170,212 Z"
-            fill="#0a3a54" stroke="#cfeefc" stroke-width="2.5"/>
-      <line x1="176" y1="234" x2="748" y2="234" stroke="#5fd0ff" stroke-width="1.4" opacity=".5"/>
-      <!-- caseta -->
-      <rect x="360" y="158" width="122" height="54" rx="4" fill="#0e4b6b" stroke="#cfeefc" stroke-width="2.5"/>
-      <rect x="372" y="170" width="26" height="20" rx="2" fill="#9fe0ff" opacity=".8"/>
-      <rect x="406" y="170" width="26" height="20" rx="2" fill="#9fe0ff" opacity=".8"/>
-      <rect x="440" y="170" width="26" height="20" rx="2" fill="#9fe0ff" opacity=".8"/>
-      <!-- chimenea -->
-      <rect x="470" y="140" width="22" height="22" rx="2" fill="#0e4b6b" stroke="#cfeefc" stroke-width="2"/>
-      <rect x="470" y="146" width="22" height="5" fill="#5fd0ff"/>
-      <!-- mástil + antena -->
-      <line x1="410" y1="158" x2="410" y2="96" stroke="#cfeefc" stroke-width="2.5"/>
-      <line x1="390" y1="104" x2="430" y2="104" stroke="#cfeefc" stroke-width="2.5"/>
-      <rect x="402" y="118" width="16" height="8" rx="2" fill="#0e4b6b" stroke="#cfeefc" stroke-width="1.6"/>
-      <!-- proa: mástil corto -->
-      <line x1="640" y1="212" x2="640" y2="176" stroke="#cfeefc" stroke-width="2"/>
-    </svg>
-    <!-- hotspots (posición en % del viewBox) -->
-    <div id="spots"></div>
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-t="barco">🚢 El barco</button>
+    <button class="tab" data-t="planta">🏭 La planta</button>
+    <button class="tab" data-t="cadena">🔗 La cadena</button>
+    <button class="tab" data-t="bigdata">🧠 Big data</button>
   </div>
 
-  <div class="counter">
-    <span class="num" id="cnum">0</span>
-    <span class="txt">registros de datos que tu barco puede generar en <b>una sola marea</b> ·
-    <span style="opacity:.75">estimación ilustrativa</span></span>
+  <!-- TAB BARCO -->
+  <div class="tabpanel on" id="tab-barco">
+    <span class="smalltag">🔹 Small data · una fuente</span>
+    <div class="stage barco">
+      <svg viewBox="0 0 820 380" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs><linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c5c82"/><stop offset="1" stop-color="#063a54"/></linearGradient></defs>
+        <rect x="0" y="250" width="820" height="130" fill="url(#sea)"/>
+        <path d="M0,258 Q60,250 120,258 T240,258 T360,258 T480,258 T600,258 T720,258 T840,258" fill="none" stroke="#2c86ab" stroke-width="2" opacity=".5"/>
+        <path d="M470,255 L432,360 L512,360 Z" fill="#5fd0ff" opacity=".10"/>
+        <path d="M182,150 Q118,196 150,252 Q168,286 214,270" fill="none" stroke="#bcdcea" stroke-width="2" stroke-dasharray="3 4" opacity=".85"/>
+        <line x1="200" y1="212" x2="182" y2="150" stroke="#cfeefc" stroke-width="2"/>
+        <line x1="232" y1="212" x2="182" y2="150" stroke="#cfeefc" stroke-width="2"/>
+        <path d="M170,212 L690,212 Q744,212 758,236 L744,248 Q736,255 700,255 L214,255 Q176,255 170,212 Z" fill="#0a3a54" stroke="#cfeefc" stroke-width="2.5"/>
+        <line x1="176" y1="234" x2="748" y2="234" stroke="#5fd0ff" stroke-width="1.4" opacity=".5"/>
+        <rect x="360" y="158" width="122" height="54" rx="4" fill="#0e4b6b" stroke="#cfeefc" stroke-width="2.5"/>
+        <rect x="372" y="170" width="26" height="20" rx="2" fill="#9fe0ff" opacity=".8"/>
+        <rect x="406" y="170" width="26" height="20" rx="2" fill="#9fe0ff" opacity=".8"/>
+        <rect x="440" y="170" width="26" height="20" rx="2" fill="#9fe0ff" opacity=".8"/>
+        <rect x="470" y="140" width="22" height="22" rx="2" fill="#0e4b6b" stroke="#cfeefc" stroke-width="2"/>
+        <rect x="470" y="146" width="22" height="5" fill="#5fd0ff"/>
+        <line x1="410" y1="158" x2="410" y2="96" stroke="#cfeefc" stroke-width="2.5"/>
+        <line x1="390" y1="104" x2="430" y2="104" stroke="#cfeefc" stroke-width="2.5"/>
+        <rect x="402" y="118" width="16" height="8" rx="2" fill="#0e4b6b" stroke="#cfeefc" stroke-width="1.6"/>
+        <line x1="640" y1="212" x2="640" y2="176" stroke="#cfeefc" stroke-width="2"/>
+      </svg>
+      <div id="spotsBarco"></div>
+    </div>
+    <div class="counter"><span class="num" id="cnum">0</span><span class="txt">registros que tu barco puede generar en <b>una sola marea</b> · <span style="opacity:.75">estimación ilustrativa</span></span></div>
+    <div class="grid">
+      <div class="col" style="flex:1 1 340px"><div class="card" id="panelBarco"></div></div>
+      <div class="col" style="flex:1 1 250px"><div class="card"><div class="pkicker">Los 7 sistemas del barco</div><ul class="list" id="menuBarco"></ul></div></div>
+    </div>
   </div>
 
-  <div class="grid">
-    <div class="col" style="flex:1 1 340px">
-      <div class="panel" id="info">
-        <div id="pkicker">Elegí un sistema del barco</div>
-        <div id="ptitle"><span class="ico">👆</span><span>Tocá un punto luminoso</span></div>
-        <p class="row"><span class="v">Cada sistema de a bordo cuenta una parte de la historia. Hacé clic en los
-        puntos del barco —o en la lista de al lado— para ver qué dato genera cada uno y cómo la IA lo aprovecha.</span></p>
+  <!-- TAB PLANTA -->
+  <div class="tabpanel" id="tab-planta">
+    <span class="smalltag">🔹 Small data · otra fuente</span>
+    <div class="stage planta">
+      <svg viewBox="0 0 820 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <!-- piso -->
+        <rect x="0" y="252" width="820" height="48" fill="#0a3a35"/>
+        <!-- nave -->
+        <path d="M30,90 L110,52 L190,90 L270,52 L350,90 L430,52 L510,90 L590,52 L670,90 L750,52 L790,90" fill="none" stroke="#bfeee0" stroke-width="2"/>
+        <rect x="30" y="90" width="760" height="162" fill="#0e463f" stroke="#bfeee0" stroke-width="2"/>
+        <!-- cinta transportadora -->
+        <rect x="90" y="196" width="560" height="14" rx="7" fill="#0b332e" stroke="#7fd6c2" stroke-width="1.6"/>
+        <circle cx="110" cy="216" r="7" fill="none" stroke="#7fd6c2" stroke-width="1.4"/>
+        <circle cx="330" cy="216" r="7" fill="none" stroke="#7fd6c2" stroke-width="1.4"/>
+        <circle cx="630" cy="216" r="7" fill="none" stroke="#7fd6c2" stroke-width="1.4"/>
+        <ellipse cx="200" cy="197" rx="12" ry="5" fill="#7fd6c2" opacity=".6"/>
+        <ellipse cx="300" cy="197" rx="12" ry="5" fill="#7fd6c2" opacity=".6"/>
+        <!-- recepción / balanza -->
+        <path d="M92,150 L150,150 L134,192 L108,192 Z" fill="#12564d" stroke="#bfeee0" stroke-width="1.8"/>
+        <!-- cámara visión -->
+        <rect x="234" y="108" width="34" height="20" rx="3" fill="#12564d" stroke="#bfeee0" stroke-width="1.6"/>
+        <path d="M251,128 L235,192 L267,192 Z" fill="#5fd0ff" opacity=".12"/>
+        <!-- sensor línea (engranaje simplificado) -->
+        <circle cx="372" cy="180" r="12" fill="none" stroke="#bfeee0" stroke-width="1.8"/>
+        <circle cx="372" cy="180" r="4" fill="#bfeee0"/>
+        <!-- cámara de frío -->
+        <rect x="470" y="112" width="120" height="98" rx="6" fill="#0b3f56" stroke="#9fe0ff" stroke-width="2"/>
+        <text x="530" y="168" font-size="30" text-anchor="middle" fill="#9fe0ff">❄</text>
+        <!-- despacho / camión -->
+        <rect x="636" y="168" width="60" height="40" rx="3" fill="#12564d" stroke="#bfeee0" stroke-width="1.6"/>
+        <rect x="696" y="180" width="26" height="28" rx="3" fill="#12564d" stroke="#bfeee0" stroke-width="1.6"/>
+        <circle cx="652" cy="214" r="7" fill="#0b332e" stroke="#bfeee0" stroke-width="1.4"/>
+        <circle cx="706" cy="214" r="7" fill="#0b332e" stroke="#bfeee0" stroke-width="1.4"/>
+        <!-- medidor energía -->
+        <rect x="44" y="66" width="24" height="30" rx="3" fill="#12564d" stroke="#ffe08a" stroke-width="1.6"/>
+        <text x="56" y="87" font-size="15" text-anchor="middle" fill="#ffe08a">⚡</text>
+      </svg>
+      <div id="spotsPlanta"></div>
+    </div>
+    <div class="grid">
+      <div class="col" style="flex:1 1 340px"><div class="card" id="panelPlanta"></div></div>
+      <div class="col" style="flex:1 1 250px"><div class="card"><div class="pkicker">Los 6 sistemas de la planta</div><ul class="list" id="menuPlanta"></ul></div></div>
+    </div>
+  </div>
+
+  <!-- TAB CADENA -->
+  <div class="tabpanel" id="tab-cadena">
+    <span class="smalltag">🔹 Small data · muchas fuentes, hoy desconectadas</span>
+    <p style="font-size:14px;color:var(--gris);margin:0 0 10px">Cada eslabón de la cadena genera su propio dato. Tocá cada punto: vas a ver qué produce y dónde la transición digital <b>impacta de lleno</b>, igual que en el barco.</p>
+    <div class="chain" id="chainNodes"></div>
+    <div class="card" id="panelCadena" style="margin-top:12px"></div>
+  </div>
+
+  <!-- TAB BIG DATA -->
+  <div class="tabpanel" id="tab-bigdata">
+    <span class="bigtag">🟢 Big data · todo conectado</span>
+    <p style="font-size:14px;color:var(--gris);margin:0 0 12px">Cada fuente por separado es <b>small data</b>: te dice qué pasó, acá y ahora. Cuando conectás <b>el barco + la planta + toda la cadena</b>, a lo largo del tiempo y de toda la flota, nace el <b>big data</b>: patrones que ninguna planilla muestra, y la IA que los aprovecha.</p>
+    <div class="bd-flow">
+      <div class="bd-col">
+        <div class="bd-src">🚢 Barco — AIS, captura, consumo, sensores</div>
+        <div class="bd-src">🏭 Planta — visión, mermas, frío, energía</div>
+        <div class="bd-src">🔗 Cadena — ambiente, logística, mercado</div>
+      </div>
+      <div style="font-size:26px;color:var(--azul);flex:0 0 auto">➜</div>
+      <div class="bd-core"><div class="t">🧠 Big data + IA</div><div class="s">datos integrados, en el tiempo, de toda la operación</div></div>
+      <div style="font-size:26px;color:var(--verde);flex:0 0 auto">➜</div>
+      <div class="bd-col">
+        <div class="bd-out">🎯 Predecir — dónde/cuándo pescar, cuántos kg</div>
+        <div class="bd-out">⚙️ Optimizar — rutas, velocidad, energía, mermas</div>
+        <div class="bd-out">🔎 Trazar y vender — trazabilidad total, mejor precio</div>
       </div>
     </div>
-    <div class="col" style="flex:1 1 260px">
-      <div class="panel">
-        <div id="pkicker">Los 7 sistemas</div>
-        <ul class="list" id="menu"></ul>
-      </div>
+    <div class="vs">
+      <div class="v"><div class="vk">Volumen</div><div class="vv">Millones de registros por temporada (posiciones, imágenes, temperaturas).</div></div>
+      <div class="v"><div class="vk">Velocidad</div><div class="vv">En tiempo real: el dato llega mientras la marea o la línea siguen andando.</div></div>
+      <div class="v"><div class="vk">Variedad</div><div class="vv">Sensores + imágenes + satélite + mercado, todo junto.</div></div>
     </div>
+    <div class="contrast">
+      <div class="sm"><b>🔹 Small data:</b> sabés qué pasó en <b>tu barco ayer</b>, o en <b>tu planta hoy</b>. Decisión local, mirando el retrovisor.</div>
+      <div class="bg"><b>🟢 Big data:</b> un modelo anticipa <b>qué conviene hacer la semana que viene</b> —en toda la operación: dónde pescar, a qué velocidad, cómo procesar, a quién vender.</div>
+    </div>
+    <p style="font-size:13.5px;color:var(--gris);margin:14px 0 0">Ese recorrido —del dato del barco al big data— es el mapa de este curso: sensores y datos (C4), predicción con ML (C6), visión artificial (C7), optimización y agentes (C8), dashboards y decisión (C9).</p>
   </div>
 
   <footer>
-    De la <b>Industria 4.0</b> a las <b>Smart Fisheries</b>: lo que ves acá lo vamos a trabajar clase a clase —
-    datos y sensores (C4), predicción con ML (C6), visión artificial (C7), optimización y agentes (C8), dashboards (C9).
-    Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+    Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026. Del <b>small data</b> de cada
+    fuente al <b>big data</b> de toda la operación: de la Industria 4.0 a las Smart Fisheries.
   </footer>
 </div>
 
 <script>
-const SIS=[
-  {n:1,ico:'📡',t:'GPS + AIS',k:'Posicionamiento',x:50.0,y:25.3,
-   mide:'Posición, rumbo y velocidad del barco, cada pocos segundos.',
-   dato:'La huella digital de la marea: miles de puntos de navegación.',
-   ia:'Reconstruye el esfuerzo pesquero, infiere el arte por el patrón de movimiento y verifica desembarcos (PSMA).',
-   real:'El AIS reveló <b>+60.000 barcos</b> pesqueros y actividad en <b>&gt;55% del océano</b> (Kroodsma et&nbsp;al., Science 2018).',
-   clase:'Clase 4 · Caso AIS/PSMA'},
-  {n:2,ico:'🔊',t:'Ecosonda y sonar',k:'Detección',x:57.3,y:78.9,
-   mide:'Ecos acústicos del fondo y de los cardúmenes bajo el casco.',
-   dato:'Perfiles de profundidad y densidad de biomasa en tiempo real.',
-   ia:'Estima abundancia y clasifica especies por su firma acústica.',
-   real:'La acústica es la base de las campañas de evaluación de stock del <b>INIDEP</b>.',
-   clase:'Clase 6'},
-  {n:3,ico:'🌡️',t:'Sensores oceanográficos',k:'Ambiente',x:79.3,y:66.3,
-   mide:'Temperatura superficial del mar (SST); se cruza con clorofila satelital.',
-   dato:'El estado del hábitat por donde se mueve el recurso.',
-   ia:'Predice zonas de pesca probables con modelos de Machine Learning.',
-   real:'SST y clorofila son <b>las variables que más pesan</b> al predecir capturas (tu modelo de la Clase 6).',
-   clase:'Clases 4 y 6'},
-  {n:4,ico:'🕸️',t:'Sensores de red',k:'Arte de pesca',x:20.1,y:68.9,
-   mide:'Profundidad, apertura y tensión de la red; sensor de captura.',
-   dato:'La geometría del lance, lance a lance.',
-   ia:'Optimiza el calado, reduce capturas no deseadas y ahorra combustible.',
-   real:'Un arte bien calado cambia la <b>selectividad</b> y el consumo por lance.',
-   clase:'Clase 8'},
-  {n:5,ico:'⛽',t:'Motor y caudalímetro',k:'Energía',x:57.3,y:61.1,
-   mide:'Consumo de gasoil, RPM y velocidad de navegación.',
-   dato:'La curva de eficiencia del barco.',
-   ia:'Calcula la velocidad óptima y anticipa fallas (mantenimiento predictivo).',
-   real:'El combustible es el <b>20–40% del costo operativo</b> de la marea (FAO).',
-   clase:'Clase 8'},
-  {n:6,ico:'📷',t:'Cámara de cubierta',k:'Visión',x:65.9,y:53.9,
-   mide:'Imagen de cada pieza en la línea de trabajo.',
-   dato:'Miles de fotos de captura por jornada.',
-   ia:'Clasifica especie, mide talla y controla calidad automáticamente.',
-   real:'La <b>visión artificial</b> ya inspecciona en planta a velocidad industrial.',
-   clase:'Clase 7'},
-  {n:7,ico:'🧊',t:'Bodega y cadena de frío',k:'Calidad',x:35.4,y:61.1,
-   mide:'Temperatura y tiempo de conservación de la captura.',
-   dato:'La trazabilidad del producto desde que sube a bordo.',
-   ia:'Alerta desvíos de la cadena de frío y sostiene la trazabilidad (SENASA).',
-   real:'La temperatura define <b>calidad, precio y acceso a mercados</b>.',
-   clase:'Clase 9 · Trazabilidad'}
+// ── Datos de cada diagrama ───────────────────────────────────────────────────
+const BARCO=[
+  {n:1,ico:'📡',t:'GPS + AIS',k:'Posicionamiento',x:50.0,y:25.3,mide:'Posición, rumbo y velocidad, cada pocos segundos.',dato:'La huella digital de la marea: miles de puntos.',ia:'Reconstruye el esfuerzo pesquero y verifica desembarcos (PSMA).',real:'El AIS reveló <b>+60.000 barcos</b> y actividad en <b>&gt;55% del océano</b> (Kroodsma, Science 2018).',clase:'Clase 4 · Caso AIS/PSMA'},
+  {n:2,ico:'🔊',t:'Ecosonda y sonar',k:'Detección',x:57.3,y:78.9,mide:'Ecos acústicos del fondo y de los cardúmenes.',dato:'Perfiles de profundidad y biomasa bajo el casco.',ia:'Estima abundancia y clasifica especies por su firma acústica.',real:'Base de las campañas de evaluación de stock del <b>INIDEP</b>.',clase:'Clase 6'},
+  {n:3,ico:'🌡️',t:'Sensores oceanográficos',k:'Ambiente',x:79.3,y:66.3,mide:'Temperatura (SST); se cruza con clorofila satelital.',dato:'El estado del hábitat del recurso.',ia:'Predice zonas de pesca con Machine Learning.',real:'SST y clorofila son <b>las variables que más pesan</b> (tu modelo de C6).',clase:'Clases 4 y 6'},
+  {n:4,ico:'🕸️',t:'Sensores de red',k:'Arte de pesca',x:20.1,y:68.9,mide:'Profundidad, apertura y tensión; sensor de captura.',dato:'La geometría del lance, lance a lance.',ia:'Optimiza el calado y reduce capturas no deseadas.',real:'Un arte bien calado cambia la <b>selectividad</b> y el consumo.',clase:'Clase 8'},
+  {n:5,ico:'⛽',t:'Motor y caudalímetro',k:'Energía',x:57.3,y:61.1,mide:'Consumo de gasoil, RPM y velocidad.',dato:'La curva de eficiencia del barco.',ia:'Calcula la velocidad óptima y anticipa fallas.',real:'El combustible es el <b>20–40% del costo</b> de la marea (FAO).',clase:'Clase 8'},
+  {n:6,ico:'📷',t:'Cámara de cubierta',k:'Visión',x:65.9,y:53.9,mide:'Imagen de cada pieza de captura.',dato:'Miles de fotos por jornada.',ia:'Clasifica especie, mide talla y controla calidad.',real:'La <b>visión artificial</b> inspecciona a velocidad industrial.',clase:'Clase 7'},
+  {n:7,ico:'🧊',t:'Bodega y cadena de frío',k:'Calidad',x:35.4,y:61.1,mide:'Temperatura y tiempo de conservación.',dato:'La trazabilidad desde que sube a bordo.',ia:'Alerta desvíos de la cadena de frío (SENASA).',real:'La temperatura define <b>calidad, precio y mercados</b>.',clase:'Clase 9'}
+];
+const PLANTA=[
+  {n:1,ico:'⚖️',t:'Balanza de recepción',k:'Recepción',x:13.4,y:58.3,mide:'Peso, especie y hora/temperatura de cada lote al entrar.',dato:'El punto de partida del rendimiento y la frescura.',ia:'Ordena el proceso por frescura (FIFO real) y controla el rinde por lote.',real:'Lo que no se pesa ni se registra, <b>no se puede optimizar</b>.',clase:'Clase 9'},
+  {n:2,ico:'📷',t:'Cámara de clasificación',k:'Visión',x:30.5,y:40.0,mide:'Imagen de cada pieza en la cinta.',dato:'Miles de fotos por jornada.',ia:'Clasifica especie, talla y defectos a velocidad industrial.',real:'~<b>2% de error</b> con visión artificial vs ~15% manual.',clase:'Clase 7'},
+  {n:3,ico:'🔧',t:'Sensores de línea',k:'Proceso',x:45.1,y:63.3,mide:'Velocidad de cinta, rendimiento y paradas.',dato:'El pulso de la línea, minuto a minuto.',ia:'Mantenimiento predictivo: anticipa fallas y cuellos de botella.',real:'Menos paradas = <b>más capacidad</b> con el mismo equipo.',clase:'Clase 8'},
+  {n:4,ico:'🧊',t:'Sensores de cámara de frío',k:'Calidad',x:64.6,y:50.0,mide:'Temperatura y tiempo de conservación.',dato:'La salud de la cadena de frío en tiempo real.',ia:'Alerta el desvío antes de que el lote se pierda.',real:'Una rotura no detectada <b>arruina toneladas</b>.',clase:'Clase 9'},
+  {n:5,ico:'🏷️',t:'Etiquetado / trazabilidad',k:'Trazabilidad',x:80.0,y:60.0,mide:'Lote, origen, proceso y destino.',dato:'El ADN documental del producto.',ia:'Trazabilidad digital punta a punta (SENASA/mercados).',real:'Sin trazabilidad, <b>no hay exportación</b> a mercados exigentes.',clase:'Clase 9'},
+  {n:6,ico:'⚡',t:'Medidor de energía',k:'Energía',x:6.7,y:26.7,mide:'Consumo eléctrico y de frío por tonelada.',dato:'La huella energética del proceso.',ia:'Detecta desperdicio y optimiza el consumo.',real:'Energía y frío son de los <b>mayores costos fijos</b> de la planta.',clase:'Clase 8'}
+];
+const CADENA=[
+  {n:1,ico:'🌊',t:'Caladero (mar)',k:'Ambiente',mide:'SST, clorofila, batimetría (satélite).',dato:'El estado del océano antes de salir.',ia:'Predice zonas de pesca probables.',real:'La transición digital <b>impacta de lleno</b>: pescar con pronóstico, no a ciegas.',clase:'Clases 4 y 6'},
+  {n:2,ico:'🚢',t:'Barco',k:'Captura',mide:'AIS, captura, consumo, sensores de a bordo.',dato:'Todo lo de la pestaña “El barco”.',ia:'Ruta y velocidad óptimas, esfuerzo y frescura.',real:'La fuente más rica de small data de la cadena.',clase:'Clases 4 y 8'},
+  {n:3,ico:'⚓',t:'Desembarque',k:'Puerto',mide:'Volumen, especie y hora de descarga.',dato:'El cruce entre lo declarado y lo real.',ia:'Control de cuota y priorización por frescura.',real:'Cruzar AIS con desembarque cierra el círculo de la fiscalización.',clase:'Clase 4 · DT-011'},
+  {n:4,ico:'🏭',t:'Planta',k:'Proceso',mide:'Clasificación, mermas, frío, energía.',dato:'Todo lo de la pestaña “La planta”.',ia:'Calidad, rendimiento y menos mermas.',real:'Ahí se recupera gran parte del valor perdido.',clase:'Clases 7 y 9'},
+  {n:5,ico:'🚚',t:'Logística',k:'Transporte',mide:'Temperatura, tiempo y ubicación (GPS).',dato:'La cadena de frío en ruta.',ia:'Mantiene la cadena de frío y estima el arribo (ETA).',real:'Un desvío de temperatura en camino baja el precio o rechaza el lote.',clase:'Clase 9'},
+  {n:6,ico:'🛒',t:'Mercado / exportación',k:'Comercial',mide:'Precio, demanda y requisitos de certificación.',dato:'La señal de a cuánto y a quién conviene vender.',ia:'Decide el momento y el destino de venta.',real:'La trazabilidad digital <b>abre mercados</b> que sin ella se cierran.',clase:'Clase 9'}
 ];
 
-const spots=document.getElementById('spots');
-const menu=document.getElementById('menu');
-SIS.forEach(s=>{
-  const b=document.createElement('button');
-  b.className='hot';b.style.left=s.x+'%';b.style.top=s.y+'%';b.textContent=s.n;
-  b.setAttribute('aria-label',s.t);b.onclick=()=>select(s.n);
-  spots.appendChild(b);
-  const li=document.createElement('li');
-  li.innerHTML='<span class="b">'+s.n+'</span><span>'+s.ico+' <b>'+s.t+'</b> · '+s.k+'</span>';
-  li.onclick=()=>select(s.n);menu.appendChild(li);
-});
-
-function select(n){
-  const s=SIS.find(x=>x.n===n);
-  document.querySelectorAll('.hot').forEach((h,i)=>h.classList.toggle('on',i===n-1));
-  document.getElementById('info').innerHTML=
-    '<div id="pkicker">'+s.k+'</div>'+
-    '<div id="ptitle"><span class="ico">'+s.ico+'</span><span>'+s.t+'</span></div>'+
-    '<div class="row"><div class="k">Qué mide</div><div class="v">'+s.mide+'</div></div>'+
-    '<div class="row"><div class="k">El dato que genera</div><div class="v">'+s.dato+'</div></div>'+
-    '<div class="row"><div class="k">Qué hace la IA</div><div class="v">'+s.ia+'</div></div>'+
+const $=id=>document.getElementById(id);
+function panelHTML(s,color){
+  return '<div class="pkicker" style="color:'+(color||'var(--azul)')+'">'+s.k+'</div>'+
+    '<div class="ptitle"><span class="ico">'+s.ico+'</span><span>'+s.t+'</span></div>'+
+    '<div class="prow"><div class="k">Qué mide</div><div class="v">'+s.mide+'</div></div>'+
+    '<div class="prow"><div class="k">El dato que genera</div><div class="v">'+s.dato+'</div></div>'+
+    '<div class="prow"><div class="k">Qué hace la IA</div><div class="v">'+s.ia+'</div></div>'+
     '<div class="real">📊 '+s.real+'</div>'+
     '<span class="clase">➜ '+s.clase+'</span>';
 }
+const intro='<div class="pkicker">Elegí un punto</div><div class="ptitle"><span class="ico">👆</span><span>Tocá un punto luminoso</span></div><p class="prow"><span class="v">Cada sistema genera una parte de la historia. Hacé clic en los puntos —o en la lista— para ver qué dato produce y cómo lo usa la IA.</span></p>';
 
-// contador animado
-const target=2436000;
-const cnum=document.getElementById('cnum');
-let started=false;
-function runCounter(){
-  if(started)return;started=true;
-  const dur=1600,t0=performance.now();
-  function step(t){
-    const p=Math.min((t-t0)/dur,1);
-    const val=Math.round(target*(1-Math.pow(1-p,3)));
-    cnum.textContent=val.toLocaleString('es-AR');
-    if(p<1)requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
+// diagramas con hotspots (barco, planta)
+const DIAG={
+  barco:{data:BARCO,spots:'spotsBarco',menu:'menuBarco',panel:'panelBarco'},
+  planta:{data:PLANTA,spots:'spotsPlanta',menu:'menuPlanta',panel:'panelPlanta'}
+};
+function buildDiagram(key){
+  const cfg=DIAG[key];const spots=$(cfg.spots),menu=$(cfg.menu);
+  $(cfg.panel).innerHTML=intro;
+  cfg.data.forEach(s=>{
+    const b=document.createElement('button');b.className='hot';b.style.left=s.x+'%';b.style.top=s.y+'%';b.textContent=s.n;
+    b.setAttribute('aria-label',s.t);b.onclick=()=>selSpot(key,s.n);spots.appendChild(b);
+    const li=document.createElement('li');li.innerHTML='<span class="b">'+s.n+'</span><span>'+s.ico+' <b>'+s.t+'</b> · '+s.k+'</span>';
+    li.onclick=()=>selSpot(key,s.n);menu.appendChild(li);
+  });
 }
-// arranca al cargar
-runCounter();
+function selSpot(key,n){
+  const cfg=DIAG[key];const s=cfg.data.find(x=>x.n===n);
+  document.querySelectorAll('#'+cfg.spots+' .hot').forEach((h,i)=>h.classList.toggle('on',i===n-1));
+  $(cfg.panel).innerHTML=panelHTML(s);
+}
+buildDiagram('barco');buildDiagram('planta');
+
+// cadena (nodos en fila)
+(function(){
+  const box=$('chainNodes');$('panelCadena').innerHTML=intro;
+  CADENA.forEach((s,i)=>{
+    const n=document.createElement('button');n.className='node';n.dataset.n=s.n;
+    n.innerHTML='<div class="ico">'+s.ico+'</div><div class="nm">'+s.t+'</div><div class="kk">'+s.k+'</div>';
+    n.onclick=()=>{document.querySelectorAll('#chainNodes .node').forEach(x=>x.classList.toggle('on',x===n));$('panelCadena').innerHTML=panelHTML(s);};
+    box.appendChild(n);
+  });
+})();
+
+// tabs
+$('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('.tab');if(!b)return;
+  const t=b.dataset.t;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.tabpanel').forEach(p=>p.classList.toggle('on',p.id==='tab-'+t));
+});
+
+// contador (barco)
+(function(){
+  const target=2436000,cnum=$('cnum'),dur=1600,t0=performance.now();
+  function step(t){const p=Math.min((t-t0)/dur,1);cnum.textContent=Math.round(target*(1-Math.pow(1-p,3))).toLocaleString('es-AR');if(p<1)requestAnimationFrame(step);}
+  requestAnimationFrame(step);
+})();
 </script>
 </body>
 </html>
