@@ -7,6 +7,7 @@ Cada archivo es 100% autocontenido (HTML+CSS+JS inline): se puede abrir con dobl
 | Archivo | Clase | Concepto |
 |---|---|---|
 | `c1_barco_fabrica_datos.html` | 1 | Barco interactivo: cada sistema genera datos y la IA los usa (hero de bienvenida) |
+| `c1_planta_transicion.html` | 1 | Planta de procesamiento: sin vs. con transición digital → KPIs + valor recuperado |
 | `c6_umbral_decision.html` | 6 | El umbral de decisión como decisión económica (matriz de confusión + costo en $) |
 | `c6_zona_pesca.html` | 6 | ¿A qué zona voy? Sliders SST/clorofila/profundidad → prob. de éxito + kg + por qué |
 | `c8_velocidad_optima.html` | 8 | Velocidad óptima de crucero (ley cúbica: combustible vs. tiempo → costo mínimo) |

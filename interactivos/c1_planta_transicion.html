@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planta de procesamiento: sin vs. con transición digital — Clase 1</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --verde-bg:#eaf6ec; --verde-bd:#bfe3cb;
+    --rojo:#d9534f; --rojo-bg:#fdeceb; --rojo-bd:#f3c6c3;
+    --ambar:#e6a417;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:940px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:23px;line-height:1.15;margin:0 0 6px}
+  h1 b{color:var(--azul)}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 16px;max-width:74ch}
+  .lead b{color:var(--tinta)}
+  /* control */
+  .controls{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin:0 0 16px}
+  .seg{display:inline-flex;background:#e7eef2;border-radius:12px;padding:4px;gap:4px}
+  .seg button{border:0;background:transparent;border-radius:9px;padding:9px 15px;font-size:14px;font-weight:800;
+    color:var(--gris);cursor:pointer;transition:.15s}
+  .seg button.on[data-m=trad]{background:var(--rojo);color:#fff}
+  .seg button.on[data-m=dig]{background:var(--verde);color:#fff}
+  .vol{flex:1 1 220px;min-width:180px}
+  .vol label{display:block;font-size:13px;font-weight:700;margin:0 0 2px}
+  .vol .fieldval{color:var(--azul);font-weight:800}
+  input[type=range]{width:100%;accent-color:var(--azul);height:24px}
+  /* línea de proceso */
+  .line{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}
+  .stage{flex:1 1 165px;min-width:150px;border-radius:12px;padding:12px;border:1px solid var(--linea);background:var(--panel)}
+  .stage.bad{border-color:var(--rojo-bd);background:var(--rojo-bg)}
+  .stage.good{border-color:var(--verde-bd);background:var(--verde-bg)}
+  .stage .ico{font-size:22px}
+  .stage .nm{font-size:13px;font-weight:800;margin:2px 0 4px}
+  .stage .tx{font-size:12px;color:var(--gris)}
+  .stage.bad .tx{color:#8a2a26}.stage.good .tx{color:#155e3f}
+  /* KPIs */
+  .kpis{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 16px}
+  .kpi{flex:1 1 150px;min-width:130px;background:var(--panel);border:1px solid var(--linea);border-radius:12px;padding:12px 14px}
+  .kpi .k{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--gris)}
+  .kpi .v{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+  .kpi .ref{font-size:11.5px;color:var(--gris);margin-top:2px}
+  /* dinero */
+  .money{border-radius:14px;padding:16px 18px;font-size:15px;font-weight:600}
+  .money.bad{background:var(--rojo-bg);border:1px solid var(--rojo-bd);color:#8a2a26}
+  .money.good{background:var(--verde-bg);border:1px solid var(--verde-bd);color:#155e3f}
+  .money .big{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;display:block;margin:2px 0}
+  .money .sub{font-size:12.5px;font-weight:600;opacity:.85}
+  footer{margin-top:16px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🏭 Clase 1 · Bienvenida</div>
+  <h1>La planta en tierra: <b>sin</b> vs. <b>con</b> transición digital</h1>
+  <p class="lead">Toda la captura termina en una planta de procesamiento, y ahí se gana o se pierde plata: en las
+  <b>mermas</b>, en la <b>clasificación</b>, en la <b>cadena de frío</b> y en la <b>trazabilidad</b>. Cambiá el
+  interruptor y mirá qué pasa en cada etapa —y cuánto <b>vale</b> la diferencia. Ese es el porqué de este curso.</p>
+
+  <div class="controls">
+    <div class="seg" id="seg">
+      <button data-m="trad" class="on">🏭 Planta tradicional</button>
+      <button data-m="dig">🤖 Con transición digital</button>
+    </div>
+    <div class="vol">
+      <label>Volumen de la jornada: <span class="fieldval" id="volVal"></span> t</label>
+      <input type="range" id="vol" min="20" max="120" step="5" value="60">
+    </div>
+  </div>
+
+  <div class="line" id="line"></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="money" id="money"></div>
+
+  <footer>
+    Modelo ilustrativo basado en rangos de la industria: combustible/energía y mermas como principales costos,
+    clasificación por <b>visión artificial</b> (Clase 7), <b>mantenimiento predictivo</b> (Clase 8) y
+    <b>trazabilidad digital</b> (Clase 9 · SENASA/mercados). Precio de referencia del producto procesado: USD 3.000/t.
+    Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+const PRICE=3000, JORNADAS=250;
+const M={
+  trad:{merma:.12,error:.15,traza:.40,rechazo:.10,through:.70},
+  dig :{merma:.04,error:.02,traza:.98,rechazo:.02,through:.92}
+};
+const STAGES=[
+  {ico:'🚢',nm:'Recepción',
+   trad:'Descarga sin registro de tiempo ni temperatura: no sabés qué lote entró primero.',
+   dig:'Sensores registran temperatura y hora al arribo. Se procesa por frescura (FIFO real).'},
+  {ico:'🐟',nm:'Clasificación',
+   trad:'Manual y subjetiva: ~15% de error mezcla tallas y calidades.',
+   dig:'Visión artificial (Clase 7): talla, especie y defectos a velocidad industrial, ~2% error.'},
+  {ico:'⚙️',nm:'Proceso',
+   trad:'Paradas imprevistas y cuellos de botella: la línea rinde al 70%.',
+   dig:'Monitoreo + mantenimiento predictivo (Clase 8): línea estable al ~92%.'},
+  {ico:'🧊',nm:'Cadena de frío',
+   trad:'Roturas de cadena de frío que nadie ve hasta que el lote ya se perdió.',
+   dig:'Sensores IoT + alertas: el desvío se detecta a tiempo y se salva el lote.'},
+  {ico:'🚚',nm:'Despacho / trazabilidad',
+   trad:'Trazabilidad en planillas: 40% de lotes rastreables → rechazos de exportación.',
+   dig:'Trazabilidad digital punta a punta (SENASA/mercados): 98% → menos rechazos, mejor precio.'}
+];
+const KPIS=[
+  {k:'Merma / desperdicio',key:'merma',pct:true,betterHigh:false},
+  {k:'Error de clasificación',key:'error',pct:true,betterHigh:false},
+  {k:'Trazabilidad de lotes',key:'traza',pct:true,betterHigh:true},
+  {k:'Rechazos de mercado',key:'rechazo',pct:true,betterHigh:false},
+  {k:'Capacidad utilizada',key:'through',pct:true,betterHigh:true}
+];
+
+function losses(vol,mode){
+  const m=M[mode];
+  const merma=vol*m.merma*PRICE;
+  const rechazo=vol*(1-m.merma)*m.rechazo*PRICE;
+  const clasif=vol*m.error*PRICE*0.30;   // producto mal clasificado se paga como categoría inferior (~-30%)
+  return merma+rechazo+clasif;
+}
+const usd=n=>'USD '+Math.round(n).toLocaleString('es-AR');
+const $=id=>document.getElementById(id);
+let mode='trad';
+
+function render(){
+  const vol=+$('vol').value;$('volVal').textContent=vol;
+  const m=M[mode], other=mode==='trad'?'dig':'trad';
+  // línea
+  $('line').innerHTML=STAGES.map(s=>
+    '<div class="stage '+(mode==='trad'?'bad':'good')+'"><div class="ico">'+s.ico+'</div>'+
+    '<div class="nm">'+s.nm+'</div><div class="tx">'+(mode==='trad'?s.trad:s.dig)+'</div></div>').join('');
+  // kpis
+  $('kpis').innerHTML=KPIS.map(kp=>{
+    const cur=M[mode][kp.key], ref=M[other][kp.key];
+    const good=kp.betterHigh?(cur>=ref):(cur<=ref);
+    const col=good?'var(--verde)':'var(--rojo)';
+    const refTxt=(mode==='trad'?'con digital: ':'tradicional: ')+Math.round(ref*100)+'%';
+    return '<div class="kpi"><div class="k">'+kp.k+'</div>'+
+      '<div class="v" style="color:'+col+'">'+Math.round(cur*100)+'%</div>'+
+      '<div class="ref">'+refTxt+'</div></div>';
+  }).join('');
+  // dinero
+  const lossTrad=losses(vol,'trad'), lossDig=losses(vol,'dig'), recuperado=lossTrad-lossDig;
+  const box=$('money');
+  if(mode==='trad'){
+    box.className='money bad';
+    box.innerHTML='💸 Con la planta tradicional, esta jornada pierde'+
+      '<span class="big">'+usd(lossTrad)+'</span>'+
+      'en mermas, mala clasificación y rechazos — y no aparece en ningún tablero. '+
+      '<span class="sub">Pasá a “Con transición digital” para ver cuánto se recupera.</span>';
+  }else{
+    box.className='money good';
+    box.innerHTML='✅ La transición digital recupera'+
+      '<span class="big">'+usd(recuperado)+' por jornada</span>'+
+      'y además destraba capacidad, calidad y trazabilidad. '+
+      '<span class="sub">≈ '+usd(recuperado*JORNADAS)+' al año (~'+JORNADAS+' jornadas, estimación ilustrativa). Eso es lo que enseña este curso.</span>';
+  }
+}
+
+$('seg').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  mode=b.dataset.m;
+  [...$('seg').children].forEach(x=>x.classList.toggle('on',x===b));
+  render();
+});
+$('vol').addEventListener('input',render);
+render();
+</script>
+</body>
+</html>
