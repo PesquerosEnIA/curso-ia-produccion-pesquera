@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kit de herramientas del curso — Antes de empezar</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff; --verde:#1f9d6b;
+    --term0:#03222f; --term1:#0a3a54;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul);text-transform:uppercase;letter-spacing:.07em;margin:0 0 4px}
+  h1{font-size:25px;line-height:1.15;margin:0 0 6px}
+  h1 b{color:var(--azul)}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 18px;max-width:74ch}
+  .lead b{color:var(--tinta)}
+  h2.sec{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:22px 0 12px}
+  /* workflow */
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
+  .stop{flex:1 1 150px;min-width:130px;border:1.5px solid var(--linea);background:var(--panel);border-radius:12px;
+    padding:12px;cursor:pointer;text-align:center;transition:.15s}
+  .stop:hover{border-color:var(--azul);transform:translateY(-2px)}
+  .stop.on{border-color:var(--azul);background:#f0f8fb;box-shadow:0 0 0 3px rgba(10,127,180,.15)}
+  .stop .ic{font-size:26px}.stop .nm{font-size:13.5px;font-weight:800;margin-top:4px}.stop .st{font-size:11.5px;color:var(--gris)}
+  .flowcap{margin-top:10px;background:#eef7f1;border:1px solid #cfe8d8;border-radius:10px;padding:11px 14px;font-size:14px;color:#155e3f}
+  /* tools */
+  .grid{display:flex;flex-wrap:wrap;gap:16px}
+  .col{flex:1 1 300px;min-width:0}
+  .card{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px}
+  .tools{list-style:none;margin:0;padding:0}
+  .tools li{display:flex;gap:11px;align-items:center;padding:10px;border-radius:10px;cursor:pointer;border:1px solid transparent}
+  .tools li:hover{background:var(--fondo)}
+  .tools li.on{background:#f0f8fb;border-color:#cfe3ee}
+  .tools li .chip{width:38px;height:38px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff}
+  .tools li .nm{font-weight:800;font-size:15px}.tools li .one{font-size:12.5px;color:var(--gris)}
+  #pane .ph{display:flex;align-items:center;gap:12px;margin:0 0 10px}
+  #pane .ph .chip{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff}
+  #pane .ph h3{margin:0;font-size:20px;font-weight:800}
+  #pane .row{margin:0 0 9px}
+  #pane .row .k{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--gris)}
+  #pane .row .v{font-size:14.5px;color:var(--tinta)}
+  #pane .ana{background:#eef4f7;border-left:4px solid var(--azul);border-radius:8px;padding:9px 12px;font-size:13.5px;color:#2c4453;margin-top:4px}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .badge{font-size:12px;font-weight:700;border-radius:999px;padding:4px 11px}
+  .b-inst{background:#eaf6ec;color:#1f7a4d}.b-no{background:#e6f1f8;color:#075d86}.b-cl{background:#eef4f7;color:#3f5a68}
+  /* terminal */
+  .term{background:var(--term0);border-radius:14px;overflow:hidden;box-shadow:0 8px 24px rgba(3,34,47,.22)}
+  .term .bar{background:#062c40;padding:9px 14px;display:flex;align-items:center;gap:8px}
+  .term .bar i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .term .bar .t{color:#9fd4ec;font-size:12.5px;margin-left:8px;font-weight:700}
+  .term .body{padding:16px 18px;font-family:Consolas,'Courier New',monospace;font-size:14.5px;color:#eaf7ff;line-height:1.6}
+  .term .body .cm{color:#7fb3ce}.term .body .kw{color:#5fd0ff}.term .body .st{color:#a5e6a5}.term .body .nm{color:#ffd479}
+  .term .ctrl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;background:#062c40;border-top:1px solid #0a3a54}
+  .term .ctrl label{color:#bfe6f7;font-size:13.5px;font-weight:700}
+  .term .ctrl input{width:70px;font-size:15px;padding:5px 8px;border-radius:7px;border:1px solid #2a6e8f;background:#0a2f42;color:#eaf7ff;font-weight:700}
+  .run{border:0;border-radius:9px;background:#1f9d6b;color:#fff;font-weight:800;font-size:14.5px;padding:9px 18px;cursor:pointer;display:flex;align-items:center;gap:7px}
+  .run:hover{background:#178257}.run:disabled{opacity:.6;cursor:default}
+  .out{margin-top:12px;background:#eef7f1;border:1px solid #cfe8d8;border-radius:10px;padding:13px 15px;font-size:14px;color:#155e3f;min-height:20px}
+  .out .mono{font-family:Consolas,monospace;color:#0e2a38;font-weight:700}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🧰 Antes de empezar · Material pre-clase</div>
+  <h1>Las herramientas del curso, <b>sin miedo</b></h1>
+  <p class="lead">No hace falta instalar nada ni saber programar para arrancar. Usamos herramientas <b>gratuitas</b> y
+  <b>desde el navegador</b>. Mirá cómo se conectan, tocá cada una para entender <b>qué es y por qué la usamos</b>, y
+  al final <b>corré tu primera línea de código</b> vos mismo/a.</p>
+
+  <h2 class="sec">1 · Cómo trabajamos (el circuito)</h2>
+  <div class="flow" id="flow"></div>
+  <div class="flowcap" id="flowcap"></div>
+
+  <h2 class="sec">2 · Las herramientas (tocá cada una)</h2>
+  <div class="grid">
+    <div class="col" style="flex:1 1 260px"><div class="card"><ul class="tools" id="tools"></ul></div></div>
+    <div class="col" style="flex:1 1 340px"><div class="card" id="pane"></div></div>
+  </div>
+
+  <h2 class="sec">3 · Probá vos: tu primera celda</h2>
+  <div class="term">
+    <div class="bar"><i style="background:#ff5f56"></i><i style="background:#ffbd2e"></i><i style="background:#27c93f"></i><span class="t">Google Colab · celda de Python</span></div>
+    <div class="body" id="code"></div>
+    <div class="ctrl">
+      <label>barcos =</label><input type="number" id="barcos" min="1" max="50" value="3">
+      <button class="run" id="run">▶ Ejecutar</button>
+      <span style="color:#7fb3ce;font-size:12.5px">Cambiá el número y volvé a ejecutar.</span>
+    </div>
+  </div>
+  <div class="out" id="out">Apretá <b>▶ Ejecutar</b> para ver qué pasa. (No se instala nada: corre en la nube.)</div>
+
+  <footer>
+    Material introductorio del curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+    Todas las herramientas son gratuitas; alcanza con una cuenta de Google.
+  </footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+// ── Circuito ─────────────────────────────────────────────────────────────────
+const FLOW=[
+  {ic:'🌐',nm:'Tu navegador',st:'Chrome, Edge…',cap:'<b>Todo pasa acá.</b> No instalás nada en tu computadora: las herramientas viven en la web y las abrís desde el navegador.'},
+  {ic:'🐙',nm:'GitHub',st:'el curso',cap:'En <b>GitHub</b> está todo el curso: buscás el notebook de la clase y hacés clic en <b>“Abrir en Colab”</b>.'},
+  {ic:'🟠',nm:'Colab',st:'corrés el código',cap:'El notebook se abre en <b>Google Colab</b>. Apretás ▶ y el código <b>corre en un servidor de Google</b>, no en tu compu.'},
+  {ic:'📁',nm:'Google Drive',st:'guardás tu copia',cap:'Hacés <b>“Guardar una copia en Drive”</b> y tu trabajo queda a salvo, listo para seguir la próxima vez.'}
+];
+const flow=$('flow');
+FLOW.forEach((s,i)=>{
+  const d=document.createElement('div');d.className='stop'+(i===0?' on':'');
+  d.innerHTML='<div class="ic">'+s.ic+'</div><div class="nm">'+s.nm+'</div><div class="st">'+s.st+'</div>';
+  d.onclick=()=>{document.querySelectorAll('.stop').forEach(x=>x.classList.remove('on'));d.classList.add('on');$('flowcap').innerHTML=s.cap;};
+  flow.appendChild(d);
+  if(i<FLOW.length-1){const a=document.createElement('div');a.style.cssText='display:flex;align-items:center;color:#0a7fb4;font-size:22px;font-weight:800';a.textContent='→';flow.appendChild(a);}
+});
+$('flowcap').innerHTML=FLOW[0].cap;
+
+// ── Herramientas ─────────────────────────────────────────────────────────────
+const TOOLS=[
+  {ic:'🟠',c:'#e8710a',nm:'Google Colab',one:'notebooks en la nube',
+   que:'Un <b>cuaderno interactivo</b> que corre Python en la nube, gratis, desde el navegador.',
+   por:'Apretás ▶ y el código corre en un servidor de Google. <b>No instalás nada.</b> Es la forma más fácil de empezar.',
+   ana:'Como usar el sonar del barco sin fabricarlo: la herramienta ya está lista, vos la operás.',
+   inst:'No se instala',dep:'Solo cuenta de Google',cl:'Clases 4, 6 y 8'},
+  {ic:'🐙',c:'#24292e',nm:'GitHub',one:'donde vive el curso',
+   que:'El <b>repositorio</b> donde está todo el curso: notebooks, datos y versiones, ordenado y público.',
+   por:'De ahí descargás o <b>“abrís en Colab”</b> cada notebook. Además guarda el historial de cambios (versiones).',
+   ana:'El puerto base: de ahí salís con todo cargado y ahí volvés a guardar.',
+   inst:'No se instala',dep:'Se navega en el navegador',cl:'Repo del curso'},
+  {ic:'🐍',c:'#3776ab',nm:'Python',one:'el lenguaje',
+   que:'El <b>lenguaje de programación</b> que usamos. El más popular en ciencia de datos e IA.',
+   por:'Es <b>legible</b> (parece inglés). No hace falta saber programar para empezar: vas leyendo y cambiando valores.',
+   ana:'El idioma común de a bordo: con cuatro palabras ya entendés la maniobra.',
+   inst:'No se instala',dep:'Viene dentro de Colab',cl:'En cada notebook'},
+  {ic:'📁',c:'#1a73e8',nm:'Google Drive',one:'tu bodega en la nube',
+   que:'Tu <b>espacio en la nube</b> para guardar tus copias de los notebooks y tus resultados.',
+   por:'Cuando hacés <b>“Guardar una copia”</b> en Colab, va a tu Drive. Así no perdés tu trabajo.',
+   ana:'La bodega: guardás ahí lo que pescaste para no perderlo.',
+   inst:'No se instala',dep:'Viene con tu cuenta de Google',cl:'Al guardar tu trabajo'},
+  {ic:'🔵',c:'#007acc',nm:'VS Code',one:'editor profesional (avanzado)',
+   que:'Un <b>editor de código profesional</b> para trabajar en tu propia computadora.',
+   por:'Para cuando quieras dar el salto a proyectos más grandes, fuera del navegador. Es <b>opcional</b> y de nivel avanzado.',
+   ana:'El taller propio en tierra: más potente, pero recién lo necesitás cuando ya sabés navegar.',
+   inst:'Se instala (gratis)',dep:'Opcional en el curso',cl:'Nivel avanzado'}
+];
+const tools=$('tools');
+TOOLS.forEach((t,i)=>{
+  const li=document.createElement('li');li.className=(i===0?'on':'');
+  li.innerHTML='<span class="chip" style="background:'+t.c+'">'+t.ic+'</span><span><div class="nm">'+t.nm+'</div><div class="one">'+t.one+'</div></span>';
+  li.onclick=()=>sel(i);tools.appendChild(li);
+});
+function sel(i){
+  const t=TOOLS[i];
+  document.querySelectorAll('#tools li').forEach((x,k)=>x.classList.toggle('on',k===i));
+  $('pane').innerHTML=
+    '<div class="ph"><span class="chip" style="background:'+t.c+'">'+t.ic+'</span><h3>'+t.nm+'</h3></div>'+
+    '<div class="row"><div class="k">¿Qué es?</div><div class="v">'+t.que+'</div></div>'+
+    '<div class="row"><div class="k">¿Por qué lo usamos?</div><div class="v">'+t.por+'</div></div>'+
+    '<div class="ana">⚓ '+t.ana+'</div>'+
+    '<div class="badges"><span class="badge '+(t.inst.startsWith('No')?'b-no':'b-inst')+'">🧩 '+t.inst+'</span>'+
+    '<span class="badge b-cl">🔧 '+t.dep+'</span><span class="badge b-cl">📍 '+t.cl+'</span></div>';
+}
+sel(0);
+
+// ── Primera celda ────────────────────────────────────────────────────────────
+function renderCode(){
+  const n=$('barcos').value||3;
+  $('code').innerHTML=
+    '<span class="cm"># Cambiá el número de barcos y apretá ▶</span><br>'+
+    '<span class="nm">barcos</span> = <span class="nm">'+n+'</span><br>'+
+    'cardumen = barcos * <span class="nm">1000</span><br>'+
+    '<span class="kw">print</span>(<span class="st">f"Con {barcos} barcos, cardumen estimado: {cardumen} peces 🐟"</span>)';
+}
+$('barcos').addEventListener('input',renderCode);
+renderCode();
+$('run').addEventListener('click',()=>{
+  const n=Math.max(1,Math.min(50,parseInt($('barcos').value||'3',10)));
+  $('barcos').value=n;renderCode();
+  const btn=$('run');btn.disabled=true;
+  $('out').innerHTML='⏳ Ejecutando en la nube…';
+  setTimeout(()=>{
+    $('out').innerHTML='<span class="mono">Con '+n+' barcos, cardumen estimado: '+(n*1000).toLocaleString('es-AR')+' peces 🐟</span><br>'+
+      '<span style="font-size:13px">✓ Eso corrió en un servidor de Google, <b>no en tu computadora</b>. Cambiaste un número, apretaste ▶ y obtuviste un resultado. <b>Eso es programar con Colab.</b></span>';
+    btn.disabled=false;
+  },750);
+});
+</script>
+</body>
+</html>
