@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Por dónde empiezo? — Autodiagnóstico</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --ambar:#e6a417; --rojo:#c0392b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:720px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul);text-transform:uppercase;letter-spacing:.07em;margin:0 0 4px}
+  h1{font-size:25px;line-height:1.15;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 18px}
+  .prog{height:8px;background:#e7eef2;border-radius:5px;overflow:hidden;margin:0 0 4px}
+  .prog span{display:block;height:100%;background:var(--azul);border-radius:5px;transition:width .3s}
+  .pnum{font-size:12.5px;color:var(--gris);margin:0 0 16px}
+  .card{background:var(--panel);border:1px solid var(--linea);border-radius:16px;padding:22px;box-shadow:0 2px 8px rgba(14,42,56,.05)}
+  .qk{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--azul);margin:0 0 6px}
+  .qt{font-size:21px;font-weight:800;margin:0 0 16px;line-height:1.25}
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opt{text-align:left;border:1.5px solid var(--linea);background:#fbfdfe;border-radius:12px;padding:13px 16px;
+    font-size:15px;font-weight:600;color:var(--tinta);cursor:pointer;transition:.15s}
+  .opt:hover{border-color:var(--azul);background:#f0f8fb;transform:translateY(-1px)}
+  .back{margin-top:14px;border:0;background:transparent;color:var(--gris);font-size:13.5px;font-weight:700;cursor:pointer}
+  .back:hover{color:var(--azul)}
+  /* resultado */
+  .badge{display:inline-block;font-size:16px;font-weight:800;color:#fff;padding:7px 16px;border-radius:999px}
+  .score{font-size:15px;color:var(--gris);margin:14px 0 4px}
+  .bar{height:12px;border-radius:7px;background:#e7eef2;overflow:hidden;margin-bottom:16px}
+  .bar span{display:block;height:100%;border-radius:7px}
+  .rec{font-size:16px;color:#2c4453;margin:0 0 14px;line-height:1.5}
+  .note{background:#eef4f7;border-left:4px solid var(--azul);border-radius:8px;padding:12px 15px;font-size:14px;color:#2c4453}
+  .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{border:0;border-radius:10px;font-weight:800;font-size:14.5px;padding:11px 18px;cursor:pointer;text-decoration:none;display:inline-block}
+  .btn.p{background:var(--azul);color:#fff}.btn.p:hover{background:var(--azul-osc)}
+  .btn.s{background:#e7eef2;color:var(--azul-osc)}.btn.s:hover{background:#dbe6ec}
+  footer{margin-top:16px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🎯 Antes de empezar · Autodiagnóstico</div>
+  <h1>¿Por dónde empiezo?</h1>
+  <p class="lead">5 preguntas rápidas para orientarte sobre qué <b>nivel</b> elegir en cada clase. No es una prueba ni una nota — es solo una brújula. Respondé con sinceridad.</p>
+
+  <div class="prog"><span id="prog" style="width:0%"></span></div>
+  <div class="pnum" id="pnum"></div>
+  <div class="card" id="card"></div>
+
+  <footer>Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026. Los 3 niveles están en todas las clases; elegís el tuyo.</footer>
+</div>
+
+<script>
+const Q=[
+  {k:'Programación',t:'¿Alguna vez escribiste código o programaste?',o:[['Nunca',0],['Un poco, copiando ejemplos',1],['Sí, con soltura',2]]},
+  {k:'Datos',t:'¿Trabajaste con datos más allá de sumar en Excel (filtros, tablas dinámicas, gráficos)?',o:[['Casi no',0],['Algo',1],['Sí, seguido',2]]},
+  {k:'Lenguajes',t:'¿Usaste Python, R u otro lenguaje de datos?',o:[['No',0],['Lo toqué alguna vez',1],['Sí',2]]},
+  {k:'IA / ML',t:'¿Qué tan claro tenés qué es la Inteligencia Artificial y el Machine Learning?',o:[['Es nuevo para mí',0],['Escuché, más o menos',1],['Lo entiendo bien',2]]},
+  {k:'Herramientas',t:'¿Usaste notebooks, Google Colab o GitHub?',o:[['Nunca',0],['Algo',1],['Sí',2]]}
+];
+const REPO='https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/';
+let i=0, score=0, ans=[];
+const $=id=>document.getElementById(id);
+
+function render(){
+  $('prog').style.width=(i/Q.length*100)+'%';
+  $('pnum').textContent='Pregunta '+(i+1)+' de '+Q.length;
+  const q=Q[i];
+  $('card').innerHTML='<div class="qk">'+q.k+'</div><div class="qt">'+q.t+'</div><div class="opts"></div>';
+  const box=$('card').querySelector('.opts');
+  q.o.forEach(([label,val])=>{
+    const b=document.createElement('button');b.className='opt';b.textContent=label;
+    b.onclick=()=>{ans[i]=val;i++;if(i<Q.length)render();else result();};
+    box.appendChild(b);
+  });
+  if(i>0){const bk=document.createElement('button');bk.className='back';bk.textContent='← Volver';
+    bk.onclick=()=>{i--;render();};$('card').appendChild(bk);}
+}
+function result(){
+  const s=ans.reduce((a,b)=>a+b,0);
+  $('prog').style.width='100%';$('pnum').textContent='Listo · tu resultado';
+  let lvl,col,rec;
+  if(s<=3){lvl='🟢 NOVATO';col='#1f9d6b';rec='Arrancás prácticamente de cero — y está <b>perfecto</b>: el curso está diseñado <b>sin requisitos</b> de programación. Empezá por el <b>Kit de herramientas</b> y el <b>tutorial de Colab</b>, y elegí el nivel 🟢 <b>Novato</b> en cada clase.';}
+  else if(s<=7){lvl='🟡 INTERMEDIO';col='#e6a417';rec='Ya tenés una <b>base</b>. Vas a poder leer y modificar el código de los notebooks sin problema. Elegí el nivel 🟡 <b>Intermedio</b>; si te queda corto, saltá al Avanzado cuando quieras.';}
+  else{lvl='🔴 AVANZADO';col='#c0392b';rec='Tenés <b>buen manejo</b>. Animate al nivel 🔴 <b>Avanzado</b> y a los <b>casos DT</b> (AIS/PSMA, concentración de renta). Igual, ojeá el glosario por los términos propios del sector.';}
+  $('card').innerHTML=
+    '<span class="badge" style="background:'+col+'">'+lvl+'</span>'+
+    '<div class="score">Tu puntaje de familiaridad: <b>'+s+' / 10</b></div>'+
+    '<div class="bar"><span style="width:'+(s/10*100)+'%;background:'+col+'"></span></div>'+
+    '<div class="rec">'+rec+'</div>'+
+    '<div class="note">🧭 Recordá: los <b>3 niveles</b> (novato / intermedio / avanzado) están en <b>todas las clases</b>. Elegís el tuyo y podés <b>cambiar cuando quieras</b>. Esto es solo una orientación.</div>'+
+    '<div class="btns"><a class="btn p" href="'+REPO+'c0_kit_herramientas.html" target="_blank" rel="noopener">🧰 Ver el Kit de herramientas</a>'+
+    '<a class="btn s" href="'+REPO+'c0_glosario.html" target="_blank" rel="noopener">📖 Glosario</a>'+
+    '<button class="btn s" id="again">↻ Hacerlo de nuevo</button></div>';
+  $('again').onclick=()=>{i=0;ans=[];render();};
+}
+render();
+</script>
+</body>
+</html>

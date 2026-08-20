@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glosario del curso — Términos sin vueltas</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff; --verde:#1f9d6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul);text-transform:uppercase;letter-spacing:.07em;margin:0 0 4px}
+  h1{font-size:25px;line-height:1.15;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 16px;max-width:74ch}
+  .tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 12px}
+  #q{flex:1 1 260px;min-width:200px;font-size:15px;padding:11px 14px;border:1.5px solid var(--linea);border-radius:10px;background:#fff}
+  #q:focus{outline:none;border-color:var(--azul)}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{border:1.5px solid var(--linea);background:#fff;border-radius:999px;padding:6px 13px;font-size:13px;font-weight:700;color:var(--gris);cursor:pointer}
+  .chip:hover{border-color:var(--azul);color:var(--azul)}
+  .chip.on{background:var(--azul);border-color:var(--azul);color:#fff}
+  .count{font-size:13px;color:var(--gris);margin:0 0 12px}
+  .grid{display:flex;flex-wrap:wrap;gap:14px}
+  .term{flex:1 1 300px;min-width:0;background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px 18px;
+    box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .term .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .term h3{font-size:18px;font-weight:800;margin:0}
+  .term .cat{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;border-radius:999px;padding:3px 9px;white-space:nowrap}
+  .term .def{font-size:14px;color:var(--tinta);margin:8px 0 8px}
+  .term .ana{font-size:13px;color:#2c4453;background:#eef4f7;border-left:3px solid var(--azul);border-radius:8px;padding:8px 11px}
+  .term .cl{font-size:12px;color:var(--gris);font-weight:700;margin-top:8px}
+  .none{color:var(--gris);font-size:15px;padding:30px 0;text-align:center}
+  /* colores por categoría */
+  .c-datos{background:#e6f1f8;color:#075d86}
+  .c-ml{background:#eae7fb;color:#5b3fa8}
+  .c-fisc{background:#fdecea;color:#a5342b}
+  .c-opt{background:#fdf0dd;color:#8a5a12}
+  .c-eco{background:#eaf6ec;color:#1f7a4d}
+  .c-tool{background:#e7eef2;color:#3f5a68}
+  footer{margin-top:16px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">📖 Material de referencia · Glosario</div>
+  <h1>Los términos del curso, <span style="color:var(--azul)">sin vueltas</span></h1>
+  <p class="lead">Buscá cualquier palabra o filtrá por tema. Cada término trae una definición corta, una <b>analogía pesquera</b> y en qué clase aparece. Volvé cuando quieras.</p>
+
+  <div class="tools">
+    <input id="q" type="search" placeholder="🔎 Buscar un término (ej: overfitting, AIS, clorofila…)" autocomplete="off">
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="count" id="count"></div>
+  <div class="grid" id="grid"></div>
+
+  <footer>Glosario del curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026. ¿Falta un término? Se agrega.</footer>
+</div>
+
+<script>
+const CATS={datos:'Datos y sensores',ml:'Machine Learning',fisc:'Fiscalización',opt:'Optimización',eco:'Economía',tool:'Herramientas'};
+const T=[
+  ['SST · Temperatura Superficial del Mar','datos','La temperatura del agua en la superficie, medida por satélite.','El termómetro del mar: cada especie tiene su rango cómodo.','Clase 4'],
+  ['Clorofila-a','datos','Pigmento del fitoplancton; indica cuánta productividad hay en el agua.','Donde hay pasto hay ganado: más clorofila, más alimento, más peces.','Clase 4'],
+  ['Batimetría / profundidad','datos','La profundidad del fondo del mar en cada punto.','El mapa de alturas, pero del fondo.','Clase 4'],
+  ['Big data / Small data','datos','Small: el dato de tu barco. Big: todo integrado, de toda la flota, en el tiempo.','Una marea vs. toda la temporada de toda la flota.','Clases 1 y 4'],
+  ['AIS','fisc','Sistema que emite posición, velocidad e identidad del barco. Es público.','El GPS que además grita quién sos y a qué velocidad vas.','Clase 4'],
+  ['VMS','fisc','Monitoreo satelital obligatorio y no público, de uso regulatorio.','El AIS de la autoridad: lo ve el Estado, no cualquiera.','Clase 4'],
+  ['PSMA','fisc','Acuerdo sobre Medidas del Estado Rector del Puerto, contra la pesca ilegal.','El control en el puerto: si tu rastro no cierra, no descargás.','Clase 4 · DT-011'],
+  ['IUU / INDNR','fisc','Pesca Ilegal, No Declarada y No Reglamentada.','La pesca "en negro" del mar.','Clase 4'],
+  ['Machine Learning','ml','Programas que aprenden patrones de ejemplos, en vez de seguir reglas fijas.','Un capitán que aprendió mirando mil mareas.','Clase 6'],
+  ['Sobreajuste (overfitting)','ml','Cuando el modelo memoriza el ruido y falla con datos nuevos.','El que se sabe el examen de memoria pero no entendió nada.','Clase 6'],
+  ['Entrenamiento / Test','ml','Se entrena con una parte de los datos y se evalúa con otra que nunca vio.','Practicás con unas mareas y te toman con otras.','Clase 6'],
+  ['Clasificación','ml','Predecir una categoría (sí/no): ¿conviene ir a esta zona?','La decisión de zarpar o no.','Clase 6'],
+  ['Regresión','ml','Predecir un número: ¿cuántos kg esperar?','Estimar cuánto vas a pescar.','Clase 6'],
+  ['Umbral','ml','El valor de probabilidad a partir del cual decidís actuar.','¿Con qué chance te subís al barco? Lo elegís vos.','Clase 6'],
+  ['AUC-ROC','ml','Métrica de qué tan bien el modelo separa los casos buenos de los malos.','La nota del modelo: 1 es perfecto, 0,5 es tirar la moneda.','Clase 6'],
+  ['Matriz de confusión','ml','Tabla de aciertos y errores: falsos positivos y falsos negativos.','El parte: cuántas veces le pegaste y cuántas erraste.','Clase 6'],
+  ['Feature / variable','ml','Cada dato de entrada que usa el modelo (SST, clorofila, profundidad…).','Los ingredientes de la receta del modelo.','Clase 6'],
+  ['Clustering (K-Means)','ml','Agrupa cosas parecidas sin etiquetas previas.','Ordenar las zonas por parecido, solas.','Clase 8'],
+  ['Velocidad óptima (ley cúbica)','opt','El consumo sube con el cubo de la velocidad; hay una velocidad de mínimo costo.','Apurarse quema gasoil al cubo.','Clase 8'],
+  ['Mantenimiento predictivo','opt','Anticipar fallas con datos de telemetría, antes de que el motor rompa.','Arreglar el motor antes de quedarte en el mar.','Clase 8'],
+  ['Agente de IA','opt','Sistema que percibe, razona y decide/actúa de forma autónoma.','Un vigía que mira la flota y avisa solo.','Clase 8'],
+  ['Gini / curva de Lorenz','eco','Miden qué tan repartido (o concentrado) está algo, como la cuota.','Qué tan pareja está la repartición de la torta.','Caso DT-009'],
+  ['HHI','eco','Índice de concentración de un mercado.','Cuánto manda el más grande.','Caso DT-009'],
+  ['Trazabilidad','eco','Seguir el producto del mar al plato: origen, proceso y destino.','El ADN documental del pescado.','Clase 9'],
+  ['Notebook (.ipynb)','tool','Documento que mezcla código, texto y resultados; se corre por celdas.','El cuaderno de bitácora que además ejecuta.','Todas'],
+  ['Google Colab','tool','Notebooks de Python en la nube, gratis y sin instalar nada.','El sonar prestado: ya está listo, vos lo usás.','Todas'],
+  ['GitHub','tool','Donde vive el curso: código, datos y versiones, ordenado y público.','El puerto base del material.','Repo del curso']
+];
+const norm=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+let cat='todos';
+const $=id=>document.getElementById(id);
+// chips
+const chips=$('chips');
+[['todos','Todos']].concat(Object.entries(CATS)).forEach(([k,v])=>{
+  const b=document.createElement('button');b.className='chip'+(k==='todos'?' on':'');b.textContent=v;
+  b.onclick=()=>{cat=k;document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));b.classList.add('on');render();};
+  chips.appendChild(b);
+});
+function render(){
+  const q=norm($('q').value.trim());
+  const items=T.filter(t=>{
+    const okCat=cat==='todos'||t[1]===cat;
+    const okQ=!q||norm(t[0]).includes(q)||norm(t[2]).includes(q)||norm(t[3]).includes(q);
+    return okCat&&okQ;
+  });
+  $('count').textContent=items.length+(items.length===1?' término':' términos');
+  if(!items.length){$('grid').innerHTML='<div class="none">Nada con eso. Probá otra palabra o quitá el filtro. 🐟</div>';return;}
+  $('grid').innerHTML=items.map(t=>
+    '<div class="term"><div class="top"><h3>'+t[0]+'</h3><span class="cat c-'+t[1]+'">'+CATS[t[1]]+'</span></div>'+
+    '<div class="def">'+t[2]+'</div><div class="ana">⚓ '+t[3]+'</div><div class="cl">📍 '+t[4]+'</div></div>').join('');
+}
+$('q').addEventListener('input',render);
+render();
+</script>
+</body>
+</html>

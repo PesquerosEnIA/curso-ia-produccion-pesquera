@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Primeros pasos en Colab — Tutorial guiado</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff; --verde:#1f9d6b;
+    --colab:#e8710a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:820px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul);text-transform:uppercase;letter-spacing:.07em;margin:0 0 4px}
+  h1{font-size:25px;line-height:1.15;margin:0 0 6px}
+  h1 b{color:var(--colab)}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 16px}
+  .dots{display:flex;gap:7px;margin:0 0 14px;flex-wrap:wrap}
+  .dot{width:30px;height:30px;border-radius:50%;border:2px solid var(--linea);background:#fff;font-size:13px;font-weight:800;
+    color:var(--gris);display:flex;align-items:center;justify-content:center}
+  .dot.on{background:var(--azul);border-color:var(--azul);color:#fff}
+  .dot.done{background:#eaf6ec;border-color:#bfe3cb;color:#1f7a4d}
+  .card{background:var(--panel);border:1px solid var(--linea);border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(14,42,56,.05)}
+  .stepk{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--azul);margin:0 0 4px}
+  .stept{font-size:21px;font-weight:800;margin:0 0 14px}
+  /* mock */
+  .mock{border:1px solid #cdd8de;border-radius:12px;overflow:hidden;margin:0 0 14px;box-shadow:0 3px 10px rgba(14,42,56,.08)}
+  .mbar{background:#e9eef1;padding:8px 12px;display:flex;align-items:center;gap:7px}
+  .mbar i{width:10px;height:10px;border-radius:50%;display:inline-block}
+  .murl{flex:1;background:#fff;border:1px solid #d5dee3;border-radius:6px;padding:4px 10px;font-size:12px;color:#5a6b75;
+    font-family:Consolas,monospace;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .mbody{background:#fff;padding:14px 16px;font-size:13.5px;min-height:120px}
+  .brc{font-family:Consolas,monospace;font-size:13px;color:#075d86;margin-bottom:10px}
+  .row{display:flex;align-items:center;gap:9px;padding:8px 6px;border-top:1px solid #eef2f4}
+  .row .i{font-size:16px}
+  .glow{box-shadow:0 0 0 3px rgba(232,113,10,.35);border-radius:8px}
+  .cbadge{display:inline-flex;align-items:center;gap:7px;background:#0a3a54;color:#fff;font-weight:700;font-size:13px;
+    padding:7px 12px;border-radius:7px}
+  .cmenu{display:flex;gap:14px;font-size:13px;color:#3f5a68;border-bottom:1px solid #eef2f4;padding-bottom:9px;margin-bottom:10px;flex-wrap:wrap}
+  .cmenu b{color:#0e2a38}
+  .cell{display:flex;gap:10px;align-items:flex-start;background:#f7fafb;border:1px solid #e4edf1;border-radius:8px;padding:10px}
+  .play{flex:none;width:30px;height:30px;border-radius:50%;background:var(--verde);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px}
+  .play.idle{background:#cdd8de;color:#fff}
+  .code{font-family:Consolas,monospace;font-size:13px;color:#0e2a38}
+  .code .cm{color:#7a96a5}.code .kw{color:#0a7fb4}
+  .drop{border:1px solid #d5dee3;border-radius:8px;width:280px;box-shadow:0 6px 16px rgba(14,42,56,.14);overflow:hidden}
+  .drop .it{padding:8px 12px;font-size:13px;border-top:1px solid #eef2f4}
+  .drop .it:first-child{border-top:0}
+  .drop .it.hl{background:#fff3e6;font-weight:700;color:#8a5a12}
+  .tip{background:#fff6e9;border:1px solid #f0dcb8;border-left:4px solid var(--colab);border-radius:8px;padding:11px 14px;font-size:13.5px;color:#7a5300}
+  .instr{font-size:15px;color:#2c4453;margin:0 0 12px}
+  .nav{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
+  .btn{border:0;border-radius:10px;font-weight:800;font-size:14.5px;padding:11px 18px;cursor:pointer;text-decoration:none}
+  .btn.p{background:var(--azul);color:#fff}.btn.p:hover{background:var(--azul-osc)}
+  .btn.s{background:#e7eef2;color:var(--azul-osc)}.btn.s:hover{background:#dbe6ec}
+  .btn:disabled{opacity:.4;cursor:default}
+  footer{margin-top:16px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🚀 Antes de empezar · Tutorial</div>
+  <h1>Primeros pasos en <b>Colab</b></h1>
+  <p class="lead">Así abrís y corrés cualquier notebook del curso, del repo a tu pantalla. 6 pasos, sin instalar nada.</p>
+  <div class="dots" id="dots"></div>
+  <div class="card" id="card"></div>
+  <footer>Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026. Todo gratis, solo con tu cuenta de Google.</footer>
+</div>
+
+<script>
+const REPO='https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/';
+const bar=(url,body)=>'<div class="mock"><div class="mbar"><i style="background:#ff5f56"></i><i style="background:#ffbd2e"></i><i style="background:#27c93f"></i><div class="murl">'+url+'</div></div><div class="mbody">'+body+'</div></div>';
+const STEPS=[
+ {k:'Paso 1 · GitHub',t:'Encontrá el notebook en el repo',
+  mock:bar('github.com/PesquerosEnIA/curso-ia-produccion-pesquera',
+    '<div class="brc">📁 curso-ia… / clase_06 / notebooks</div>'+
+    '<div class="row glow"><span class="i">📓</span> clase06_ml_novato.ipynb</div>'+
+    '<div class="row"><span class="i">📓</span> clase06_ml_intermedio.ipynb</div>'+
+    '<div class="row"><span class="i">📓</span> clase06_ml_avanzado.ipynb</div>'),
+  instr:'Entrá al <b>repo del curso</b> en GitHub y abrí la carpeta de tu clase → <b>notebooks</b>. Elegí el archivo <b>.ipynb</b> de tu nivel (novato / intermedio / avanzado).',
+  tip:'El link del repo está en el material de cada clase y en la sección de bienvenida.'},
+ {k:'Paso 2 · GitHub',t:'Abrí el archivo y buscá “Open in Colab”',
+  mock:bar('github.com/…/clase06_ml_intermedio.ipynb',
+    '<div class="brc">📓 clase06_ml_intermedio.ipynb</div>'+
+    '<div style="margin:6px 0 12px"><span class="cbadge glow">🟠 Open in Colab</span></div>'+
+    '<div style="color:#8aa0ab;font-size:12.5px">— vista previa del notebook (texto y código) —</div>'),
+  instr:'Al abrir el <b>.ipynb</b>, GitHub muestra el notebook. Arriba de todo vas a ver el botón <b>“Open in Colab”</b> (un badge naranja). Hacé clic ahí.',
+  tip:'Si no ves el badge, copiá el link del archivo y pegalo en colab.research.google.com → pestaña “GitHub”.'},
+ {k:'Paso 3 · Colab',t:'El notebook se abre en Colab',
+  mock:bar('colab.research.google.com/github/PesquerosEnIA/…',
+    '<div class="cmenu"><b>Archivo</b> <span>Editar</span> <span>Ver</span> <span>Insertar</span> <span>Entorno</span> <span style="margin-left:auto">🟢 Conectar</span></div>'+
+    '<div class="cell"><div class="play idle">▶</div><div class="code"><span class="cm"># Clase 6 — Machine Learning</span><br><span class="kw">import</span> pandas <span class="kw">as</span> pd</div></div>'),
+  instr:'Colab abre el notebook <b>listo para usar</b>. No instalaste nada: Python ya está corriendo en un servidor de Google.',
+  tip:'Arriba a la derecha, “Conectar” asigna una máquina en la nube (es automático y gratis).'},
+ {k:'Paso 4 · Colab',t:'Guardá tu propia copia',
+  mock:bar('colab.research.google.com/…',
+    '<div class="cmenu"><b style="color:#e8710a">Archivo ▾</b></div>'+
+    '<div class="drop"><div class="it">Nuevo notebook</div><div class="it">Abrir…</div><div class="it hl">📁 Guardar una copia en Drive</div><div class="it">Descargar</div></div>'),
+  instr:'Para <b>editar</b> y no perder tu trabajo: menú <b>Archivo → “Guardar una copia en Drive”</b>. Se crea una copia tuya en tu Google Drive.',
+  tip:'Trabajá siempre sobre TU copia. El original del repo queda intacto para todos.'},
+ {k:'Paso 5 · Colab',t:'Corré tu primera celda',
+  mock:bar('colab.research.google.com/…',
+    '<div class="cell glow"><div class="play">▶</div><div class="code">cardumen = <span class="kw">3</span> * <span class="kw">1000</span><br><span class="kw">print</span>(cardumen)</div></div>'+
+    '<div style="font-family:Consolas,monospace;font-size:13px;color:#155e3f;margin-top:8px">▸ 3000</div>'),
+  instr:'Poné el cursor en una celda y apretá <b>▶</b> (o <b>Shift + Enter</b>). La primera vez, Colab pide permiso: <b>aceptá</b>. El resultado aparece debajo.',
+  tip:'Eso corrió en la nube, no en tu compu. Podés cambiar los números y volver a correr.'},
+ {k:'Paso 6 · Colab',t:'Seguí las celdas en orden',
+  mock:bar('colab.research.google.com/…',
+    '<div class="cell" style="margin-bottom:8px"><div class="play">✓</div><div class="code"><span class="cm"># 1 · Cargar datos</span></div></div>'+
+    '<div class="cell" style="margin-bottom:8px"><div class="play">✓</div><div class="code"><span class="cm"># 2 · Entrenar modelo</span></div></div>'+
+    '<div class="cell glow"><div class="play">▶</div><div class="code"><span class="cm"># 3 · 🟡 Ejercicio: cambiá un valor</span></div></div>'),
+  instr:'Corré las celdas <b>de arriba hacia abajo, en orden</b> (cada una usa lo de la anterior). En los <b>ejercicios 🟡</b>, cambiá valores y volvé a correr para ver qué pasa.',
+  tip:'Si algo se rompe: Entorno → “Reiniciar y ejecutar todo”. Empieza limpio.'}
+];
+let i=0;
+const $=id=>document.getElementById(id);
+const dots=$('dots');
+STEPS.forEach((s,k)=>{const d=document.createElement('div');d.className='dot';d.textContent=k+1;d.onclick=()=>{i=k;render();};dots.appendChild(d);});
+function render(){
+  document.querySelectorAll('.dot').forEach((d,k)=>{d.className='dot'+(k===i?' on':(k<i?' done':''))});
+  const s=STEPS[i];
+  const last=i===STEPS.length-1;
+  $('card').innerHTML='<div class="stepk">'+s.k+'</div><div class="stept">'+s.t+'</div>'+
+    '<div class="instr">'+s.instr+'</div>'+s.mock+'<div class="tip">💡 '+s.tip+'</div>'+
+    '<div class="nav"><button class="btn s" id="prev"'+(i===0?' disabled':'')+'>← Anterior</button>'+
+    (last?'<a class="btn p" href="'+REPO+'c0_kit_herramientas.html" target="_blank" rel="noopener">🧰 Repasar el Kit</a>':'<button class="btn p" id="next">Siguiente →</button>')+'</div>';
+  if(!last)$('next').onclick=()=>{i++;render();};
+  if(i>0)$('prev').onclick=()=>{i--;render();};
+}
+render();
+</script>
+</body>
+</html>
