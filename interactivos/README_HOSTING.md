@@ -10,6 +10,7 @@ Cada archivo es 100% autocontenido (HTML+CSS+JS inline): se puede abrir con dobl
 | `c0_autodiagnostico.html` | Pre-clase | Autodiagnóstico de 5 preguntas → recomienda nivel (novato/intermedio/avanzado) |
 | `c0_pasos_colab.html` | Pre-clase | Tutorial guiado de 6 pasos: abrir y correr un notebook del repo en Colab (con maquetas) |
 | `c0_glosario.html` | Pre-clase | Glosario buscable con filtros por tema + analogías pesqueras (27 términos) |
+| `c0_mapa_curso.html` | Overview | Mapa navegable del curso (6 paradas: pre-clase + 5 clases) → aprendés/hacés/fecha |
 | `c1_barco_fabrica_datos.html` | 1 | Barco interactivo: cada sistema genera datos y la IA los usa (hero de bienvenida) |
 | `c1_planta_transicion.html` | 1 | Planta de procesamiento: sin vs. con transición digital → KPIs + valor recuperado |
 | `c6_umbral_decision.html` | 6 | El umbral de decisión como decisión económica (matriz de confusión + costo en $) |

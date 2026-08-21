@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El viaje del curso — Mapa navegable</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff; --verde:#1f9d6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul);text-transform:uppercase;letter-spacing:.07em;margin:0 0 4px}
+  h1{font-size:25px;line-height:1.15;margin:0 0 6px}
+  h1 b{color:var(--azul)}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 18px;max-width:74ch}
+  /* ruta */
+  .route{display:flex;flex-wrap:wrap;gap:8px}
+  .stop{flex:1 1 140px;min-width:120px;border:1.5px solid var(--linea);background:var(--panel);border-radius:12px;
+    padding:12px 10px;cursor:pointer;text-align:center;transition:.15s;position:relative}
+  .stop:hover{border-color:var(--azul);transform:translateY(-2px)}
+  .stop.on{border-color:var(--azul);background:#f0f8fb;box-shadow:0 0 0 3px rgba(10,127,180,.15)}
+  .stop .vc{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:#8aa0ab}
+  .stop .ic{font-size:26px;margin:2px 0}
+  .stop .nm{font-size:13px;font-weight:800;line-height:1.15}
+  .stop .dt{font-size:11.5px;color:var(--gris);margin-top:3px}
+  /* panel */
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:16px;padding:22px;margin-top:16px;
+    box-shadow:0 2px 8px rgba(14,42,56,.05)}
+  .ph{display:flex;flex-wrap:wrap;gap:12px;align-items:baseline;justify-content:space-between}
+  .ph .l{display:flex;align-items:center;gap:12px}
+  .ph .ic{font-size:32px}
+  .ph .vc{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--azul)}
+  .ph h2{font-size:22px;font-weight:800;margin:2px 0 0}
+  .meta{font-size:13px;color:var(--gris);text-align:right}
+  .meta b{color:var(--tinta)}
+  .cols{display:flex;flex-wrap:wrap;gap:16px;margin-top:16px}
+  .box{flex:1 1 300px;background:#f7fafb;border:1px solid #e4edf1;border-radius:12px;padding:14px 16px}
+  .box h3{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--azul-txt);margin:0 0 8px}
+  .box ul{margin:0;padding-left:18px;font-size:14px;color:var(--tinta)}
+  .box ul li{margin-bottom:5px}
+  .box.do{background:#eef7f1;border-color:#cfe8d8}.box.do h3{color:#12784f}
+  .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+  .tag{font-size:12px;font-weight:700;background:#e6f1f8;color:#075d86;border-radius:999px;padding:4px 11px}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🗺️ Mapa del curso</div>
+  <h1>El viaje: <b>del dato a la decisión</b></h1>
+  <p class="lead">Todo el curso en un vistazo. Cada parada suma sobre la anterior — del porqué (Clase 1) al impacto (Clase 10). Tocá una parada para ver qué vas a aprender, qué vas a hacer y cuándo.</p>
+
+  <div class="route" id="route"></div>
+  <div class="panel" id="panel"></div>
+
+  <footer>Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026. Clases cada ~15 días; los 3 niveles (novato/intermedio/avanzado) están en todas.</footer>
+</div>
+
+<script>
+const S=[
+ {vc:'Preparación',ic:'🧰',nm:'Antes de empezar',dt:'Cuando quieras',
+  aprende:['Qué es y por qué usamos Colab, GitHub, Python y Drive','A abrir y correr un notebook, paso a paso','A ubicar tu nivel y los términos del sector'],
+  hace:['Kit de herramientas (con una celda que corre)','Autodiagnóstico de nivel','Primeros pasos en Colab · Glosario'],
+  docentes:'—',tags:['Kit','Autodiagnóstico','Pasos Colab','Glosario']},
+ {vc:'Estrategia',ic:'🧭',nm:'Clase 1',sub:'Estrategia y Transformación Digital',dt:'mar 18/08/2026',
+  aprende:['Por qué la IA importa en la pesca, con datos reales','De la Industria 4.0 a las Smart Fisheries','La brecha argentina y la oportunidad'],
+  hace:['Explorás el barco y la planta como fábricas de datos','Ves cómo el small data se vuelve big data'],
+  docentes:'Ariel Giamportone · Soraya Corvalán · María Ana Reussi · Soledad Gurisich',tags:['Barco 4-tabs','Planta sin/con digital']},
+ {vc:'Datos',ic:'🌊',nm:'Clase 4',sub:'Datos y Sensores del Mar',dt:'mar 29/09/2026',
+  aprende:['SST, clorofila y corrientes: las variables que mandan','AIS y VMS: el rastro digital de la flota','Plataformas de datos abiertos (Copernicus, GFW…)'],
+  hace:['Notebook de datos ambientales × captura','Simulás el rastro AIS y el apagón de transpondedor (PSMA)'],
+  docentes:'Ariel Giamportone · Soraya Corvalán',tags:['Notebook datos','Rastro AIS (DT-011)']},
+ {vc:'Predicción',ic:'🧠',nm:'Clase 6',sub:'Machine Learning y Modelos Predictivos',dt:'mar 27/10/2026',
+  aprende:['Cómo un modelo predice zonas de pesca','Entrenar y evaluar: ROC, los dos errores','El umbral como decisión económica; ética'],
+  hace:['Simuladores de umbral, zona y sobreajuste','Caso: concentración de la renta (DT-009)'],
+  docentes:'Damián Giacone · Ariel Giamportone',tags:['Umbral','¿A qué zona voy?','Sobreajuste','Renta (DT-009)']},
+ {vc:'Optimización',ic:'⚙️',nm:'Clase 8',sub:'Optimización de Flota y Agentes',dt:'mar 24/11/2026',
+  aprende:['La velocidad óptima (ley cúbica del consumo)','Clustering de zonas y mantenimiento predictivo','Un agente de IA que vigila la flota'],
+  hace:['Simulás la velocidad de mínimo costo de una marea'],
+  docentes:'Damián Giacone · Ariel Giamportone',tags:['Velocidad óptima']},
+ {vc:'Impacto',ic:'🏁',nm:'Clase 10',sub:'Cierre y Hoja de Ruta',dt:'mar 22/12/2026',
+  aprende:['Síntesis: de los datos a las decisiones','Por dónde empezar (la fruta baja) y tu hoja de ruta','IA ética y sostenible; el Proyecto Integrador'],
+  hace:['Jugás "Sos el capitán": una marea, 4 decisiones'],
+  docentes:'Soraya Corvalán · Ariel Giamportone',tags:['Sos el capitán']}
+];
+const $=id=>document.getElementById(id);
+const route=$('route');
+S.forEach((s,i)=>{
+  const d=document.createElement('div');d.className='stop'+(i===0?' on':'');
+  d.innerHTML='<div class="vc">'+s.vc+'</div><div class="ic">'+s.ic+'</div><div class="nm">'+s.nm+'</div><div class="dt">'+s.dt+'</div>';
+  d.onclick=()=>sel(i);route.appendChild(d);
+});
+function sel(i){
+  const s=S[i];
+  document.querySelectorAll('.stop').forEach((x,k)=>x.classList.toggle('on',k===i));
+  $('panel').innerHTML=
+    '<div class="ph"><div class="l"><span class="ic">'+s.ic+'</span><div><div class="vc">'+s.vc+'</div><h2>'+s.nm+(s.sub?' · '+s.sub:'')+'</h2></div></div>'+
+    '<div class="meta">📅 <b>'+s.dt+'</b>'+(s.docentes&&s.docentes!=='—'?'<br>👥 '+s.docentes:'')+'</div></div>'+
+    '<div class="cols"><div class="box"><h3>Qué vas a aprender</h3><ul>'+s.aprende.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>'+
+    '<div class="box do"><h3>Qué vas a hacer</h3><ul>'+s.hace.map(x=>'<li>'+x+'</li>').join('')+'</ul>'+
+    '<div class="tags">'+s.tags.map(t=>'<span class="tag">'+t+'</span>').join('')+'</div></div></div>';
+}
+sel(0);
+</script>
+</body>
+</html>
