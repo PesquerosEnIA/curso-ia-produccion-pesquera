@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El camino a la operación inteligente — Clase 1</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --ambar:#e6a417; --rojo:#d9534f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul);text-transform:uppercase;letter-spacing:.07em;margin:0 0 4px}
+  h1{font-size:25px;line-height:1.15;margin:0 0 6px}
+  h1 b{color:var(--azul)}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 16px;max-width:76ch}
+  /* modo */
+  .modes{display:inline-flex;background:#e7eef2;border-radius:12px;padding:4px;gap:4px;margin:0 0 16px}
+  .modes button{border:0;background:transparent;border-radius:9px;padding:10px 18px;font-size:15px;font-weight:800;color:var(--gris);cursor:pointer}
+  .modes button.on{background:var(--azul);color:#fff}
+  /* stepper */
+  .steps{display:flex;align-items:flex-start;gap:0;margin:0 0 6px}
+  .stp{flex:1;text-align:center;position:relative}
+  .stp .dot{width:38px;height:38px;border-radius:50%;border:3px solid var(--linea);background:#fff;color:var(--gris);
+    font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto;position:relative;z-index:2}
+  .stp.done .dot{background:#eaf6ec;border-color:var(--verde);color:var(--verde)}
+  .stp.on .dot{background:var(--azul);border-color:var(--azul);color:#fff;transform:scale(1.12)}
+  .stp .lb{font-size:11.5px;font-weight:700;color:var(--gris);margin-top:6px;line-height:1.2}
+  .stp.on .lb{color:var(--azul-osc)}
+  .stp::before{content:'';position:absolute;top:19px;left:-50%;width:100%;height:3px;background:var(--linea);z-index:1}
+  .stp:first-child::before{display:none}
+  .stp.done::before,.stp.on::before{background:var(--verde)}
+  /* madurez */
+  .mad{margin:14px 0 16px}
+  .mad .top{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;margin-bottom:5px}
+  .mad .top b{color:var(--azul)}
+  .madbar{height:14px;border-radius:8px;background:#e7eef2;overflow:hidden}
+  .madbar span{display:block;height:100%;background:linear-gradient(90deg,#0a7fb4,#1f9d6b);border-radius:8px;transition:width .6s}
+  /* grid */
+  .grid{display:flex;flex-wrap:wrap;gap:16px}
+  .col{flex:1 1 340px;min-width:0}
+  .card{background:var(--panel);border:1px solid var(--linea);border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(14,42,56,.05)}
+  .lvlk{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--azul);margin:0 0 4px}
+  .lvlt{font-size:22px;font-weight:800;margin:0 0 12px;display:flex;align-items:center;gap:10px}
+  .lvlt .badge{width:34px;height:34px;border-radius:10px;background:var(--azul);color:#fff;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+  .row{margin:0 0 12px}
+  .row .k{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--gris);margin:0 0 3px}
+  .row .v{font-size:15.5px;color:var(--tinta)}
+  .persp{background:#eef7f1;border:1px solid #cfe8d8;border-left:5px solid #1f9d6b;border-radius:10px;padding:13px 15px;font-size:15.5px;color:#155e3f}
+  .persp b{color:#12784f}
+  .stack{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+  .chip{font-size:12px;font-weight:700;background:#e6f1f8;color:#075d86;border-radius:999px;padding:4px 11px}
+  /* kpis */
+  .kpi{margin:0 0 14px}
+  .kpi .top{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:4px}
+  .kpi .top .n{font-weight:700}
+  .kpi .top .p{font-weight:800;font-variant-numeric:tabular-nums}
+  .track{height:20px;border-radius:8px;background:#eef3f5;overflow:hidden}
+  .fill{height:100%;border-radius:8px;transition:width .6s}
+  .nav{display:flex;gap:10px;margin-top:16px}
+  .btn{border:0;border-radius:11px;font-weight:800;font-size:15px;padding:13px 20px;cursor:pointer}
+  .btn.p{background:var(--azul);color:#fff;flex:1}.btn.p:hover{background:var(--azul-osc)}
+  .btn.p:disabled{background:#8fb9cd;cursor:default}
+  .btn.s{background:#e7eef2;color:var(--azul-osc)}.btn.s:hover{background:#dbe6ec}
+  .win{background:linear-gradient(135deg,#0e7a54,#1f9d6b);color:#fff;border-radius:12px;padding:14px 16px;font-size:15.5px;font-weight:700;margin-top:14px}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🎮 Clase 1 · Experiencia interactiva</div>
+  <h1>Subí de nivel: de lo <b>tradicional</b> a lo <b>inteligente</b></h1>
+  <p class="lead">Manejás una operación del sector. Andá <b>adoptando datos e IA, paso a paso</b>, y mirá en cada nivel qué <b>nueva perspectiva</b> ganás y cómo <b>sube el rendimiento</b>. No hace falta saber nada todavía: es el mapa del viaje que vas a recorrer en el curso.</p>
+
+  <div class="modes" id="modes">
+    <button data-m="pesca" class="on">🎣 Pesca</button>
+    <button data-m="acui">🐟 Acuicultura</button>
+  </div>
+
+  <div class="steps" id="steps"></div>
+
+  <div class="mad">
+    <div class="top"><span>Madurez digital de tu operación</span><b id="madv">5%</b></div>
+    <div class="madbar"><span id="madbar" style="width:5%"></span></div>
+  </div>
+
+  <div class="grid">
+    <div class="col">
+      <div class="card" id="lvlcard"></div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <div class="lvlk">Rendimiento de la operación</div>
+        <div id="kpis" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="btn s" id="prev">← Volver</button>
+    <button class="btn p" id="next">Adoptar el próximo paso →</button>
+  </div>
+
+  <footer>Experiencia introductoria del curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026. Valores ilustrativos del proceso de transformación digital del sector.</footer>
+</div>
+
+<script>
+const KLABEL={
+  pesca:['Eficiencia de marea','Ahorro de combustible','Sostenibilidad (cuota)','Trazabilidad'],
+  acui :['Rendimiento (conversión)','Ahorro de energía/alimento','Calidad y sanidad','Trazabilidad']
+};
+const KCOLOR=['#0a7fb4','#e0752d','#1f9d6b','#7a5bd6'];
+const DATA={
+ pesca:[
+  {step:'Tradicional',t:'Pesca tradicional',adopta:'Nada digital: decisiones por intuición y experiencia. Los partes y consumos quedan en papel… o se pierden.',persp:'Sabés lo que pasó, pero no lo podés <b>medir ni comparar</b>. Cada marea arranca casi de cero.',kpi:[40,20,55,15],mad:5,stack:[]},
+  {step:'Registro',t:'Registro digital',adopta:'Cargás partes de pesca y consumos en digital (planilla/app). Se terminó el papel.',persp:'Ahora podés <b>MEDIR</b>: comparar mareas, barcos y costos, y ver qué funciona.',kpi:[52,35,60,45],mad:25,stack:['Datos digitales']},
+  {step:'Sensores',t:'Sensores y satélite',adopta:'Sumás SST y clorofila satelital, AIS a bordo y sensores del barco.',persp:'Ahora podés <b>VER</b> el ambiente y tu flota en tiempo real — no navegás a ciegas.',kpi:[64,48,68,60],mad:48,stack:['Datos digitales','Sensores + satélite']},
+  {step:'Predicción',t:'Predicción con ML',adopta:'Un modelo de Machine Learning recomienda zonas y estima la captura esperada.',persp:'Ahora podés <b>ANTICIPAR</b>: menos vueltas, menos gasoil, mejor zona. (Clase 6)',kpi:[78,66,78,72],mad:72,stack:['Datos','Sensores','Modelos predictivos']},
+  {step:'Optimización',t:'Optimización y agentes',adopta:'Velocidad óptima, mantenimiento predictivo y un agente de IA que vigila la flota.',persp:'Ahora <b>OPTIMIZÁS</b> todo — dentro de la cuota. 🏆 Sos una <b>Smart Fishery</b>. (Clases 8 y 10)',kpi:[90,85,92,90],mad:100,stack:['Datos','Sensores','ML','Optimización + agentes']}
+ ],
+ acui:[
+  {step:'Tradicional',t:'Acuicultura tradicional',adopta:'Alimentación y control "a ojo". Sin registro sistemático de pesos, alimento ni ambiente.',persp:'Reaccionás cuando algo ya salió mal. No podés <b>anticipar</b> nada.',kpi:[42,25,50,18],mad:5,stack:[]},
+  {step:'Registro',t:'Registro digital',adopta:'Registrás pesos, alimentación y temperaturas en digital.',persp:'Ahora podés <b>MEDIR</b> la conversión alimenticia y detectar qué lote rinde mejor.',kpi:[54,38,58,48],mad:25,stack:['Datos digitales']},
+  {step:'Sensores',t:'Sensores IoT',adopta:'Sumás sensores de oxígeno y temperatura, y cámaras en las jaulas/piletas.',persp:'Ahora <b>MONITOREÁS</b> en tiempo real y te evitás sustos (baja de oxígeno, estrés).',kpi:[66,50,66,62],mad:48,stack:['Datos digitales','Sensores IoT']},
+  {step:'Visión + ML',t:'Visión artificial y predicción',adopta:'Conteo y estimación de biomasa por visión artificial; alertas tempranas de salud.',persp:'Ahora podés <b>ANTICIPAR</b> mortandad y afinar la alimentación pez por pez. (Clases 6 y 7)',kpi:[80,66,80,74],mad:72,stack:['Datos','Sensores','Visión + ML']},
+  {step:'Optimización',t:'Optimización y agentes',adopta:'Alimentación optimizada, mantenimiento predictivo y trazabilidad total del producto.',persp:'Ahora <b>OPTIMIZÁS</b> todo el ciclo. 🏆 Sos una <b>Smart Farm</b>. (Clases 8 y 10)',kpi:[92,86,94,92],mad:100,stack:['Datos','Sensores','Visión + ML','Optimización + agentes']}
+ ]
+};
+const STEPN=['Tradicional','Registro','Sensores','Predicción','Optimización'];
+let mode='pesca', lvl=0;
+const $=id=>document.getElementById(id);
+
+// stepper
+function buildSteps(){
+  $('steps').innerHTML=STEPN.map((s,i)=>'<div class="stp" data-i="'+i+'"><div class="dot">'+i+'</div><div class="lb">'+s+'</div></div>').join('');
+  document.querySelectorAll('.stp').forEach(el=>el.onclick=()=>{lvl=+el.dataset.i;render();});
+}
+buildSteps();
+
+function render(){
+  const d=DATA[mode][lvl];
+  // stepper
+  document.querySelectorAll('.stp').forEach((el,i)=>{el.className='stp'+(i<lvl?' done':(i===lvl?' on':''))});
+  // madurez
+  $('madv').textContent=d.mad+'%';$('madbar').style.width=d.mad+'%';
+  // level card
+  const stack=d.stack.length?'<div class="stack">'+d.stack.map(c=>'<span class="chip">✓ '+c+'</span>').join('')+'</div>':'';
+  const win=lvl===4?'<div class="win">🏆 ¡Llegaste! Tu operación pasó de decidir por intuición a decidir con datos e IA. Ese es el viaje de este curso.</div>':'';
+  $('lvlcard').innerHTML=
+    '<div class="lvlk">Nivel '+lvl+' de 4</div>'+
+    '<div class="lvlt"><span class="badge">'+lvl+'</span>'+d.t+'</div>'+
+    '<div class="row"><div class="k">🔧 Qué adoptás</div><div class="v">'+d.adopta+'</div></div>'+
+    '<div class="persp">💡 '+d.persp+'</div>'+stack+win;
+  // kpis
+  $('kpis').innerHTML=KLABEL[mode].map((lb,i)=>
+    '<div class="kpi"><div class="top"><span class="n">'+lb+'</span><span class="p" style="color:'+KCOLOR[i]+'">'+d.kpi[i]+'%</span></div>'+
+    '<div class="track"><div class="fill" id="f'+i+'" style="background:'+KCOLOR[i]+'"></div></div></div>').join('');
+  requestAnimationFrame(()=>KLABEL[mode].forEach((_,i)=>{$('f'+i).style.width=d.kpi[i]+'%';}));
+  // nav
+  $('prev').style.visibility=lvl===0?'hidden':'visible';
+  $('next').textContent=lvl<4?'Adoptar el próximo paso →':'↻ Empezar de nuevo';
+}
+
+$('modes').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  mode=b.dataset.m;lvl=0;document.querySelectorAll('#modes button').forEach(x=>x.classList.toggle('on',x===b));render();});
+$('next').addEventListener('click',()=>{lvl=lvl<4?lvl+1:0;render();});
+$('prev').addEventListener('click',()=>{if(lvl>0)lvl--;render();});
+render();
+</script>
+</body>
+</html>
