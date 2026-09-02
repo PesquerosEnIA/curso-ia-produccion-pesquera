@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Doctrina del Grupo · IA Aplicada a la Producción Pesquera</title>
+<meta name="description" content="Las leyes del curso, escritas por quienes lo cursan. Carta de navegación acumulativa.">
+<meta property="og:title" content="Doctrina del Grupo · IA Aplicada a la Producción Pesquera">
+<meta property="og:description" content="Las leyes del curso, escritas por quienes lo cursan.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --abismo:#07161F;
+  --sonda:#0E2C3D;
+  --plataforma:#164055;
+  --carta:#EFE6D2;
+  --carta-tenue:#B9AE96;
+  --langostino:#E8623A;
+  --marea:#48B39C;
+  --boya:#F0B441;
+  --linea:rgba(239,230,210,.14);
+  --linea-fuerte:rgba(239,230,210,.28);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{
+  background:var(--abismo);color:var(--carta);
+  font-family:'Archivo',system-ui,sans-serif;line-height:1.5;
+  padding:22px 14px 70px;
+  display:flex;flex-direction:column;align-items:center;gap:20px;
+}
+:focus-visible{outline:2px solid var(--boya);outline-offset:3px}
+
+/* ---------- Encabezado ---------- */
+.cabecera{max-width:520px;width:100%;padding:4px 4px 0}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--carta-tenue);
+}
+.cabecera h1{
+  font-family:'Archivo Black',sans-serif;font-size:2.05rem;line-height:1;
+  letter-spacing:-.025em;margin:.55rem 0;text-transform:uppercase;
+}
+.cabecera h1 em{font-style:normal;color:var(--langostino)}
+.bajada{font-size:.9rem;color:var(--carta-tenue);max-width:44ch}
+
+/* ---------- Riel de avance del curso ---------- */
+.riel{max-width:520px;width:100%;margin-top:4px}
+.riel .rotulo{
+  font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--carta-tenue);
+  display:flex;justify-content:space-between;margin-bottom:8px;
+}
+.estaciones{display:flex;gap:4px}
+.estacion{
+  flex:1;height:5px;background:var(--plataforma);border-radius:1px;
+}
+.estacion.sondada{background:var(--langostino)}
+
+/* ---------- Filtros ---------- */
+.filtros{
+  max-width:520px;width:100%;display:flex;flex-wrap:wrap;gap:7px;
+  padding-top:4px;
+}
+.chip{
+  font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--carta-tenue);
+  background:transparent;border:1px solid var(--linea);border-radius:2px;
+  padding:7px 11px;cursor:pointer;transition:.15s;
+}
+.chip:hover{border-color:var(--linea-fuerte);color:var(--carta)}
+.chip[aria-pressed="true"]{
+  background:var(--langostino);border-color:var(--langostino);color:var(--abismo);font-weight:600;
+}
+
+/* ---------- Ley ---------- */
+.ley{
+  position:relative;width:100%;max-width:520px;
+  background:var(--sonda);border:1px solid var(--linea);border-radius:2px;
+  padding:24px 22px 20px;overflow:hidden;isolation:isolate;
+}
+/* firma de la pieza: curvas batimétricas */
+.ley::before{
+  content:"";position:absolute;inset:-40% -10% auto -10%;height:180%;
+  background:
+    radial-gradient(ellipse 78% 50% at 88% 6%, transparent 0 34%, var(--linea) 34% 34.5%, transparent 34.5%),
+    radial-gradient(ellipse 78% 50% at 88% 6%, transparent 0 50%, var(--linea) 50% 50.4%, transparent 50.4%),
+    radial-gradient(ellipse 78% 50% at 88% 6%, transparent 0 68%, var(--linea) 68% 68.4%, transparent 68.4%),
+    radial-gradient(ellipse 78% 50% at 88% 6%, transparent 0 88%, var(--linea) 88% 88.4%, transparent 88.4%);
+  z-index:-1;pointer-events:none;
+}
+.ley .marca{
+  font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--carta-tenue);
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  border-bottom:1px solid var(--linea);padding-bottom:9px;margin-bottom:16px;
+}
+.ley .marca .der{display:flex;align-items:center;gap:9px}
+.nueva{
+  background:var(--boya);color:var(--abismo);font-weight:600;
+  padding:2px 6px;border-radius:1px;letter-spacing:.1em;font-size:.55rem;
+}
+.autor{
+  font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--langostino);margin-bottom:7px;
+}
+.enunciado{
+  font-family:'Archivo Black',sans-serif;
+  font-size:clamp(1.25rem,5.6vw,1.6rem);line-height:1.12;letter-spacing:-.02em;
+}
+.fundamento{font-size:.87rem;color:var(--carta-tenue);margin-top:13px}
+.fundamento strong{color:var(--carta);font-weight:600}
+.textual{
+  font-size:.82rem;font-style:italic;color:var(--carta-tenue);
+  border-left:2px solid var(--plataforma);padding:2px 0 2px 12px;margin-top:14px;
+}
+.origen{
+  font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:var(--carta-tenue);
+  margin-top:15px;padding-top:10px;border-top:1px solid var(--linea);
+  display:flex;align-items:baseline;gap:7px;
+}
+.origen::before{content:"⌖";color:var(--langostino);font-size:.78rem}
+
+.vacio{
+  max-width:520px;width:100%;padding:28px 22px;border:1px dashed var(--linea);
+  border-radius:2px;color:var(--carta-tenue);font-size:.88rem;text-align:center;
+}
+
+/* ---------- Pie ---------- */
+.pie{
+  max-width:520px;width:100%;font-family:'IBM Plex Mono',monospace;
+  font-size:.63rem;color:var(--carta-tenue);line-height:1.75;padding:6px 4px 0;
+  border-top:1px solid var(--linea);margin-top:10px;padding-top:18px;
+}
+.pie b{color:var(--carta);font-weight:500}
+
+/* ---------- Impresión: el certificado final ---------- */
+@media print{
+  body{background:#fff;color:#111;padding:0;gap:0}
+  .filtros,.riel,.pie{display:none}
+  .ley{background:#fff;border:1px solid #ccc;break-inside:avoid;margin-bottom:10px;max-width:100%}
+  .ley::before{display:none}
+  .enunciado,.cabecera h1{color:#111}
+  .autor,.cabecera h1 em{color:#B33F1C}
+  .fundamento,.textual,.origen,.ley .marca,.bajada{color:#555}
+  .nueva{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="cabecera">
+  <p class="eyebrow">Inteligencia Artificial Aplicada a la Producción Pesquera · UTN</p>
+  <h1>Doctrina<br>del <em>grupo</em></h1>
+  <p class="bajada">Las leyes de este curso no las escribo yo. Las escriben ustedes, clase a clase, en el foro y en el grupo. Esta carta se actualiza después de cada encuentro.</p>
+</header>
+
+<section class="riel" aria-label="Avance del curso">
+  <div class="rotulo"><span>Estaciones sondadas</span><span id="rielConteo"></span></div>
+  <div class="estaciones" id="riel"></div>
+</section>
+
+<nav class="filtros" id="filtros" aria-label="Filtrar por clase"></nav>
+
+<main id="leyes" style="display:contents"></main>
+
+<footer class="pie">
+  <b>Cómo se entra en esta carta.</b> Cada ley nace de un aporte concreto en el foro de Moodle o en el grupo de WhatsApp. Se cita con nombre porque es autoría, no participación.<br><br>
+  <b>Al cierre del curso</b> esta página se imprime y se entrega firmada. Lo que escriban acá queda.
+</footer>
+
+<script>
+/* ============================================================
+   LEYES DE LA DOCTRINA
+   Para sumar una clase: agregá objetos nuevos a este array.
+   No hace falta tocar nada más del archivo.
+
+   Campos:
+     clase      número de clase (1..10)
+     autor      nombre del alumno, tal como firma
+     tipo       Ley | Principio | Corolario | Regla | Analogía | Tesis
+                | Advertencia | Observación   (variá para que no se repita)
+     enunciado  la ley. Máximo ~14 palabras. Afirmativa y memorable.
+     fundamento evidencia que la respalda. 1-2 oraciones con cifra o fuente.
+     textual    cita literal del alumno, recortada
+     canal      "Foro de Moodle" | "Grupo de WhatsApp"
+   ============================================================ */
+const CLASES_TOTALES = 10;
+
+const LEYES = [
+  {
+    clase:1, autor:"Sergio", tipo:"Ley",
+    enunciado:"La veda no es un costo. Es capital puesto a interés biológico.",
+    fundamento:"Costello, Ovando y Hilborn (<strong>PNAS, 2016</strong>) sobre 4.713 pesquerías: el buen manejo sumaría <strong>USD 53.000 millones</strong> de ganancia anual. El Golfo San Jorge lo confirma: con veda y monitoreo, los desembarques superan las <strong>200.000 t/año desde hace más de 8 años</strong> y la biomasa creció <strong>~25%</strong> en la última evaluación (INIDEP).",
+    textual:"…pensándolo bien, por la sustentabilidad me dio tildar la correcta.",
+    canal:"Grupo de WhatsApp"
+  },
+  {
+    clase:1, autor:"Nicolás", tipo:"Principio",
+    enunciado:"Se demuestra. No se impone.",
+    fundamento:"El <strong>70%</strong> de las transformaciones digitales no alcanza sus objetivos (BCG, 2020), y el obstáculo dominante es la cultura, no la tecnología. Imponer de arriba hacia abajo es la vía más rápida a ese número.",
+    textual:"La decisión radica no en ser extremistas con la imposición, sino en demostrar que con pequeños cambios se pueden llegar a resultados provechosos.",
+    canal:"Grupo de WhatsApp"
+  },
+  {
+    clase:1, autor:"Carla", tipo:"Regla",
+    enunciado:"Nadie adopta lo que no vio funcionar al lado suyo.",
+    fundamento:"Es la teoría de difusión de innovaciones de <strong>Rogers</strong>: la adopción depende de que algo se pueda probar chico y que los resultados se vean. El <em>change agent</em> es una figura del modelo, no una intuición.",
+    textual:"La capacitación, los gestores del cambio y el acompañamiento pueden lograr mejoras y adaptabilidad.",
+    canal:"Grupo de WhatsApp"
+  },
+  {
+    clase:1, autor:"Claudio", tipo:"Corolario",
+    enunciado:"Sin línea de base no hay nada que demostrar.",
+    fundamento:"Una causa documentada de fracaso son los objetivos vagos y tecnocéntricos. <strong>“Implementar IA” no es un objetivo. “Bajar el bycatch de merluza un X%” sí lo es.</strong>",
+    textual:"Primero ver cómo estoy con respecto a esas tecnologías y después los cambios.",
+    canal:"Grupo de WhatsApp"
+  },
+  {
+    clase:1, autor:"Marcelo", tipo:"Analogía",
+    enunciado:"Esto ya lo hicimos una vez y salió bien. Se llamó HACCP.",
+    fundamento:"La FAO documentó la implementación de HACCP en pesquerías de países en desarrollo con personal de baja escolaridad formal: funcionó con <strong>capacitación visual, listas de chequeo y entrenamiento en el puesto</strong>. La IA a bordo no es un problema nuevo.",
+    textual:"Nos pasa con otros requerimientos sanitarios, como HACCP a bordo, Buenas Prácticas de Manufactura, etc.",
+    canal:"Grupo de WhatsApp"
+  },
+  {
+    clase:1, autor:"Rino", tipo:"Ley",
+    enunciado:"El cuello de botella nunca es quien obedece. Es quien decide.",
+    fundamento:"Es el <em>skipper effect</em>: capitán, tripulación y arte explican el <strong>20–24%</strong> de la varianza de captura (Hilborn &amp; Ledbetter, 1985), y se pierde el <strong>36,5%</strong> del output potencial por operar debajo de las mejores prácticas (Oliveira et al., 2016).",
+    textual:"El problema que vas a tener es sacar de la zona de confort a los capitanes de pesca.",
+    canal:"Grupo de WhatsApp"
+  },
+  {
+    clase:1, autor:"Rino", tipo:"Advertencia",
+    enunciado:"Va a costar más de lo que se imaginan.",
+    fundamento:"Cierto en los costos ocultos: integración, mantenimiento y gestión del cambio. Pero la barrera nº1 se derrumbó: el plan satelital ilimitado a bordo <strong>cayó de USD 25.000 a USD 2.500 por mes</strong> a fines de 2025. No es barato. Es financiable.",
+    textual:"Y ya que estamos en tema, todo esto va a costar más de lo que se imaginan.",
+    canal:"Grupo de WhatsApp"
+  },
+  {
+    clase:1, autor:"Claudio", tipo:"Tesis",
+    enunciado:"Un dato que no se integra no es un dato. Es un archivo.",
+    fundamento:"El estándar <strong>GDST</strong> distingue digitalizar de interoperar: digitalizar cada silo por separado no resuelve nada. Hay que estandarizar qué se captura y en qué momento del recorrido (KDEs y CTEs sobre GS1 EPCIS).",
+    textual:"Información de una misma operación puede quedar registrada en distintos sectores sin estar integrada.",
+    canal:"Foro de Moodle"
+  },
+  {
+    clase:1, autor:"Vanesa", tipo:"Observación",
+    enunciado:"Un sistema único vale más que cinco sistemas buenos.",
+    fundamento:"Planet Tracker estimó que una trazabilidad compatible con GDST puede <strong>duplicar el margen EBIT</strong> del procesador pesquero típico, hoy en apenas 3%, por menores recalls, mermas y costos legales.",
+    textual:"Sería útil digitalizar los controles básicos de descarga y calidad en un sistema único.",
+    canal:"Foro de Moodle"
+  },
+  {
+    clase:1, autor:"Alan", tipo:"Tesis",
+    enunciado:"Automatizá primero todo lo que no agrega valor.",
+    fundamento:"Procesar una factura a mano cuesta entre <strong>USD 12,88 y 19,83</strong>; automatizada, cerca de <strong>USD 2,78</strong>. El OCR moderno llega al 95–99% de exactitud. Y el MCP que ya usa Alan es hoy estándar de industria.",
+    textual:"Me avoqué a reducir a su mínima expresión los esfuerzos administrativos, que generan gastos de capital humano y nada de valor agregado.",
+    canal:"Foro de Moodle"
+  }
+];
+
+/* ---------- Render ---------- */
+const $leyes = document.getElementById('leyes');
+const $filtros = document.getElementById('filtros');
+const ultimaClase = Math.max(...LEYES.map(l => l.clase));
+const clases = [...new Set(LEYES.map(l => l.clase))].sort((a,b)=>a-b);
+let filtro = 'todas';
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function riel(){
+  const cont = document.getElementById('riel');
+  cont.innerHTML = '';
+  for(let i=1; i<=CLASES_TOTALES; i++){
+    const d = document.createElement('div');
+    d.className = 'estacion' + (clases.includes(i) ? ' sondada' : '');
+    d.title = 'Clase ' + i;
+    cont.appendChild(d);
+  }
+  document.getElementById('rielConteo').textContent =
+    LEYES.length + ' leyes · clase ' + ultimaClase + ' de ' + CLASES_TOTALES;
+}
+
+function filtros(){
+  const opciones = [{v:'todas', t:'Todas'}].concat(
+    clases.map(c => ({v:String(c), t:'Clase ' + c}))
+  );
+  $filtros.innerHTML = '';
+  opciones.forEach(o => {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.type = 'button';
+    b.textContent = o.t;
+    b.setAttribute('aria-pressed', String(filtro === o.v));
+    b.addEventListener('click', () => { filtro = o.v; filtros(); render(); });
+    $filtros.appendChild(b);
+  });
+}
+
+function render(){
+  const lista = filtro === 'todas' ? LEYES : LEYES.filter(l => String(l.clase) === filtro);
+  if(!lista.length){
+    $leyes.innerHTML = '<p class="vacio">Todavía no hay leyes cargadas para esa clase.</p>';
+    return;
+  }
+  $leyes.innerHTML = lista.map((l, i) => {
+    const n = String(LEYES.indexOf(l) + 1).padStart(2, '0');
+    const nueva = l.clase === ultimaClase && ultimaClase > 1
+      ? '<span class="nueva">Nueva</span>' : '';
+    return `
+      <article class="ley">
+        <div class="marca">
+          <span>Estación ${n}</span>
+          <span class="der">${nueva}<span>Clase ${l.clase}</span></span>
+        </div>
+        <p class="autor">${esc(l.tipo)} de ${esc(l.autor)}</p>
+        <h2 class="enunciado">${esc(l.enunciado)}</h2>
+        <p class="fundamento">${l.fundamento}</p>
+        <p class="textual">“${esc(l.textual)}”</p>
+        <p class="origen">${esc(l.autor)} · ${esc(l.canal)} · Clase ${l.clase}</p>
+      </article>`;
+  }).join('');
+}
+
+riel(); filtros(); render();
+</script>
+
+</body>
+</html>
