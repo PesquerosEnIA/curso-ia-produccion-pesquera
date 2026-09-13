@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Animación · El arte de pesca en acción (DEJUPA)</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --naranja:#e0752d; --rojo:#d64545; --gris2:#8aa0ab;
+    --langostino:#e8623a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 14px;max-width:74ch}
+  .lead b{color:var(--tinta)}
+  .stage{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:10px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  canvas{width:100%;height:auto;display:block;border-radius:9px}
+  .ctrls{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;flex:1 1 300px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 12px;font-weight:800}
+  label.field{display:block;font-size:13.5px;font-weight:700;margin:2px 0 4px}
+  .fieldval{font-weight:800;color:var(--azul)}
+  input[type=range]{width:100%;accent-color:var(--azul);height:26px}
+  .hint{font-size:12px;color:var(--gris);margin:2px 0 0}
+  .btns{display:flex;gap:8px;margin-top:12px}
+  .btn{flex:1;border:0;border-radius:10px;background:var(--azul);color:#fff;font-weight:800;font-size:13.5px;padding:10px;cursor:pointer}
+  .btn.sec{background:#eaf1f4;color:var(--azul-txt)}
+  .btn:hover{filter:brightness(1.05)}
+  .l50{margin-top:12px;background:#eef7fb;border:1px solid #cfe6f1;border-radius:10px;padding:10px 12px;font-size:13px}
+  .l50 b{color:var(--azul-osc)}
+  .rows .r{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed var(--linea);font-size:13.5px}
+  .rows .r:last-child{border-bottom:0}
+  .rows .r .k{color:var(--gris);display:flex;align-items:center}
+  .rows .r .v{font-weight:800;font-variant-numeric:tabular-nums}
+  .dotc{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:7px}
+  .conx{margin-top:16px}
+  .conx .c{display:flex;gap:11px;align-items:flex-start;font-size:13px;padding:8px 0;border-bottom:1px dashed var(--linea)}
+  .conx .c:last-child{border-bottom:0}
+  .conx .tag{flex:0 0 auto;font-size:11px;font-weight:800;color:#fff;background:var(--azul);border-radius:6px;padding:3px 8px;text-transform:uppercase;letter-spacing:.03em}
+  .conx .tag.d6{background:var(--verde)} .conx .tag.d8{background:var(--naranja)} .conx .tag.d4{background:var(--azul-osc)}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+  footer a{color:var(--azul-txt)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🎬 Artes de pesca · Animación interactiva</div>
+  <h1>El arte de pesca en acción: cómo la grilla decide</h1>
+  <p class="lead">Mirá entrar a la red al <b style="color:var(--langostino)">langostino</b> (el objetivo) y a la
+  <b>merluza</b> (el bycatch). La grilla <b>DEJUPA</b> separa por el <b>alto del cuerpo</b>: la merluza no pasa entre
+  las barras y se va por el escape de arriba; el langostino, mucho más chico, pasa y queda. Y en el copo, la
+  <b>malla</b> deja escapar a los más chiquitos. Movés la <b>separación de barras</b> y ves el efecto al instante.</p>
+
+  <div class="stage">
+    <canvas id="cv" width="900" height="420" aria-label="Animación del arte de pesca con grilla DEJUPA"></canvas>
+  </div>
+
+  <div class="ctrls">
+    <div class="panel">
+      <h2>El arte</h2>
+      <label class="field">Separación de barras de la grilla: <span class="fieldval" id="sVal"></span> mm</label>
+      <input type="range" id="s" min="12" max="48" step="1" value="26">
+      <p class="hint">Más juntas → sale más merluza (aun la mediana). Más separadas → se cuela.</p>
+      <div class="l50" id="l50box"></div>
+      <div class="btns">
+        <button class="btn" id="play">⏸ Pausar</button>
+        <button class="btn sec" id="reset">↺ Reiniciar conteo</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Lo que va saliendo del lance</h2>
+      <div class="rows">
+        <div class="r"><span class="k"><span class="dotc" style="background:var(--langostino)"></span>🦐 Langostino retenido</span><span class="v" id="tLang">0</span></div>
+        <div class="r"><span class="k"><span class="dotc" style="background:var(--verde)"></span>🐟 Merluza liberada</span><span class="v" id="tMerlLib">0</span></div>
+        <div class="r"><span class="k"><span class="dotc" style="background:var(--rojo)"></span>🐟 Merluza retenida (bycatch)</span><span class="v" id="tMerlRet">0</span></div>
+      </div>
+      <div class="l50" style="background:#f4f8fa;border-color:var(--linea)" id="resumen"></div>
+    </div>
+  </div>
+
+  <div class="panel conx" style="margin-top:16px">
+    <h2>Cómo se conecta con el curso</h2>
+    <div class="c"><span class="tag d4">Clase 4</span><span>Cada pez que ves es un <b>dato</b>: talla, especie, comportamiento en la red. De acá salen los muestreos que alimentan todo lo demás.</span></div>
+    <div class="c"><span class="tag d6">Clase 6</span><span>La “curva de selectividad” (qué % se retiene según la talla) es un <b>modelo ajustado a datos</b> por máxima verosimilitud — el mismo tipo de ajuste que hace el machine learning.</span></div>
+    <div class="c"><span class="tag d8">Clase 8</span><span><b>Optimización:</b> elegir la grilla que maximiza langostino y minimiza bycatch es un problema de optimización con restricciones (la talla mínima legal).</span></div>
+    <div class="c"><span class="tag">Dato real</span><span>Los valores medidos de la DEJUPA salen de experimentos reales (dataset 2015). Probalos en el <a href="./selectividad_arte.html" target="_blank" rel="noopener">simulador de curvas reales</a>.</span></div>
+  </div>
+
+  <footer>
+    Animación didáctica del principio del <b>DEJUPA</b> (Dispositivo Selectivo, pesquería de langostino, Argentina):
+    la grilla excluye por alto del cuerpo (≈0,18·longitud), el langostino pasa, la malla suelta a los más chicos.
+    La <b>talla mínima</b> de merluza es 35&nbsp;cm. Informe:
+    <a href="https://www.researchgate.net/publication/378582619" target="_blank" rel="noopener">Optimizando la sostenibilidad pesquera — selectividad artificial</a>.
+    Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cv=$('cv'), ctx=cv.getContext('2d');
+const W=900,H=420;
+let dpr=Math.max(1,window.devicePixelRatio||1);
+function fit(){const w=cv.clientWidth||W;dpr=Math.max(1,window.devicePixelRatio||1);cv.width=w*dpr;cv.height=w*H/W*dpr;ctx.setTransform(dpr*w/W,0,0,dpr*w/W,0,0);}
+window.addEventListener('resize',fit);
+
+// Geometría de la escena (en coords lógicas 900x420)
+const GRIDX=470;          // posición de la grilla
+const ESCAPE_Y=70;        // altura del escape (arriba)
+const WATER_TOP=42, WATER_BOT=H-16;
+const CODEND_X=760;       // boca del copo
+
+let barras=26;            // mm
+let playing=true, speed=1;
+let tLang=0,tMerlLib=0,tMerlRet=0;
+const parts=[];
+
+function Lcut(){return barras/1.8;}   // cm: merluza más larga escapa por la grilla
+const meshCut=18;                      // cm: merluza más chica escapa por la malla del copo
+
+function spawn(){
+  const isLang=Math.random()<0.58;
+  let len;
+  if(isLang){len=3+Math.random()*3;}   // langostino "talla" pequeña (ilustrativa)
+  else{ // merluza: mezcla juveniles/adultos
+    len = Math.random()<0.6 ? 18+Math.random()*20 : 34+Math.random()*24;
+  }
+  parts.push({
+    x:-20-Math.random()*60, y:WATER_TOP+18+Math.random()*(WATER_BOT-WATER_TOP-36),
+    vx:1.5+Math.random()*0.5, vy:0, len, isLang, state:'flow', decided:false, a:1,
+    wig:Math.random()*6.28
+  });
+}
+function decideMerluza(p){
+  p.decided=true;
+  if(p.len>Lcut()){ p.state='escape'; }   // la saca la grilla → sube al escape
+  else { p.state='pass'; }                // pasa entre barras hacia el copo
+}
+function step(){
+  if(parts.length<70 && Math.random()<0.5) spawn();
+  for(const p of parts){
+    if(p.state==='done') continue;
+    p.wig+=0.2;
+    if(p.state==='flow'){
+      p.x+=p.vx*speed;
+      p.y+=Math.sin(p.wig)*0.3;
+      if(p.x>=GRIDX-14){
+        if(p.isLang){ p.state='pass'; }
+        else if(!p.decided){ decideMerluza(p); }
+      }
+    } else if(p.state==='escape'){
+      // desviada por la grilla hacia arriba-derecha, sale por el escape
+      p.x+=0.5*speed; p.y-=1.9*speed;
+      if(p.y<=ESCAPE_Y-6){ tMerlLib++; p.state='done'; }
+    } else if(p.state==='pass'){
+      p.x+=p.vx*speed;
+      p.y+=Math.sin(p.wig)*0.3;
+      if(p.x>=CODEND_X-4){
+        // en el copo: los más chicos escapan por la malla (caen), el resto queda
+        if(p.len<meshCut){ p.state='mesh'; }
+        else { p.state='kept'; p.kx=CODEND_X+14+Math.random()*70; }
+      }
+    } else if(p.state==='mesh'){
+      p.x+=0.3*speed; p.y+=2.0*speed;
+      if(p.y>=WATER_BOT+6){ if(p.isLang){tLang++;} else {tMerlLib++;} p.state='done'; }
+    } else if(p.state==='kept'){
+      if(p.x<p.kx) p.x+=Math.max(0.4,(p.kx-p.x)*0.06)*speed;
+      p.y+=Math.sin(p.wig)*0.2;
+      if(!p.counted){ p.counted=true; if(p.isLang){tLang++;} else {tMerlRet++;} }
+      // se acumula en el copo; se desvanece de a poco para no saturar
+      p.a-=0.006; if(p.a<=0.05) p.state='done';
+    }
+  }
+  // limpiar
+  for(let i=parts.length-1;i>=0;i--){ if(parts[i].state==='done'||parts[i].x>W+40) parts.splice(i,1); }
+}
+
+function fish(x,y,len,col,a){
+  const L=Math.min(30,6+len*0.5); const hgt=L*0.42;
+  ctx.save();ctx.globalAlpha=a;ctx.fillStyle=col;
+  ctx.beginPath();ctx.ellipse(x,y,L*0.5,hgt*0.5,0,0,6.283);ctx.fill();
+  ctx.beginPath();ctx.moveTo(x-L*0.5,y);ctx.lineTo(x-L*0.5-hgt*0.6,y-hgt*0.5);ctx.lineTo(x-L*0.5-hgt*0.6,y+hgt*0.5);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+function langostino(x,y,len,a){
+  ctx.save();ctx.globalAlpha=a;ctx.fillStyle='#e8623a';ctx.strokeStyle='#e8623a';ctx.lineWidth=1.4;
+  const L=6+len*0.9;
+  ctx.beginPath();ctx.ellipse(x,y,L*0.5,L*0.24,0,0,6.283);ctx.fill();
+  ctx.beginPath();ctx.moveTo(x-L*0.5,y);ctx.lineTo(x-L*0.72,y-3);ctx.moveTo(x-L*0.5,y);ctx.lineTo(x-L*0.72,y+3);ctx.stroke();
+  ctx.restore();
+}
+function scene(){
+  ctx.clearRect(0,0,W,H);
+  // agua
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#dcecf4');g.addColorStop(1,'#bcdcea');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // boca de red (líneas que convergen)
+  ctx.strokeStyle='#7fa6b8';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(0,WATER_TOP);ctx.lineTo(GRIDX-16,ESCAPE_Y+6);ctx.moveTo(0,WATER_BOT);ctx.lineTo(GRIDX-16,WATER_BOT);ctx.stroke();
+  // escape (arriba)
+  ctx.fillStyle='rgba(31,157,107,.14)';ctx.fillRect(GRIDX-26,WATER_TOP-2,120,ESCAPE_Y-WATER_TOP+8);
+  ctx.fillStyle='#1f9d6b';ctx.font='bold 12px Segoe UI,Arial';ctx.textAlign='left';
+  ctx.fillText('↑ ESCAPE (merluza sale)',GRIDX-20,ESCAPE_Y-6);
+  // grilla DEJUPA: barras inclinadas
+  const gap=Math.max(6,barras*0.7);
+  ctx.strokeStyle='#0e2a38';ctx.lineWidth=3;
+  for(let y=ESCAPE_Y+4;y<=WATER_BOT;y+=gap){
+    ctx.beginPath();ctx.moveTo(GRIDX-14,y);ctx.lineTo(GRIDX+14,y-24);ctx.stroke();
+  }
+  ctx.fillStyle='#0e2a38';ctx.textAlign='center';ctx.fillText('GRILLA DEJUPA',GRIDX,WATER_BOT+0);
+  // copo (bag) a la derecha
+  ctx.strokeStyle='#7fa6b8';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(GRIDX+14,ESCAPE_Y+30);ctx.lineTo(CODEND_X,ESCAPE_Y+70);ctx.lineTo(W-20,H/2-30);
+  ctx.moveTo(GRIDX+14,WATER_BOT);ctx.lineTo(CODEND_X,WATER_BOT-30);ctx.lineTo(W-20,H/2+30);ctx.stroke();
+  ctx.fillStyle='#3f5a68';ctx.fillText('COPO (malla)',(CODEND_X+W-20)/2,H/2-40);
+  // partículas
+  for(const p of parts){
+    if(p.isLang) langostino(p.x,p.y,p.len,p.a);
+    else fish(p.x,p.y,p.len, p.state==='escape'?'#1f9d6b':(p.state==='kept'?'#d64545':'#33566a'), p.a);
+  }
+}
+function loop(){ if(playing){ for(let k=0;k<2;k++) step(); } scene(); updateHUD(); requestAnimationFrame(loop); }
+
+function updateHUD(){
+  $('tLang').textContent=tLang; $('tMerlLib').textContent=tMerlLib; $('tMerlRet').textContent=tMerlRet;
+  const tot=tMerlLib+tMerlRet;
+  const libPct=tot? Math.round(tMerlLib/tot*100):0;
+  $('resumen').innerHTML = tot<8 ? 'Dejá correr el lance para ver los números…'
+    : '<b>'+libPct+'%</b> de la merluza que entró se liberó. '+(libPct>=80?'La grilla está trabajando bien. 🎯':'Se está reteniendo bastante merluza: probá juntar las barras.');
+}
+function updateL50(){
+  $('sVal').textContent=barras;
+  $('l50box').innerHTML='Con esta separación, la grilla empieza a soltar merluza desde ~<b>'+Lcut().toFixed(0)+' cm</b>. '+
+    (Lcut()<20?'Suelta hasta juveniles chicos.':'Cuidado: retiene juveniles por debajo de 35 cm.');
+}
+
+$('s').addEventListener('input',e=>{barras=+e.target.value;updateL50();});
+$('play').addEventListener('click',e=>{playing=!playing;e.target.textContent=playing?'⏸ Pausar':'▶ Reanudar';});
+$('reset').addEventListener('click',()=>{tLang=tMerlLib=tMerlRet=0;parts.length=0;});
+// warm-up: poblar la escena antes de mostrarla (arranca "viva", no vacía)
+for(let i=0;i<220;i++) step();
+tLang=tMerlLib=tMerlRet=0;
+fit();updateL50();loop();
+</script>
+</body>
+</html>
