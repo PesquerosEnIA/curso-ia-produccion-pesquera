@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · La jaula de cultivo bajo la corriente</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --naranja:#e0752d; --rojo:#d64545; --gris2:#8aa0ab;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 14px;max-width:74ch}
+  .lead b{color:var(--tinta)}
+  .stage{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:10px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  canvas{width:100%;height:auto;display:block;border-radius:9px}
+  .grid{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px}
+  .col{flex:1 1 380px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 10px;font-weight:800}
+  .sub{font-size:11.5px;font-weight:800;color:var(--gris2);text-transform:uppercase;letter-spacing:.05em;margin:12px 0 2px}
+  label.field{display:block;font-size:13.5px;font-weight:700;margin:8px 0 4px}
+  .fieldval{font-weight:800;color:var(--azul)}
+  input[type=range]{width:100%;accent-color:var(--azul);height:26px}
+  input.dis{accent-color:var(--verde)}
+  .hint{font-size:12px;color:var(--gris);margin:2px 0 0}
+  .big{margin:0 0 2px;display:flex;align-items:baseline;justify-content:space-between}
+  .big .k{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--gris)}
+  .big .v{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+  .gauge{height:11px;border-radius:6px;background:#eef3f5;overflow:hidden;margin:5px 0 6px;position:relative}
+  .gauge>i{display:block;height:100%;border-radius:6px;transition:width .12s}
+  .gauge>.lim{position:absolute;top:-3px;width:2px;height:17px;background:var(--tinta)}
+  .rows .r{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--linea);font-size:13.5px}
+  .rows .r:last-child{border-bottom:0}
+  .rows .r .k{color:var(--gris)} .rows .r .v{font-weight:800;font-variant-numeric:tabular-nums}
+  .estado{margin-top:10px;font-size:13.5px;border-radius:10px;padding:10px 12px;border:1px solid;font-weight:600}
+  .estado.ok{background:#eaf6ec;border-color:#bfe3cb;color:#177a53}
+  .estado.mid{background:#fdf3e6;border-color:#f2d6ac;color:#b26a1a}
+  .estado.bad{background:#fdecec;border-color:#f3c6c6;color:#b52d2d}
+  .leg{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--gris);margin-top:8px}
+  .dotc{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .conx{margin-top:16px;font-size:13px}
+  .conx .c{display:flex;gap:11px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--linea)}
+  .conx .c:last-child{border-bottom:0}
+  .conx .tag{flex:0 0 auto;font-size:11px;font-weight:800;color:#fff;background:var(--azul);border-radius:6px;padding:3px 8px;text-transform:uppercase}
+  .conx .tag.d6{background:var(--verde)} .conx .tag.d8{background:var(--naranja)} .conx .tag.d4{background:var(--azul-osc)}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+  footer a{color:var(--azul-txt)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🐟 Acuicultura · Simulador interactivo</div>
+  <h1>La jaula de cultivo bajo la corriente</h1>
+  <p class="lead">Una jaula de mar no está quieta: la <b>corriente</b> empuja la red y la <b>deforma</b>. Cuanta más
+  fuerza, más se tumba y <b>menos volumen</b> le queda a los peces (estrés, peor bienestar) — y más carga sobre el
+  fondeo. La fuerza crece con el <b>cuadrado de la velocidad</b> y depende de tu diseño de red. Ajustá las
+  condiciones y tu diseño, y mantené la jaula segura.</p>
+
+  <div class="stage">
+    <canvas id="cv" width="900" height="400" aria-label="Animación de la jaula de cultivo deformándose por la corriente"></canvas>
+  </div>
+
+  <div class="grid">
+    <div class="col">
+      <div class="panel">
+        <h2>Condiciones y diseño</h2>
+        <div class="sub">🌊 Condiciones del sitio</div>
+        <label class="field">Velocidad de corriente: <span class="fieldval" id="vVal"></span> m/s</label>
+        <input type="range" id="v" min="0.1" max="2.5" step="0.05" value="1.8">
+        <p class="hint">La fuerza crece con la velocidad al cuadrado (∝ v²).</p>
+        <label class="field">Ángulo de ataque de la corriente: <span class="fieldval" id="aVal"></span>°</label>
+        <input type="range" id="a" min="0" max="90" step="1" value="80">
+
+        <div class="sub">🕸️ Tu diseño de red</div>
+        <label class="field">Solidez de la red (Sn): <span class="fieldval" id="sVal"></span></label>
+        <input type="range" class="dis" id="s" min="0.10" max="0.40" step="0.01" value="0.34">
+        <p class="hint">Más solidez = red más tupida (más superficie que frena el agua).</p>
+        <label class="field">Diámetro del hilo: <span class="fieldval" id="dVal"></span> mm</label>
+        <input type="range" class="dis" id="d" min="0.5" max="5" step="0.1" value="4">
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="panel">
+        <h2>Resultado</h2>
+        <div class="big"><span class="k">Fuerza hidrodinámica</span><span class="v" id="oF"></span></div>
+        <div class="gauge"><i id="gF"></i><span class="lim" id="limMark" title="límite estructural"></span></div>
+        <div class="rows" style="margin-top:6px">
+          <div class="r"><span class="k">Deformación de la jaula</span><span class="v" id="oDef"></span></div>
+          <div class="r"><span class="k">Volumen de cultivo perdido</span><span class="v" id="oVol"></span></div>
+          <div class="r"><span class="k">Límite estructural</span><span class="v" id="oLim"></span></div>
+        </div>
+        <div class="estado" id="estado"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <h2>Fuerza según la velocidad de corriente (con tu diseño)</h2>
+    <canvas id="cv2" width="900" height="260" aria-label="Fuerza hidrodinámica vs velocidad de corriente"></canvas>
+    <div class="leg">
+      <span><span class="dotc" style="background:var(--azul)"></span>Fuerza (∝ v²)</span>
+      <span><span class="dotc" style="background:var(--tinta)"></span>Velocidad actual</span>
+      <span><span class="dotc" style="background:var(--rojo)"></span>Límite estructural</span>
+    </div>
+  </div>
+
+  <div class="panel conx" style="margin-top:16px">
+    <h2>Cómo se conecta con el curso</h2>
+    <div class="c"><span class="tag d4">Clase 4</span><span>La <b>velocidad de corriente</b> es un dato de sensor: la medís para saber a qué se expone la jaula.</span></div>
+    <div class="c"><span class="tag d6">Clase 6</span><span>En vez de ensayar cada red en el canal, se <b>entrena un modelo</b> que predice la fuerza a partir del diseño — exactamente el proyecto que dio origen a este simulador.</span></div>
+    <div class="c"><span class="tag d8">Clase 8</span><span><b>Optimización:</b> elegir el diseño más liviano que aún resista las peores condiciones del sitio.</span></div>
+  </div>
+
+  <footer>
+    Modelo: <b>F = K·v²·Sn·d·sen(θ)</b> — la fuerza crece con el cuadrado de la velocidad, la solidez, el diámetro
+    del hilo y el ángulo de ataque. Basado en el proyecto
+    <a href="https://github.com/arielgiamportone/Hydrodinamic_model_Aquaculture_nets" target="_blank" rel="noopener">Diseño Hidrodinámico de Redes de Acuicultura</a>
+    (A. Giamportone — ALG Data&Engineering). Valores ilustrativos con fines didácticos.
+    Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const K=1000, LIMITE=4000; // N (límite estructural de referencia)
+const v=$('v'),a=$('a'),s=$('s'),d=$('d');
+
+function fuerza(V,Sn,D,ang){ return K*V*V*Sn*D*Math.sin(ang*Math.PI/180); }
+function estadoDe(F){ const r=F/LIMITE; return r<0.6?'ok':(r<=1?'mid':'bad'); }
+
+// ---- animación (jaula + corriente) ----
+const cv=$('cv'), ctx=cv.getContext('2d'); const W=900,H=400;
+let phase=0, curF=0;
+function fit(){const w=cv.clientWidth||W;cv.width=w*(window.devicePixelRatio||1);cv.height=w*H/W*(window.devicePixelRatio||1);ctx.setTransform((window.devicePixelRatio||1)*w/W,0,0,(window.devicePixelRatio||1)*w/W,0,0);}
+window.addEventListener('resize',()=>{fit();chart();});
+
+function scene(){
+  ctx.clearRect(0,0,W,H);
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#cfe6f1');g.addColorStop(1,'#a9d2e6');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  const surf=54;
+  ctx.strokeStyle='#7fb4cf';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,surf);ctx.lineTo(W,surf);ctx.stroke();
+  // flechas de corriente (animadas), cantidad/velocidad ∝ v
+  const V=+v.value; const n=Math.round(3+V*3);
+  ctx.strokeStyle='rgba(10,127,180,.5)';ctx.fillStyle='rgba(10,127,180,.5)';ctx.lineWidth=2;
+  for(let i=0;i<n;i++){
+    const y=surf+30+i*(H-surf-50)/n;
+    const x=((phase*(0.5+V) + i*120)%(W+120))-60;
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+34,y);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x+34,y);ctx.lineTo(x+27,y-4);ctx.lineTo(x+27,y+4);ctx.closePath();ctx.fill();
+  }
+  // jaula
+  const cageX=380, cageW=150, topY=surf+6, botY=H-40, cageH=botY-topY;
+  const tilt=Math.min(1.15, curF/LIMITE)*0.9;               // rad de inclinación efectiva
+  const dx=Math.sin(tilt)*cageH*0.9;
+  const tl=[cageX-cageW/2,topY], tr=[cageX+cageW/2,topY];
+  const bl=[cageX-cageW/2+dx,botY], br=[cageX+cageW/2+dx,botY];
+  // red (relleno translúcido)
+  ctx.fillStyle='rgba(14,42,56,.10)';
+  ctx.beginPath();ctx.moveTo(tl[0],tl[1]);ctx.lineTo(tr[0],tr[1]);ctx.lineTo(br[0],br[1]);ctx.lineTo(bl[0],bl[1]);ctx.closePath();ctx.fill();
+  // malla
+  ctx.strokeStyle='rgba(14,42,56,.5)';ctx.lineWidth=1;
+  for(let k=0;k<=6;k++){const t=k/6;
+    ctx.beginPath();ctx.moveTo(tl[0]+(tr[0]-tl[0])*t,topY);ctx.lineTo(bl[0]+(br[0]-bl[0])*t,botY);ctx.stroke();}
+  for(let k=0;k<=6;k++){const t=k/6;
+    const lx=tl[0]+(bl[0]-tl[0])*t, rx=tr[0]+(br[0]-tr[0])*t, yy=topY+cageH*t;
+    ctx.beginPath();ctx.moveTo(lx,yy);ctx.lineTo(rx,yy);ctx.stroke();}
+  // flotador (collar) en superficie
+  ctx.fillStyle='#e0752d';ctx.beginPath();ctx.ellipse(cageX,topY,cageW/2+8,9,0,0,6.283);ctx.fill();
+  ctx.fillStyle='#c15f1e';ctx.beginPath();ctx.ellipse(cageX,topY,cageW/2+8,9,0,Math.PI,2*Math.PI);ctx.fill();
+  // peces adentro (se corren con la deformación)
+  ctx.fillStyle='#0e2a38';
+  const fishN=5;
+  for(let i=0;i<fishN;i++){
+    const t=(i+1)/(fishN+1), fy=topY+cageH*(0.35+0.4*((i%2)?0.3:0.7));
+    const fx=cageX-cageW*0.22 + (i*cageW*0.11) + Math.sin(tilt)* (fy-topY)*0.9;
+    ctx.save();ctx.globalAlpha=.85;
+    ctx.beginPath();ctx.ellipse(fx,fy,8,3.4,0,0,6.283);ctx.fill();
+    ctx.beginPath();ctx.moveTo(fx-8,fy);ctx.lineTo(fx-12,fy-3);ctx.lineTo(fx-12,fy+3);ctx.closePath();ctx.fill();
+    ctx.restore();
+  }
+  // etiqueta corriente + fuerza
+  ctx.fillStyle='#075d86';ctx.font='bold 13px Segoe UI,Arial';ctx.textAlign='left';
+  ctx.fillText('→ corriente '+V.toFixed(2)+' m/s',16,surf-10);
+  const est=estadoDe(curF), col=est==='ok'?'#1f9d6b':(est==='mid'?'#e0752d':'#d64545');
+  ctx.fillStyle=col;ctx.textAlign='center';ctx.font='bold 15px Segoe UI,Arial';
+  ctx.fillText(Math.round(curF)+' N',br[0]+2,botY+24);
+}
+function loop(){ phase+=1.4; scene(); requestAnimationFrame(loop); }
+
+// ---- gráfico fuerza vs velocidad ----
+function chart(){
+  const c=$('cv2'),dpr=window.devicePixelRatio||1;
+  const w=c.clientWidth||c.parentElement.clientWidth,h=260;
+  c.width=w*dpr;c.height=h*dpr;c.style.height=h+'px';
+  const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
+  const mL=52,mR=14,mT=12,mB=28,pw=w-mL-mR,ph=h-mT-mB;
+  const Sn=+s.value,D=+d.value,ang=+a.value,Vc=+v.value;
+  const ymax=Math.max(LIMITE*1.25, fuerza(2.5,Sn,D,ang)*1.1);
+  const X=V=>mL+(V/2.5)*pw, Y=F=>mT+ph-(F/ymax)*ph;
+  x.strokeStyle='#d9e4e9';x.strokeRect(mL,mT,pw,ph);
+  x.font='11px Segoe UI,Arial';x.textAlign='center';x.fillStyle='#8aa0ab';
+  for(let V=0.5;V<=2.5;V+=0.5){const px=X(V);x.fillText(V,px,mT+ph+15);}
+  x.fillStyle='#3f5a68';x.fillText('velocidad de corriente (m/s)',mL+pw/2,h-6);
+  x.textAlign='right';for(let g=0;g<=2;g++){const F=ymax*g/2,py=Y(F);x.fillStyle='#8aa0ab';x.fillText(Math.round(F/1000)+'k N',mL-6,py+3);
+    x.strokeStyle='#f2f6f8';x.beginPath();x.moveTo(mL,py);x.lineTo(mL+pw,py);x.stroke();}
+  // límite
+  x.strokeStyle='#d64545';x.setLineDash([6,4]);x.lineWidth=1.6;x.beginPath();x.moveTo(mL,Y(LIMITE));x.lineTo(mL+pw,Y(LIMITE));x.stroke();x.setLineDash([]);
+  x.fillStyle='#d64545';x.textAlign='left';x.fillText('límite',mL+4,Y(LIMITE)-4);
+  // curva ∝ v²
+  x.strokeStyle='#0a7fb4';x.lineWidth=2.6;x.beginPath();
+  for(let V=0;V<=2.5;V+=0.03){const px=X(V),py=Y(fuerza(V,Sn,D,ang));V===0?x.moveTo(px,py):x.lineTo(px,py);}x.stroke();
+  // punto actual
+  const py=Y(fuerza(Vc,Sn,D,ang));
+  x.strokeStyle='#0e2a38';x.setLineDash([4,3]);x.beginPath();x.moveTo(X(Vc),mT);x.lineTo(X(Vc),mT+ph);x.stroke();x.setLineDash([]);
+  x.fillStyle='#0e2a38';x.beginPath();x.arc(X(Vc),py,5,0,6.283);x.fill();x.strokeStyle='#fff';x.lineWidth=2;x.stroke();
+}
+
+function render(){
+  const V=+v.value,ang=+a.value,Sn=+s.value,D=+d.value;
+  $('vVal').textContent=V.toFixed(2);$('aVal').textContent=ang;$('sVal').textContent=Sn.toFixed(2);$('dVal').textContent=D.toFixed(1);
+  const F=fuerza(V,Sn,D,ang); curF=F;
+  const est=estadoDe(F);
+  $('oF').textContent=Math.round(F).toLocaleString('es-AR')+' N';
+  $('gF').style.width=Math.min(100,F/LIMITE*100)+'%';
+  $('gF').style.background=est==='ok'?'#1f9d6b':(est==='mid'?'#e0752d':'#d64545');
+  $('limMark').style.left='calc(100% - 2px)';
+  const tilt=Math.min(1.15,F/LIMITE)*0.9;
+  const defPct=Math.round(Math.sin(tilt)*100);
+  const volPct=Math.min(70,Math.round((1-Math.cos(tilt))*140));
+  $('oDef').textContent=defPct+'%';
+  $('oVol').textContent=volPct+'%';
+  $('oLim').textContent=LIMITE.toLocaleString('es-AR')+' N';
+  const e=$('estado');
+  if(est==='ok'){e.className='estado ok';e.innerHTML='✅ <b>Jaula segura.</b> La red resiste con margen y el volumen de cultivo se mantiene.';}
+  else if(est==='mid'){e.className='estado mid';e.innerHTML='⚠️ <b>Al límite.</b> La jaula se deforma y pierde volumen: aliviá el diseño (menos solidez o hilo más fino) o el sitio expone a menos corriente.';}
+  else{e.className='estado bad';e.innerHTML='❌ <b>Riesgo estructural.</b> La fuerza supera el límite: la red podría colapsar o soltar el fondeo. Bajá la solidez / el diámetro del hilo.';}
+  chart();
+}
+[v,a,s,d].forEach(el=>el.addEventListener('input',render));
+fit();render();loop();
+</script>
+</body>
+</html>
