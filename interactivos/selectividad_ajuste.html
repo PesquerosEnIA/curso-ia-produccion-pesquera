@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estimá la curva de selección — ajuste por máxima verosimilitud</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --naranja:#e0752d; --rojo:#d64545; --gris2:#8aa0ab;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 16px;max-width:74ch}
+  .lead b{color:var(--tinta)}
+  .grid{display:flex;flex-wrap:wrap;gap:16px}
+  .col{flex:1 1 380px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 12px;font-weight:800}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:6px}
+  .chip{font-size:12.5px;font-weight:700;border:1px solid var(--linea);background:var(--fondo);border-radius:20px;padding:6px 12px;cursor:pointer}
+  .chip.on{background:var(--azul);border-color:var(--azul);color:#fff}
+  label.field{display:block;font-size:13.5px;font-weight:700;margin:14px 0 4px}
+  .fieldval{font-weight:800;color:var(--azul)}
+  input[type=range]{width:100%;accent-color:var(--azul);height:26px}
+  .hint{font-size:12px;color:var(--gris);margin:2px 0 0}
+  .metric{margin-top:6px;background:var(--tinta);color:#fff;border-radius:10px;padding:11px 14px}
+  .metric .k{font-size:12px;text-transform:uppercase;letter-spacing:.05em;opacity:.85}
+  .metric .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+  .bar{height:9px;border-radius:6px;background:#33465280;overflow:hidden;margin-top:8px}
+  .bar>i{display:block;height:100%;border-radius:6px;background:var(--verde);transition:width .15s}
+  .btns{display:flex;gap:8px;margin-top:12px}
+  .btn{flex:1;border:0;border-radius:10px;background:var(--azul);color:#fff;font-weight:800;font-size:13.5px;padding:10px;cursor:pointer}
+  .btn.sec{background:#eaf1f4;color:var(--azul-txt)} .btn:hover{filter:brightness(1.05)}
+  .opt{margin-top:10px;font-size:13px;border-radius:10px;padding:10px 12px;border:1px solid;background:#f4f8fa;border-color:var(--linea)}
+  .opt.ok{background:#eaf6ec;border-color:#bfe3cb} .opt.ok b{color:var(--verde)}
+  canvas{width:100%;height:auto;display:block;margin-top:6px}
+  .leg{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--gris);margin-top:8px}
+  .dotc{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .conx{margin-top:16px;font-size:13px;background:#eef7ec;border:1px solid #cde7c9;border-radius:12px;padding:12px 14px}
+  .conx b{color:var(--verde)}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+  footer a{color:var(--azul-txt)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">📈 Artes de pesca · De los datos al modelo</div>
+  <h1>Estimá la curva de selección</h1>
+  <p class="lead">Cada punto es un muestreo real: de todas las merluzas de esa talla, qué proporción quedó
+  <b>retenida</b> (el punto más grande = más peces medidos, más confiable). Tu tarea: mover <b>L50</b> (la talla
+  de 50% de retención) y <b>SR</b> (qué tan gradual es la curva) para que la <b>ojiva</b> pase lo mejor posible por
+  los puntos. Cuanto mejor el ajuste, más baja la <b>−log verosimilitud</b>. Esto es, exactamente, lo que hace el
+  machine learning: <b>ajustar un modelo minimizando una pérdida</b>.</p>
+
+  <div class="grid">
+    <div class="col">
+      <div class="panel">
+        <h2>Datos: dispositivo</h2>
+        <div class="chips" id="chips"></div>
+        <label class="field">L50 (talla al 50% de retención): <span class="fieldval" id="l50v"></span> cm</label>
+        <input type="range" id="l50" min="24" max="48" step="0.1" value="33">
+        <label class="field">SR (rango de selección, L75−L25): <span class="fieldval" id="srv"></span> cm</label>
+        <input type="range" id="sr" min="3" max="20" step="0.1" value="10">
+        <div class="btns">
+          <button class="btn sec" id="reveal">👁️ Ver ajuste MVS</button>
+          <button class="btn" id="auto">✨ Ajustar solo</button>
+        </div>
+        <div class="opt" id="fb"></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <h2>Qué tan bueno es tu ajuste</h2>
+        <div class="metric"><div class="k">− Log verosimilitud (menor = mejor)</div><div class="v" id="nll">—</div>
+          <div class="bar"><i id="fitbar"></i></div>
+        </div>
+        <div style="font-size:13px;color:var(--gris);margin-top:10px">
+          El mínimo posible con estos datos es <b id="best">—</b>. Tu objetivo es acercarte a ese valor moviendo
+          las dos perillas. Cuando estés muy cerca, encontraste el mismo <b>L50</b> que se midió por máxima
+          verosimilitud.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <h2>Los datos y tu curva</h2>
+    <canvas id="cv" width="900" height="320" aria-label="Datos de retención y curva ajustada"></canvas>
+    <div class="leg">
+      <span><span class="dotc" style="background:var(--azul-osc)"></span>Datos observados (tamaño = nº medido)</span>
+      <span><span class="dotc" style="background:var(--azul)"></span>Tu curva</span>
+      <span><span class="dotc" style="background:var(--verde)"></span>Ajuste MVS (al revelar)</span>
+      <span><span class="dotc" style="background:var(--gris)"></span>Talla mínima (35 cm)</span>
+    </div>
+  </div>
+
+  <div class="conx">
+    <b>El puente con la Clase 6.</b> Ajustar esta ojiva es un problema de <b>optimización</b>: buscás los parámetros
+    (L50, SR) que hacen más probable lo observado. Cambiá "curva de selección" por "modelo predictivo" y "−log
+    verosimilitud" por "función de pérdida", y estás describiendo cómo se entrena un modelo de machine learning.
+  </div>
+
+  <footer>
+    Parámetros objetivo (ajuste MVS, dataset <i>Cálculo de selectividad 2015</i>, A. Giamportone): copo desnudo
+    L50≈42,6 · DEJUPA L50≈35,9 · Flexigrid L50≈37,4 · tangonera L50≈29,9 cm. Los puntos se generan a partir de esas
+    curvas con dispersión de muestreo realista. Informe:
+    <a href="https://www.researchgate.net/publication/378582619" target="_blank" rel="noopener">Optimizando la sostenibilidad pesquera</a>.
+    Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const TALLA=35;
+const DISP=[
+  {id:'dejupa',nm:'DEJUPA',L50:35.9,SR:14.6},
+  {id:'flexi', nm:'Flexigrid',L50:37.4,SR:11.9},
+  {id:'copo',  nm:'Copo desnudo',L50:42.6,SR:5.7},
+  {id:'tango', nm:'Tangonera',L50:29.9,SR:7.2}
+];
+let sel='dejupa';
+const logistic=(L,L50,SR)=>1/(1+Math.exp(-Math.log(9)*(L-L50)/SR));
+
+// PRNG determinista (para que los datos no cambien entre sesiones)
+function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+let DATA=[]; // {L, n, k}
+function genData(d){
+  const r=rng(d.id.split('').reduce((a,c)=>a+c.charCodeAt(0),7)*97);
+  const out=[]; const mode=d.L50, spread=9;
+  for(let L=22;L<=52;L++){
+    const dens=Math.exp(-((L-mode-2)**2)/(2*spread*spread));
+    const n=Math.round(6+dens*90 + r()*8);      // nº medido a esa talla
+    if(n<=0){continue;}
+    const p=logistic(L,d.L50,d.SR);
+    // k ~ Binomial(n,p) aprox con ruido
+    let k=0; for(let i=0;i<n;i++){ if(r()<p) k++; }
+    out.push({L,n,k});
+  }
+  return out;
+}
+function negLogLik(L50,SR){
+  let s=0;
+  for(const d of DATA){
+    let p=logistic(d.L,L50,SR); p=Math.min(1-1e-6,Math.max(1e-6,p));
+    s -= d.k*Math.log(p)+(d.n-d.k)*Math.log(1-p);
+  }
+  return s;
+}
+let bestNLL=0, worstNLL=1;
+function computeBounds(){
+  const t=DISP.find(x=>x.id===sel);
+  bestNLL=negLogLik(t.L50,t.SR);
+  // "peor" de referencia: un ajuste malo típico
+  worstNLL=negLogLik(t.L50-8,4);
+}
+
+function renderChips(){
+  $('chips').innerHTML=DISP.map(d=>`<button class="chip ${d.id===sel?'on':''}" data-id="${d.id}">${d.nm}</button>`).join('');
+  $('chips').querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{
+    sel=b.dataset.id; DATA=genData(DISP.find(x=>x.id===sel)); computeBounds(); revealed=false; render();
+  }));
+}
+let revealed=false;
+function render(){
+  const L50=+$('l50').value, SR=+$('sr').value;
+  $('l50v').textContent=L50.toFixed(1); $('srv').textContent=SR.toFixed(1);
+  const nll=negLogLik(L50,SR);
+  $('nll').textContent=nll.toFixed(1);
+  $('best').textContent=bestNLL.toFixed(1);
+  const frac=Math.max(0,Math.min(1,(worstNLL-nll)/(worstNLL-bestNLL)));
+  $('fitbar').style.width=(frac*100)+'%';
+  const t=DISP.find(x=>x.id===sel);
+  const near=Math.abs(L50-t.L50)<0.8 && Math.abs(SR-t.SR)<2.2;
+  const fb=$('fb');
+  if(near){fb.className='opt ok';fb.innerHTML='✅ <b>¡Ajuste logrado!</b> Encontraste L50 ≈ <b>'+t.L50.toFixed(1)+' cm</b> — el mismo valor medido por máxima verosimilitud en 2015. Así se estima una curva de selectividad a partir de datos.';}
+  else{fb.className='opt';const dir=L50<t.L50?'Subí':'Bajá';fb.innerHTML='◐ Seguí ajustando. Fijate si la curva pasa por el centro de los puntos grandes. '+(Math.abs(L50-t.L50)>=0.8?('<b>'+dir+' un poco el L50.</b>'):'Afiná el <b>SR</b> (la pendiente).');}
+  chart(L50,SR,revealed?t:null);
+}
+function chart(L50,SR,truth){
+  const cv=$('cv'),dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.parentElement.clientWidth,h=320;
+  cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+  const mL=44,mR=14,mT=12,mB=30,pw=w-mL-mR,ph=h-mT-mB;
+  const Lmin=22,Lmax=52;
+  const X=L=>mL+(L-Lmin)/(Lmax-Lmin)*pw, Y=p=>mT+ph-p*ph;
+  ctx.strokeStyle='#d9e4e9';ctx.strokeRect(mL,mT,pw,ph);
+  ctx.font='11px Segoe UI,Arial';ctx.textAlign='center';
+  for(let L=25;L<=50;L+=5){const x=X(L);ctx.fillStyle='#8aa0ab';ctx.fillText(L,x,mT+ph+16);
+    ctx.strokeStyle='#f2f6f8';ctx.beginPath();ctx.moveTo(x,mT);ctx.lineTo(x,mT+ph);ctx.stroke();}
+  ctx.textAlign='right';for(let g=0;g<=4;g++){const p=g/4,y=Y(p);ctx.fillStyle='#8aa0ab';ctx.fillText((p*100)+'%',mL-6,y+3);
+    ctx.strokeStyle='#f2f6f8';ctx.beginPath();ctx.moveTo(mL,y);ctx.lineTo(mL+pw,y);ctx.stroke();}
+  ctx.fillStyle='#3f5a68';ctx.textAlign='center';ctx.fillText('longitud (cm)  →  retención observada',mL+pw/2,h-8);
+  // talla mínima
+  ctx.strokeStyle='#3f5a68';ctx.setLineDash([5,4]);ctx.lineWidth=1.3;
+  ctx.beginPath();ctx.moveTo(X(TALLA),mT);ctx.lineTo(X(TALLA),mT+ph);ctx.stroke();ctx.setLineDash([]);
+  // residuales (líneas punto→curva)
+  ctx.strokeStyle='rgba(214,69,69,.35)';ctx.lineWidth=1;
+  for(const d of DATA){const pr=d.k/d.n,pc=logistic(d.L,L50,SR);ctx.beginPath();ctx.moveTo(X(d.L),Y(pr));ctx.lineTo(X(d.L),Y(pc));ctx.stroke();}
+  // curva ajuste real (verde) si revelado
+  if(truth){ctx.strokeStyle='#1f9d6b';ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.beginPath();
+    for(let L=Lmin;L<=Lmax;L+=0.5){const x=X(L),y=Y(logistic(L,truth.L50,truth.SR));L===Lmin?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();ctx.setLineDash([]);}
+  // tu curva (azul)
+  ctx.strokeStyle='#0a7fb4';ctx.lineWidth=2.6;ctx.beginPath();
+  for(let L=Lmin;L<=Lmax;L+=0.5){const x=X(L),y=Y(logistic(L,L50,SR));L===Lmin?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();
+  // puntos observados
+  for(const d of DATA){const pr=d.k/d.n,rad=Math.min(9,2.2+Math.sqrt(d.n)*0.5);
+    ctx.fillStyle='rgba(0,82,126,.75)';ctx.beginPath();ctx.arc(X(d.L),Y(pr),rad,0,6.283);ctx.fill();}
+}
+function animateTo(L50,SR){
+  const a=+$('l50').value,b=+$('sr').value,steps=26;let i=0;
+  const t=setInterval(()=>{i++;const f=i/steps;
+    $('l50').value=(a+(L50-a)*f).toFixed(1);$('sr').value=(b+(SR-b)*f).toFixed(1);render();
+    if(i>=steps)clearInterval(t);},22);
+}
+// ajuste automático por búsqueda en grilla (muestra que "la máquina" minimiza la pérdida)
+function autofit(){
+  let best={nll:Infinity,L50:35,SR:10};
+  for(let L=24;L<=48;L+=0.3)for(let S=3;S<=20;S+=0.3){const n=negLogLik(L,S);if(n<best.nll)best={nll:n,L50:L,SR:S};}
+  animateTo(best.L50,best.SR);
+}
+
+$('l50').addEventListener('input',()=>{revealed=false;render();});
+$('sr').addEventListener('input',()=>{revealed=false;render();});
+$('reveal').addEventListener('click',()=>{const t=DISP.find(x=>x.id===sel);revealed=true;animateTo(t.L50,t.SR);});
+$('auto').addEventListener('click',()=>{revealed=false;autofit();});
+window.addEventListener('resize',()=>render());
+renderChips(); DATA=genData(DISP.find(x=>x.id===sel)); computeBounds(); render();
+</script>
+</body>
+</html>
