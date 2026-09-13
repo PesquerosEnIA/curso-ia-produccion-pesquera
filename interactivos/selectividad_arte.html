@@ -3,13 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Simulador · El copo que decide — selectividad y DEJUPA</title>
+<title>Simulador · Selectividad de artes con datos reales (DEJUPA / Flexigrid)</title>
 <style>
   :root{
     --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
     --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
     --verde:#1f9d6b; --naranja:#e0752d; --rojo:#d64545; --gris2:#8aa0ab;
-    --langostino:#e8623a;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--fondo);color:var(--tinta);
@@ -26,11 +25,17 @@
     box-shadow:0 1px 2px rgba(14,42,56,.04)}
   .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);
     margin:0 0 12px;font-weight:800}
-  label.field{display:block;font-size:13.5px;font-weight:700;margin:14px 0 4px}
-  label.field:first-of-type{margin-top:0}
-  .fieldval{font-weight:800;color:var(--azul)}
-  input[type=range]{width:100%;accent-color:var(--azul);height:26px}
-  .hint{font-size:12px;color:var(--gris);margin:2px 0 0}
+  .devs{display:flex;flex-direction:column;gap:8px}
+  .dev{display:flex;align-items:center;gap:11px;width:100%;text-align:left;cursor:pointer;
+    background:var(--fondo);border:1px solid var(--linea);border-radius:11px;padding:11px 13px;transition:.12s}
+  .dev:hover{border-color:var(--gris2)}
+  .dev.on{border-color:var(--azul);background:#eef7fb;box-shadow:0 0 0 1px var(--azul) inset}
+  .dev .sw{width:12px;height:12px;border-radius:50%;flex:0 0 auto}
+  .dev .nm{font-weight:800;font-size:14px}
+  .dev .pr{font-size:12px;color:var(--gris);font-variant-numeric:tabular-nums}
+  .devdesc{font-size:12.5px;color:var(--gris);margin:10px 2px 0;min-height:2.4em}
+  .cmp{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:700;cursor:pointer}
+  .cmp input{width:16px;height:16px;accent-color:var(--azul)}
   .big{margin:0 0 2px;display:flex;align-items:baseline;justify-content:space-between}
   .big .k{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--gris)}
   .big .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
@@ -45,176 +50,149 @@
     display:flex;justify-content:space-between;align-items:baseline}
   .total .k{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;opacity:.85}
   .total .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
-  .opt{margin-top:10px;font-size:13px;border-radius:10px;padding:9px 12px;border:1px solid}
-  .opt.ok{background:#eaf6ec;border-color:#bfe3cb} .opt.ok b{color:var(--verde)}
-  .opt.bad{background:#fdecec;border-color:#f3c6c6} .opt.bad b{color:var(--rojo)}
-  .btn{margin-top:14px;width:100%;border:0;border-radius:10px;background:var(--azul);color:#fff;
-    font-weight:800;font-size:14px;padding:11px 14px;cursor:pointer}
-  .btn:hover{background:var(--azul-osc)}
+  .opt{margin-top:10px;font-size:13px;border-radius:10px;padding:9px 12px;border:1px solid;background:#eaf6ec;border-color:#bfe3cb}
+  .opt b{color:var(--verde)} .opt.warn{background:#fdecec;border-color:#f3c6c6} .opt.warn b{color:var(--rojo)}
   canvas{width:100%;height:auto;display:block;margin-top:6px}
   .leg{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--gris);margin-top:8px}
   .leg span{display:flex;align-items:center}
   footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+  footer a{color:var(--azul-txt)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="eyebrow">🕸️ Artes de pesca · Simulador interactivo</div>
-  <h1>El copo que decide: selectividad y DEJUPA</h1>
-  <p class="lead">En la pesquería de <b>langostino</b>, el gran problema es el <b>bycatch de merluza</b> —sobre todo
-  juveniles—. La grilla <b>DEJUPA</b> separa por forma del cuerpo: guía a la merluza hacia afuera y deja pasar al
-  langostino. Diseñá el arte: movés la <b>separación de barras</b>, el <b>tamaño de malla</b> del copo y la
-  <b>velocidad de arrastre</b>, y buscá retener langostino liberando la merluza. La <b>talla mínima</b> de merluza
-  es 35&nbsp;cm.</p>
+  <div class="eyebrow">🕸️ Artes de pesca · Simulador con datos reales</div>
+  <h1>Selectividad: qué merluza se queda y qué se libera</h1>
+  <p class="lead">En la pesquería de <b>langostino</b>, el problema es el <b>bycatch de merluza</b> —sobre todo
+  juveniles bajo la <b>talla mínima (35&nbsp;cm)</b>—. Cada dispositivo tiene una <b>curva de selectividad</b>
+  distinta: la longitud a la que retiene el 50% de los peces (<b>L50</b>) define a quién deja escapar. Estas
+  curvas salen de <b>experimentos reales</b> (copo cubierto, ajuste por máxima verosimilitud). Elegí un
+  dispositivo y mirá qué le pasa a la merluza.</p>
 
   <div class="grid">
     <div class="col">
       <div class="panel">
-        <h2>Diseño del arte</h2>
-        <label class="field">DEJUPA · separación de barras: <span class="fieldval" id="sVal"></span> mm</label>
-        <input type="range" id="s" min="12" max="40" step="1" value="30">
-        <p class="hint">Menos separación → más merluza sale por la grilla (incluso juveniles).</p>
-
-        <label class="field">Malla del copo: <span class="fieldval" id="mVal"></span> mm</label>
-        <input type="range" id="m" min="15" max="55" step="1" value="44">
-        <p class="hint">Malla muy grande → se te escapa el langostino (el objetivo).</p>
-
-        <label class="field">Velocidad de arrastre: <span class="fieldval" id="vVal"></span> kn</label>
-        <input type="range" id="v" min="2.5" max="4.5" step="0.1" value="4.0">
-        <p class="hint">Más rápido → la grilla trabaja peor: se cuela más merluza.</p>
-
-        <button class="btn" id="optBtn">⚙️ Configuración recomendada</button>
+        <h2>Dispositivo</h2>
+        <div class="devs" id="devs"></div>
+        <p class="devdesc" id="devdesc"></p>
+        <label class="cmp"><input type="checkbox" id="cmp"> Comparar los 4 en el gráfico</label>
       </div>
     </div>
 
     <div class="col">
       <div class="panel">
-        <h2>Resultado del lance</h2>
-        <div class="big"><span class="k">🦐 Langostino retenido</span><span class="v" id="oLang"></span></div>
-        <div class="gauge"><i id="gLang" style="background:var(--langostino)"></i></div>
-        <div class="big"><span class="k">🐟 Merluza liberada</span><span class="v" id="oMerlLib"></span></div>
-        <div class="gauge"><i id="gMerl" style="background:var(--verde)"></i></div>
+        <h2>Efecto sobre la merluza</h2>
+        <div class="big"><span class="k">🐟 Merluza sublegal liberada (&lt;35 cm)</span><span class="v" id="oLib"></span></div>
+        <div class="gauge"><i id="gLib" style="background:var(--verde)"></i></div>
         <div class="rows" style="margin-top:6px">
-          <div class="r"><span class="k"><span class="dotc" style="background:var(--rojo)"></span>Merluza juvenil retenida (&lt;35 cm)</span><span class="v" id="oJuv"></span></div>
+          <div class="r"><span class="k">L50 medido (MVS)</span><span class="v" id="oL50"></span></div>
+          <div class="r"><span class="k"><span class="dotc" style="background:var(--rojo)"></span>Juvenil retenida (bycatch)</span><span class="v" id="oJuv"></span></div>
+          <div class="r"><span class="k">Comercial retenida (≥35 cm)</span><span class="v" id="oCom"></span></div>
           <div class="r"><span class="k">Talla mínima</span><span class="v" id="oLegal"></span></div>
         </div>
-        <div class="total"><span class="k">Eficiencia del arte</span><span class="v" id="oScore"></span></div>
+        <div class="total"><span class="k">Sostenibilidad del arte</span><span class="v" id="oScore"></span></div>
         <div class="opt" id="optBox"></div>
       </div>
     </div>
   </div>
 
   <div class="panel" style="margin-top:16px">
-    <h2>Qué pasa con la merluza que entra a la red</h2>
-    <canvas id="cv" width="900" height="300" aria-label="Distribución de tallas de merluza: retenida vs liberada"></canvas>
-    <div class="leg">
-      <span><span class="dotc" style="background:var(--rojo)"></span>Merluza retenida (bycatch)</span>
-      <span><span class="dotc" style="background:#cfe0e8"></span>Merluza liberada por la grilla</span>
-      <span><span class="dotc" style="background:var(--azul)"></span>Curva de retención</span>
-      <span><span class="dotc" style="background:var(--gris)"></span>Talla mínima (35 cm)</span>
-    </div>
+    <h2>Curva de selectividad sobre las tallas de merluza</h2>
+    <canvas id="cv" width="900" height="300" aria-label="Curva de selectividad y distribución de tallas"></canvas>
+    <div class="leg" id="leg"></div>
   </div>
 
   <footer>
-    Modelo didáctico: la grilla excluye a la merluza por profundidad corporal (≈0,18·longitud); barras más juntas
-    bajan la talla de corte. El langostino (mucho más chico) pasa la grilla y lo retiene la malla del copo.
-    Basado en el principio del <b>DEJUPA</b> (Dispositivo Selectivo para la pesquería de langostino, desarrollado en
-    Argentina) y en la <b>talla mínima de merluza (35 cm)</b>. La IA entra en <b>predecir la curva de selección</b>
-    de cada arte a partir de datos de lances, para diseñar sin tener que probar en el mar cada variante.
+    <b>Datos:</b> curvas de selectividad ajustadas por <b>máxima verosimilitud (MVS)</b> sobre experimentos de copo
+    cubierto — dataset <i>Cálculo de selectividad (2015)</i> de A. Giamportone. Valores L50 (cm): copo desnudo ≈42,6 ·
+    DEJUPA ≈35,9 · Flexigrid ≈37,4 · tangonera ≈29,9. Informe:
+    <a href="https://www.researchgate.net/publication/378582619" target="_blank" rel="noopener">Optimizando la sostenibilidad pesquera — selectividad artificial con enfoque científico</a>.
+    <b>La IA entra</b> en estimar estas curvas a partir de datos (el ajuste MVS es optimización de un modelo) y en
+    predecir la selectividad de un arte nuevo sin probarla en el mar.
     Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+    <br><span style="color:#8aa0ab">Nota: la distribución de tallas es ilustrativa; las curvas L50/RS son las medidas.</span>
   </footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const s=$('s'), m=$('m'), v=$('v');
 const TALLA=35; // cm, talla mínima merluza
 
-// Distribución de tallas de merluza que entra a la red (long. total, cm)
+// Dispositivos con parámetros REALES (ajuste MVS, dataset 2015)
+const DISP=[
+  {id:'copo',   nm:'Copo desnudo',  L50:42.6, RS:5.7,  col:'#8aa0ab', desc:'Copo de malla sin dispositivo selectivo. L50 alto: libera juveniles… pero también mucho comercial (se te va captura legal).'},
+  {id:'dejupa', nm:'DEJUPA',        L50:35.9, RS:14.6, col:'#0a7fb4', desc:'Grilla selectiva desarrollada en Argentina para la pesquería de langostino. Su L50 cae justo sobre la talla mínima.'},
+  {id:'flexi',  nm:'Flexigrid',     L50:37.4, RS:11.9, col:'#1f9d6b', desc:'Grilla flexible de selección. L50 apenas por encima de la talla mínima: protege juveniles reteniendo comercial.'},
+  {id:'tango',  nm:'Red tangonera', L50:29.9, RS:7.2,  col:'#e0752d', desc:'Red tangonera sin dispositivo. L50 por debajo de la talla mínima: retiene juveniles de merluza (bycatch sublegal).'}
+];
+let sel='tango'; // arranca en el peor caso, para que haya algo que mejorar
+
+// Distribución ilustrativa de tallas de merluza que entra a la red
 const POP=(()=>{
   const b=[];
   for(let L=12;L<=70;L+=2){
-    const juv=Math.exp(-((L-26)**2)/(2*36))*0.58;   // moda juvenil ~26 cm
-    const ad =Math.exp(-((L-45)**2)/(2*81))*0.42;   // moda adulta ~45 cm
+    const juv=Math.exp(-((L-27)**2)/(2*40))*0.58;
+    const ad =Math.exp(-((L-45)**2)/(2*81))*0.42;
     b.push({L,n:juv+ad});
   }
-  const tot=b.reduce((a,x)=>a+x.n,0);
-  b.forEach(x=>x.p=x.n/tot);
-  return b;
+  const tot=b.reduce((a,x)=>a+x.n,0); b.forEach(x=>x.p=x.n/tot); return b;
 })();
 
-// Probabilidad de que una merluza de longitud L quede RETENIDA (no la saca la grilla)
-function retMerluza(L, sBar, vel){
-  const Lcut = sBar/1.8;                 // cm: profundidad corporal ≈ 1.8·L(mm) supera la barra
-  const sr = 3.0;
-  let ret = 1/(1+Math.exp(-(L-Lcut)/sr)); // OJO: L<Lcut -> chico -> ~0? verificamos abajo
-  // Queremos: L < Lcut => RETENIDA (~1); L > Lcut => sale (~0)
-  ret = 1/(1+Math.exp((L-Lcut)/sr));
-  // fuga por velocidad: más rápido, la grilla saca menos (retiene más de lo que debería)
-  const leak = Math.max(0, Math.min(0.5, 0.14*(vel-3)));
-  return ret + (1-ret)*leak;
-}
-// Retención de langostino según malla (y leve penalización por barras muy juntas)
-function retLangostino(mesh, sBar){
-  let r = 1/(1+Math.exp((mesh-41)/2.4));  // malla >~41 mm empieza a perder langostino
-  if(sBar<17) r *= (1 - (17-sBar)*0.012); // barras muy juntas: algo de traba/pérdida
-  return Math.max(0, Math.min(1, r));
+// Ojiva logística de retención: pequeños escapan, grandes se retienen
+const ret=(L,L50,RS)=>1/(1+Math.exp(-Math.log(9)*(L-L50)/RS));
+
+function metrics(d){
+  let juvTot=0,juvRet=0,comTot=0,comRet=0;
+  POP.forEach(b=>{
+    const r=ret(b.L,d.L50,d.RS);
+    if(b.L<TALLA){juvTot+=b.p;juvRet+=b.p*r;} else {comTot+=b.p;comRet+=b.p*r;}
+  });
+  const libPct=(1-juvRet/juvTot)*100;      // juveniles liberados
+  const juvRetPct=juvRet/juvTot*100;
+  const comPct=comRet/comTot*100;          // comercial retenido
+  const legal=juvRetPct<=25;
+  let score=0.55*libPct + 0.45*comPct; // liberar sublegal + retener comercial
+  if(!legal) score*=0.55;              // incumplir talla penaliza fuerte
+  score=Math.max(0,Math.min(100, score));
+  return {libPct,juvRetPct,comPct,legal,score};
 }
 
-function calc(sBar, mesh, vel){
-  let merlRet=0, merlTot=0, juvRet=0, juvTot=0;
-  POP.forEach(b=>{
-    const r=retMerluza(b.L,sBar,vel);
-    merlRet+=b.p*r; merlTot+=b.p;
-    if(b.L<TALLA){ juvTot+=b.p; juvRet+=b.p*r; }
-  });
-  const merlLibPct=(1-merlRet/merlTot)*100;
-  const juvRetPct=juvRet/juvTot*100;          // % de juveniles que igual quedan retenidos
-  const langPct=retLangostino(mesh,sBar)*100;
-  // eficiencia: retener langostino y liberar merluza; castigo fuerte por juveniles
-  let score = 0.55*langPct + 0.45*merlLibPct - 0.5*juvRetPct;
-  score = Math.max(0, Math.min(100, score));
-  const legal = juvRetPct <= 22;              // umbral de cumplimiento
-  return {merlLibPct,juvRetPct,langPct,score,legal};
-}
-function optimal(){
-  let best=null;
-  for(let sB=12;sB<=40;sB++) for(let me=15;me<=55;me+=2){
-    const r=calc(sB,me,3.2);
-    if(!r.legal) continue;
-    if(!best||r.score>best.score) best={s:sB,m:me,score:r.score};
-  }
-  return best;
+function renderDevs(){
+  $('devs').innerHTML=DISP.map(d=>`
+    <button class="dev ${d.id===sel?'on':''}" data-id="${d.id}">
+      <span class="sw" style="background:${d.col}"></span>
+      <span style="flex:1"><span class="nm">${d.nm}</span></span>
+      <span class="pr">L50 ${d.L50.toString().replace('.',',')} cm</span>
+    </button>`).join('');
+  $('devs').querySelectorAll('.dev').forEach(b=>b.addEventListener('click',()=>{sel=b.dataset.id;render();}));
 }
 
 function render(){
-  const S=+s.value, M=+m.value, V=+v.value;
-  $('sVal').textContent=S; $('mVal').textContent=M; $('vVal').textContent=V.toFixed(1);
-  const r=calc(S,M,V);
-  $('oLang').textContent=Math.round(r.langPct)+'%';
-  $('gLang').style.width=r.langPct+'%';
-  $('oMerlLib').textContent=Math.round(r.merlLibPct)+'%';
-  $('gMerl').style.width=r.merlLibPct+'%';
+  const d=DISP.find(x=>x.id===sel), r=metrics(d);
+  $('devdesc').textContent=d.desc;
+  $('oLib').textContent=Math.round(r.libPct)+'%'; $('gLib').style.width=r.libPct+'%';
+  $('oL50').textContent=d.L50.toString().replace('.',',')+' cm';
   $('oJuv').textContent=Math.round(r.juvRetPct)+'%';
-  $('oLegal').textContent=r.legal?'✅ cumple':'❌ no cumple';
+  $('oCom').textContent=Math.round(r.comPct)+'%';
+  $('oLegal').textContent=r.legal?'✅ protege la talla':'❌ retiene sublegal';
   $('oScore').textContent=Math.round(r.score)+' / 100';
   const box=$('optBox');
-  if(r.legal && r.langPct>=80 && r.merlLibPct>=80){
-    box.className='opt ok';
-    box.innerHTML='✅ <b>Arte bien diseñado.</b> Retenés el langostino y liberás la merluza —incluidos los juveniles—. Esto es selectividad: no se pesca menos, se pesca <b>mejor</b>.';
-  }else if(!r.legal){
-    box.className='opt bad';
-    box.innerHTML='❌ <b>Estás reteniendo demasiada merluza juvenil.</b> Achicá la <b>separación de barras</b> o bajá la <b>velocidad</b>: la grilla necesita margen para sacar a los chicos.';
-  }else{
-    box.className='opt ok';
-    const foco = r.langPct<80 ? 'Estás perdiendo langostino: la <b>malla</b> quedó muy grande.' :
-                 'Podés liberar más merluza afinando la <b>separación de barras</b>.';
-    box.innerHTML='◐ Vas bien, pero se puede mejorar. '+foco;
-  }
-  draw(S,M,V);
+  if(d.id==='tango'){box.className='opt warn';box.innerHTML='❌ <b>Retiene merluza por debajo de talla.</b> El L50 (29,9 cm) queda por debajo de los 35 cm: entran juveniles. Probá una <b>grilla selectiva</b>.';}
+  else if(d.id==='copo'){box.className='opt';box.innerHTML='◐ Libera juveniles, pero su L50 (42,6 cm) es <b>tan alto</b> que también deja escapar comercial: sostenible pero perdés captura legal.';}
+  else{box.className='opt';box.innerHTML='✅ <b>El L50 cae sobre la talla mínima</b>: libera lo sublegal y retiene lo comercial. Esto es selectividad bien resuelta — y sale de datos, no de intuición.';}
+  renderDevs();
+  draw(d);
+  // leyenda
+  $('leg').innerHTML = $('cmp').checked
+    ? DISP.map(x=>`<span><span class="dotc" style="background:${x.col}"></span>${x.nm} (L50 ${x.L50.toString().replace('.',',')})</span>`).join('')
+      + '<span><span class="dotc" style="background:var(--gris)"></span>Talla mínima (35 cm)</span>'
+    : `<span><span class="dotc" style="background:var(--rojo)"></span>Merluza retenida</span>
+       <span><span class="dotc" style="background:#cfe0e8"></span>Merluza liberada</span>
+       <span><span class="dotc" style="background:${d.col}"></span>Curva de selectividad</span>
+       <span><span class="dotc" style="background:var(--gris)"></span>Talla mínima (35 cm)</span>`;
 }
 
-function draw(S,M,V){
+function draw(d){
   const cv=$('cv'),dpr=window.devicePixelRatio||1;
   const w=cv.clientWidth||cv.parentElement.clientWidth,h=300;
   cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';
@@ -222,36 +200,40 @@ function draw(S,M,V){
   const mL=44,mR=14,mT=12,mB=30,pw=w-mL-mR,ph=h-mT-mB;
   const Lmin=12,Lmax=70;
   let pmax=0; POP.forEach(b=>{if(b.p>pmax)pmax=b.p;}); pmax*=1.12;
-  const X=L=>mL+(L-Lmin)/(Lmax-Lmin)*pw, Y=p=>mT+ph-(p/pmax)*ph;
-  // marco + grilla eje X
+  const X=L=>mL+(L-Lmin)/(Lmax-Lmin)*pw, Yp=p=>mT+ph-(p/pmax)*ph, Yr=r=>mT+ph-r*ph;
   ctx.strokeStyle='#d9e4e9';ctx.strokeRect(mL,mT,pw,ph);
   ctx.font='11px Segoe UI,Arial';ctx.textAlign='center';
   for(let L=20;L<=70;L+=10){const x=X(L);ctx.fillStyle='#8aa0ab';ctx.fillText(L,x,mT+ph+16);
     ctx.strokeStyle='#f2f6f8';ctx.beginPath();ctx.moveTo(x,mT);ctx.lineTo(x,mT+ph);ctx.stroke();}
   ctx.fillStyle='#3f5a68';ctx.fillText('longitud de la merluza (cm)',mL+pw/2,h-8);
-  // barras: retenida (rojo) apilada sobre liberada (celeste)
-  const bw=(X(14)-X(12))*0.82;
-  POP.forEach(b=>{
-    const x=X(b.L), yTop=Y(b.p), hh=(mT+ph)-yTop;
-    const ret=retMerluza(b.L,S,V);
-    // liberada (parte de abajo) celeste, retenida (arriba) rojo
-    ctx.fillStyle='#cfe0e8';ctx.fillRect(x-bw/2,yTop,bw,hh);
-    ctx.fillStyle='#d64545';ctx.fillRect(x-bw/2,yTop,bw,hh*ret);
-  });
-  // curva de retención (0..1 escalada al alto)
-  ctx.strokeStyle='#0a7fb4';ctx.lineWidth=2.4;ctx.beginPath();
-  for(let L=Lmin;L<=Lmax;L+=1){const x=X(L),y=mT+ph-retMerluza(L,S,V)*ph;L===Lmin?ctx.moveTo(x,y):ctx.lineTo(x,y);}
-  ctx.stroke();
+
+  const compare=$('cmp').checked;
+  if(!compare){
+    // barras: liberada (celeste) + retenida (rojo) según dispositivo
+    const bw=(X(14)-X(12))*0.82;
+    POP.forEach(b=>{const x=X(b.L),yTop=Yp(b.p),hh=(mT+ph)-yTop,r=ret(b.L,d.L50,d.RS);
+      ctx.fillStyle='#cfe0e8';ctx.fillRect(x-bw/2,yTop,bw,hh);
+      ctx.fillStyle='#d64545';ctx.fillRect(x-bw/2,yTop,bw,hh*r);});
+    // ojiva del dispositivo
+    line(ctx,d.L50,d.RS,d.col,2.6,X,Yr,Lmin,Lmax);
+  }else{
+    // solo las 4 ojivas
+    DISP.forEach(x=>line(ctx,x.L50,x.RS,x.col,x.id===sel?3:1.6,X,Yr,Lmin,Lmax));
+  }
   // línea talla mínima
   ctx.strokeStyle='#3f5a68';ctx.setLineDash([5,4]);ctx.lineWidth=1.4;
   ctx.beginPath();ctx.moveTo(X(TALLA),mT);ctx.lineTo(X(TALLA),mT+ph);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='#3f5a68';ctx.textAlign='left';ctx.fillText('35 cm',X(TALLA)+4,mT+11);
 }
+function line(ctx,L50,RS,col,wid,X,Yr,Lmin,Lmax){
+  ctx.strokeStyle=col;ctx.lineWidth=wid;ctx.beginPath();
+  for(let L=Lmin;L<=Lmax;L+=0.5){const x=X(L),y=Yr(ret(L,L50,RS));L===Lmin?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+  ctx.stroke();
+}
 
-[s,m,v].forEach(el=>el.addEventListener('input',render));
-$('optBtn').addEventListener('click',()=>{const o=optimal();if(o){s.value=o.s;m.value=o.m;v.value=3.2;render();}});
+$('cmp').addEventListener('change',render);
 window.addEventListener('resize',render);
-render();
+renderDevs(); render();
 </script>
 </body>
 </html>
