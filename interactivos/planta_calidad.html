@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · La cinta: rendimiento vs calidad (visión artificial)</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --naranja:#e0752d; --rojo:#d64545; --amar:#e0a92d; --gris2:#8aa0ab;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 14px;max-width:74ch}
+  .lead b{color:var(--tinta)}
+  .stage{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:10px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  canvas{width:100%;height:auto;display:block;border-radius:9px}
+  .grid{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px}
+  .col{flex:1 1 380px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 10px;font-weight:800}
+  label.field{display:block;font-size:13.5px;font-weight:700;margin:12px 0 4px}
+  label.field:first-of-type{margin-top:0}
+  .fieldval{font-weight:800;color:var(--azul)}
+  input[type=range]{width:100%;accent-color:var(--azul);height:26px}
+  .hint{font-size:12px;color:var(--gris);margin:2px 0 0}
+  .big{margin:0 0 2px;display:flex;align-items:baseline;justify-content:space-between}
+  .big .k{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--gris)}
+  .big .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+  .rows .r{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--linea);font-size:13.5px}
+  .rows .r:last-child{border-bottom:0}
+  .rows .r .k{color:var(--gris);display:flex;align-items:center} .rows .r .v{font-weight:800;font-variant-numeric:tabular-nums}
+  .dotc{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:7px}
+  .total{margin-top:10px;background:var(--tinta);color:#fff;border-radius:10px;padding:11px 14px;display:flex;justify-content:space-between;align-items:baseline}
+  .total .k{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;opacity:.85} .total .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+  .estado{margin-top:10px;font-size:13px;border-radius:10px;padding:10px 12px;border:1px solid}
+  .estado.ok{background:#eaf6ec;border-color:#bfe3cb;color:#177a53} .estado.ok b{color:var(--verde)}
+  .estado.bad{background:#fdecec;border-color:#f3c6c6;color:#b52d2d} .estado.bad b{color:var(--rojo)}
+  .btns{display:flex;gap:8px;margin-top:12px}
+  .btn{flex:1;border:0;border-radius:10px;background:var(--azul);color:#fff;font-weight:800;font-size:13.5px;padding:10px;cursor:pointer}
+  .btn.sec{background:#eaf1f4;color:var(--azul-txt)} .btn:hover{filter:brightness(1.05)}
+  .conx{margin-top:16px;font-size:13px}
+  .conx .c{display:flex;gap:11px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--linea)}
+  .conx .c:last-child{border-bottom:0}
+  .conx .tag{flex:0 0 auto;font-size:11px;font-weight:800;color:#fff;background:var(--azul);border-radius:6px;padding:3px 8px;text-transform:uppercase}
+  .conx .tag.d6{background:var(--verde)} .conx .tag.d8{background:var(--naranja)} .conx .tag.d4{background:var(--azul-osc)}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🏭 Procesamiento · Simulador interactivo</div>
+  <h1>La cinta: rendimiento vs calidad</h1>
+  <p class="lead">Una cámara con <b>visión artificial</b> clasifica cada pieza que pasa por la cinta en
+  <b>Grado A</b>, <b>B</b> o <b>rechazo</b>. Vos manejás la línea: más <b>velocidad</b> produce más, pero el modelo
+  <b>se equivoca más</b>; el <b>umbral</b> del clasificador decide si sos estricto (rechazás de más) o permisivo
+  (dejás pasar malas); y la <b>temperatura de sala</b> define cuánta materia prima llega bien. El error peligroso es
+  la <b>mala aprobada</b> (falso negativo): esa llega al cliente.</p>
+
+  <div class="stage">
+    <canvas id="cv" width="900" height="300" aria-label="Cinta de proceso con clasificación por visión artificial"></canvas>
+  </div>
+
+  <div class="grid">
+    <div class="col">
+      <div class="panel">
+        <h2>La línea</h2>
+        <label class="field">Velocidad de cinta: <span class="fieldval" id="vVal"></span> piezas/min</label>
+        <input type="range" id="v" min="20" max="120" step="1" value="105">
+        <p class="hint">Más rápido = más producción, pero la cámara clasifica peor.</p>
+        <label class="field">Umbral del clasificador: <span class="fieldval" id="uVal"></span></label>
+        <input type="range" id="u" min="0" max="100" step="1" value="28">
+        <p class="hint">Bajo = permisivo (pasan malas) · Alto = estricto (rechaza buenas).</p>
+        <label class="field">Temperatura de sala: <span class="fieldval" id="tVal"></span> °C</label>
+        <input type="range" id="t" min="0" max="10" step="0.5" value="7">
+        <p class="hint">Más calor = cadena de frío peor = más piezas malas de entrada.</p>
+        <div class="btns">
+          <button class="btn sec" id="reset">↺ Reiniciar</button>
+          <button class="btn" id="opt">⚙️ Config recomendada</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="panel">
+        <h2>Turno (acumulado)</h2>
+        <div class="big"><span class="k">Producción</span><span class="v" id="oProd"></span></div>
+        <div class="rows" style="margin-top:6px">
+          <div class="r"><span class="k"><span class="dotc" style="background:var(--verde)"></span>Grado A entre lo aprobado</span><span class="v" id="oA"></span></div>
+          <div class="r"><span class="k">Rendimiento (bueno aprovechado)</span><span class="v" id="oRend"></span></div>
+          <div class="r"><span class="k"><span class="dotc" style="background:var(--rojo)"></span>⚠️ Malas aprobadas (falso neg.)</span><span class="v" id="oFN"></span></div>
+          <div class="r"><span class="k"><span class="dotc" style="background:var(--amar)"></span>Buenas descartadas (falso pos.)</span><span class="v" id="oFP"></span></div>
+        </div>
+        <div class="total"><span class="k">Resultado de la línea</span><span class="v" id="oScore"></span></div>
+        <div class="estado" id="estado"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel conx" style="margin-top:16px">
+    <h2>Cómo se conecta con el curso</h2>
+    <div class="c"><span class="tag d4">Clase 4</span><span>Cada pieza deja datos de <b>sensores</b>: cámara, termómetro infrarrojo, balanza. Esa es la materia prima del sistema.</span></div>
+    <div class="c"><span class="tag d6">Clase 6/7</span><span>El clasificador es un <b>modelo de visión artificial</b>. El umbral mueve el balance entre <b>falsos positivos y falsos negativos</b> — la matriz de confusión en vivo.</span></div>
+    <div class="c"><span class="tag d8">Clase 8</span><span><b>Optimización:</b> máxima producción con la calidad y el rendimiento que exige el mercado, sin dejar pasar una mala.</span></div>
+  </div>
+
+  <footer>
+    Modelo didáctico de línea de fileteado con control de calidad por visión. La temperatura de sala afecta la
+    proporción de materia prima apta (cadena de frío); la velocidad, la tasa de error del clasificador; el umbral,
+    el balance falsos positivos/negativos. Grados y trazabilidad en el espíritu de <b>HACCP/SENASA</b>.
+    Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const v=$('v'),u=$('u'),t=$('t');
+// tallies acumulados
+let ac; function resetAc(){ac={A:0,B:0,M:0, aKeptGood:0, keptA:0, keptB:0, keptM:0, rejGood:0, rejM:0, total:0};}
+resetAc();
+
+// --- modelo por pieza ---
+function trueState(temp){
+  const pM=Math.min(0.6,0.05+temp*0.045);       // proporción mala sube con temp
+  const pA=Math.max(0.15,0.6-temp*0.04);
+  const r=Math.random();
+  if(r<pM) return 'M'; if(r<pM+ (1-pM-pA<0?0:pA)) return 'A'; return 'B';
+}
+function classify(st, speed, umbral){
+  // "score medido" con ruido según velocidad
+  const base={A:0.85,B:0.55,M:0.22}[st];
+  const noise=(0.05+(speed-20)/100*0.28)*(Math.random()*2-1);
+  const meas=base+noise;
+  const cut=0.25+umbral/100*0.5;                // umbral 0..100 -> corte 0.25..0.75
+  return meas<cut ? 'rechazo' : 'aprobado';
+}
+
+// --- animación de la cinta ---
+const cv=$('cv'), ctx=cv.getContext('2d'); const W=900,H=300;
+function fit(){const w=cv.clientWidth||W;const r=(window.devicePixelRatio||1);cv.width=w*r;cv.height=w*H/W*r;ctx.setTransform(r*w/W,0,0,r*w/W,0,0);}
+window.addEventListener('resize',fit);
+const beltY=170, scanX=560;
+const pieces=[]; let spawnAcc=0;
+
+function spawn(){
+  const st=trueState(+t.value);
+  pieces.push({x:-20,y:beltY-6-Math.random()*4,st,decided:false,cls:null,vy:0,a:1});
+}
+function stepSim(dt){
+  const speed=+v.value;
+  spawnAcc += speed/60*dt;                        // piezas/seg * dt
+  while(spawnAcc>=1){ spawn(); spawnAcc-=1; }
+  const px=1.1+speed/60*2.2;                       // vel visual de la cinta
+  for(const p of pieces){
+    if(p.state==='gone') continue;
+    if(!p.diverting){ p.x+=px; }
+    if(!p.decided && p.x>=scanX){
+      p.decided=true;
+      p.cls=classify(p.st,speed,+u.value);
+      // tally
+      ac.total++; if(p.st==='A')ac.A++; else if(p.st==='B')ac.B++; else ac.M++;
+      if(p.cls==='rechazo'){ if(p.st==='M')ac.rejM++; else ac.rejGood++; p.diverting=true; }
+      else { if(p.st==='M')ac.keptM++; else { if(p.st==='A')ac.keptA++; else ac.keptB++; } }
+    }
+    if(p.diverting){ p.vy+=0.5; p.y+=p.vy; p.x+=0.6; p.a-=0.02; if(p.y>H+20||p.a<=0) p.state='gone'; }
+    else if(p.decided && p.x>W+20){ p.state='gone'; }
+  }
+  for(let i=pieces.length-1;i>=0;i--) if(pieces[i].state==='gone') pieces.splice(i,1);
+}
+function drawPiece(p){
+  const col = p.decided ? (p.cls==='rechazo'?'#d64545':(p.st==='A'?'#1f9d6b':(p.st==='B'?'#e0a92d':'#d64545'))) : '#9fb4bf';
+  ctx.save();ctx.globalAlpha=p.a;
+  // fillet: cuña
+  ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(p.x,p.y,13,7,0,0,6.283);ctx.fill();
+  ctx.restore();
+}
+function scene(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#eef4f7';ctx.fillRect(0,0,W,H);
+  // cinta
+  ctx.fillStyle='#c4d3db';ctx.fillRect(0,beltY,W,26);
+  ctx.strokeStyle='#a9bcc6';ctx.lineWidth=2;
+  for(let x=-20;x<W;x+=26){ctx.beginPath();ctx.moveTo(x,beltY);ctx.lineTo(x-8,beltY+26);ctx.stroke();}
+  // rodillos
+  ctx.fillStyle='#8aa0ab';ctx.beginPath();ctx.arc(16,beltY+13,10,0,6.283);ctx.fill();ctx.beginPath();ctx.arc(W-16,beltY+13,10,0,6.283);ctx.fill();
+  // cámara / visión
+  ctx.fillStyle='#0e2a38';ctx.fillRect(scanX-24,26,48,30);
+  ctx.fillStyle='#0a7fb4';ctx.beginPath();ctx.arc(scanX,56,6,0,6.283);ctx.fill();
+  ctx.strokeStyle='rgba(10,127,180,.5)';ctx.lineWidth=2;ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(scanX,60);ctx.lineTo(scanX,beltY);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#075d86';ctx.font='bold 12px Segoe UI,Arial';ctx.textAlign='center';ctx.fillText('📷 visión IA',scanX,20);
+  // zona de descarte
+  ctx.fillStyle='rgba(214,69,69,.10)';ctx.fillRect(scanX-6,beltY+26,90,H-beltY-26);
+  ctx.fillStyle='#b52d2d';ctx.textAlign='left';ctx.font='11px Segoe UI,Arial';ctx.fillText('↓ rechazo',scanX+8,H-10);
+  ctx.fillStyle='#177a53';ctx.textAlign='right';ctx.fillText('aprobado →',W-14,beltY-8);
+  for(const p of pieces) drawPiece(p);
+}
+let last=0;
+function loop(ts){ const dt=Math.min(2,(ts-last)/16.67||1); last=ts; stepSim(dt); scene(); render(); requestAnimationFrame(loop); }
+
+function render(){
+  $('vVal').textContent=v.value;$('uVal').textContent=u.value;$('tVal').textContent=(+t.value).toFixed(1);
+  const prodH=Math.round(+v.value*60);
+  $('oProd').textContent=prodH.toLocaleString('es-AR')+' pz/h';
+  const aprob=ac.keptA+ac.keptB+ac.keptM;
+  const goodTot=ac.A+ac.B;
+  const aPct=aprob? Math.round(ac.keptA/aprob*100):0;
+  const rend=goodTot? Math.round((ac.keptA+ac.keptB)/goodTot*100):0;
+  const fnPct=ac.M? Math.round(ac.keptM/ac.M*100):0;
+  $('oA').textContent=aPct+'%';
+  $('oRend').textContent=rend+'%';
+  $('oFN').textContent=ac.keptM+' ('+fnPct+'% de las malas)';
+  $('oFP').textContent=ac.rejGood+'';
+  // score: producción normalizada * rendimiento * calidad, con castigo fuerte a falsos negativos
+  const prodN=Math.min(1,prodH/7200);
+  let score=100*(0.30*prodN + 0.35*rend/100 + 0.20*aPct/100) - fnPct*0.9;
+  score=Math.max(0,Math.min(100,score));
+  $('oScore').textContent=(ac.total<12?'—':Math.round(score)+' / 100');
+  const e=$('estado');
+  if(ac.total<12){e.className='estado';e.innerHTML='Dejá correr la línea unos segundos para ver los números…';}
+  else if(fnPct>12){e.className='estado bad';e.innerHTML='❌ <b>Estás dejando pasar malas ('+fnPct+'%).</b> Subí el umbral (más estricto), bajá la velocidad o enfriá la sala. Una mala aprobada es un reclamo — o un decomiso de SENASA.';}
+  else if(rend<70){e.className='estado bad';e.innerHTML='◐ Seguridad OK, pero <b>rendimiento bajo</b>: el umbral quedó tan estricto que descartás buenas. Aflojá un poco el umbral.';}
+  else{e.className='estado ok';e.innerHTML='✅ <b>Línea equilibrada.</b> Buena producción, alto rendimiento y casi ninguna mala aprobada. Ese es el punto.';}
+}
+
+[v,u,t].forEach(el=>el.addEventListener('change',resetAc));
+$('reset').addEventListener('click',resetAc);
+$('opt').addEventListener('click',()=>{v.value=70;u.value=52;t.value=2.5;resetAc();});
+// warm-up para que arranque con piezas en la cinta
+for(let i=0;i<220;i++) stepSim(1); resetAc();
+fit(); requestAnimationFrame(loop);
+</script>
+</body>
+</html>
