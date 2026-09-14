@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · ¿A dónde vas a pescar? (capas de datos)</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --naranja:#e0752d; --rojo:#d64545; --amar:#e0a92d; --gris2:#8aa0ab;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 14px;max-width:74ch}
+  .lead b{color:var(--tinta)}
+  .stage{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:10px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  canvas{width:100%;height:auto;display:block;border-radius:9px;cursor:crosshair}
+  .grid{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px}
+  .col{flex:1 1 380px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 10px;font-weight:800}
+  .sub{font-size:11.5px;font-weight:800;color:var(--gris2);text-transform:uppercase;letter-spacing:.05em;margin:12px 0 6px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{font-size:13px;font-weight:700;border:1px solid var(--linea);background:var(--fondo);border-radius:20px;padding:7px 13px;cursor:pointer}
+  .chip.on{background:var(--azul);border-color:var(--azul);color:#fff}
+  .chip.sp.on{background:var(--azul-osc);border-color:var(--azul-osc)}
+  .legend{font-size:12px;color:var(--gris);margin-top:8px;min-height:1.2em}
+  .rows .r{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--linea);font-size:13.5px}
+  .rows .r:last-child{border-bottom:0}
+  .rows .r .k{color:var(--gris)} .rows .r .v{font-weight:800;font-variant-numeric:tabular-nums}
+  .total{margin-top:10px;background:var(--tinta);color:#fff;border-radius:10px;padding:11px 14px;display:flex;justify-content:space-between;align-items:baseline}
+  .total .k{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;opacity:.85} .total .v{font-size:20px;font-weight:800}
+  .estado{margin-top:10px;font-size:13px;border-radius:10px;padding:10px 12px;border:1px solid;background:#f4f8fa;border-color:var(--linea)}
+  .estado.ok{background:#eaf6ec;border-color:#bfe3cb} .estado.ok b{color:var(--verde)}
+  .estado.bad{background:#fdecec;border-color:#f3c6c6} .estado.bad b{color:var(--rojo)}
+  .btn{width:100%;margin-top:12px;border:0;border-radius:10px;background:var(--azul);color:#fff;font-weight:800;font-size:14px;padding:11px;cursor:pointer}
+  .btn:hover{background:var(--azul-osc)}
+  .conx{margin-top:16px;font-size:13px}
+  .conx .c{display:flex;gap:11px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--linea)}
+  .conx .c:last-child{border-bottom:0}
+  .conx .tag{flex:0 0 auto;font-size:11px;font-weight:800;color:#fff;background:var(--azul-osc);border-radius:6px;padding:3px 8px;text-transform:uppercase}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🗺️ Clase 4 · Simulador de decisión</div>
+  <h1>¿A dónde vas a pescar?</h1>
+  <p class="lead">Antes de zarpar, tenés capas de datos <b>gratis</b>: temperatura del mar (SST), clorofila,
+  profundidad, vedas y la flota (AIS). Ninguna sola te dice dónde ir — <b>el valor está en cruzarlas</b>. Elegí
+  especie, prendé las capas para leer el mar, y <b>tocá una celda para calar</b>. Después se revela la captura, el
+  combustible y si caíste en veda.</p>
+
+  <div class="stage">
+    <canvas id="cv" width="900" height="440" aria-label="Mapa del mar con capas de datos"></canvas>
+  </div>
+
+  <div class="grid">
+    <div class="col">
+      <div class="panel">
+        <h2>Tu decisión</h2>
+        <div class="sub">🎣 Especie objetivo</div>
+        <div class="chips" id="sp"></div>
+        <div class="sub">🗂️ Capa de datos (leé el mar)</div>
+        <div class="chips" id="layers"></div>
+        <div class="legend" id="legend"></div>
+        <button class="btn" id="nueva">🔄 Nueva campaña (otro mar)</button>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <h2>Resultado del lance</h2>
+        <div id="pre" style="font-size:13.5px;color:var(--gris)">Tocá una celda del mapa para calar ahí.</div>
+        <div id="res" hidden>
+          <div class="rows">
+            <div class="r"><span class="k">Captura</span><span class="v" id="oKg"></span></div>
+            <div class="r"><span class="k">Combustible (distancia al puerto)</span><span class="v" id="oFuel"></span></div>
+            <div class="r"><span class="k">Legalidad</span><span class="v" id="oLegal"></span></div>
+          </div>
+          <div class="total"><span class="k">Rendimiento del lance</span><span class="v" id="oScore"></span></div>
+          <div class="estado" id="estado"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel conx" style="margin-top:16px">
+    <h2>Cómo se conecta con el curso</h2>
+    <div class="c"><span class="tag">Clase 4</span><span>Cada capa es una <b>fuente de datos abierta</b> (Copernicus, NOAA, INIDEP, Global Fishing Watch). Small data (tu barco) + big data (el sector).</span></div>
+    <div class="c"><span class="tag" style="background:#1f9d6b">Clase 6</span><span>Cruzar SST + clorofila + profundidad para predecir dónde hay recurso es, exactamente, un <b>modelo predictivo</b>.</span></div>
+    <div class="c"><span class="tag" style="background:#e0752d">Clase 8</span><span>Elegir la zona que maximiza captura por litro de gasoil, sin caer en veda, es <b>optimización</b>.</span></div>
+  </div>
+
+  <footer>
+    Modelo didáctico: la abundancia de cada especie depende de la temperatura (rango propio), la clorofila
+    (productividad), la profundidad (hábitat) y los frentes (donde se cruzan aguas). Zonas y datos ilustrativos del
+    Mar Argentino. Fuentes reales del tipo usado: Copernicus Marine, NOAA, INIDEP, Global Fishing Watch.
+    Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cv=$('cv'), ctx=cv.getContext('2d'); const W=900,H=440;
+const COLS=7, ROWS=5;
+const mapX=120, mapY=20, cellW=(W-mapX-20)/COLS, cellH=(H-mapY-20)/ROWS;
+const PORT={i:-1, j:2}; // puerto en la costa
+
+const SP={
+  merluza:{nom:'Merluza',sstOpt:8,sstSd:3.2,depthOpt:250,depthSd:180,col:'#0a7fb4'},
+  langostino:{nom:'Langostino',sstOpt:12,sstSd:2.8,depthOpt:90,depthSd:70,col:'#e8623a'}
+};
+let sp='merluza', layer='sst', field=null, fished=null;
+
+function gen(){
+  const f={sst:[],chl:[],depth:[],veda:[],ais:[],ab:{merluza:[],langostino:[]}};
+  // frente diagonal aleatorio
+  const fr=1+Math.random()*(COLS-3);
+  for(let i=0;i<COLS;i++){f.sst[i]=[];f.chl[i]=[];f.depth[i]=[];f.veda[i]=[];f.ais[i]=[];f.ab.merluza[i]=[];f.ab.langostino[i]=[];
+    for(let j=0;j<ROWS;j++){
+      const north=(ROWS-1-j)/(ROWS-1);           // 1 arriba (norte, cálido)
+      const off=i/(COLS-1);                       // 1 lejos de costa
+      const distFr=Math.abs(i-fr);
+      const frente=Math.exp(-distFr*distFr/1.2);  // 1 en el frente
+      f.sst[i][j]=4+north*11 + (Math.random()*1.4-0.7);          // 4..15 °C
+      f.chl[i][j]=Math.max(0,Math.min(1,(1-off)*0.5 + frente*0.6 + (Math.random()*0.2-0.1)));
+      f.depth[i][j]=30+off*620 + (Math.random()*40-20);
+      f.veda[i][j]=false;
+    }
+  }
+  // 2 vedas
+  for(let k=0;k<2;k++){const i=1+Math.floor(Math.random()*(COLS-1)),j=Math.floor(Math.random()*ROWS);f.veda[i][j]=true;}
+  // abundancia por especie + AIS
+  for(const key of ['merluza','langostino']){const s=SP[key];
+    for(let i=0;i<COLS;i++)for(let j=0;j<ROWS;j++){
+      const g=v=>Math.exp(-(v)*(v));
+      const sstf=Math.exp(-((f.sst[i][j]-s.sstOpt)**2)/(2*s.sstSd*s.sstSd));
+      const depf=Math.exp(-((f.depth[i][j]-s.depthOpt)**2)/(2*s.depthSd*s.depthSd));
+      const chlf=0.35+0.65*f.chl[i][j];
+      f.ab[key][i][j]=Math.max(0,Math.min(1, sstf*depf*chlf*1.25));
+    }
+  }
+  for(let i=0;i<COLS;i++)for(let j=0;j<ROWS;j++){
+    const dist=Math.hypot(i-PORT.i,j-PORT.j);
+    f.ais[i][j]=Math.max(0,Math.min(1, f.ab.merluza[i][j]*0.6+f.ab.langostino[i][j]*0.5 - dist*0.05 + (Math.random()*0.15)));
+  }
+  field=f; fished=null;
+}
+
+function lerp(a,b,t){return a+(b-a)*t;}
+function mix(c1,c2,t){return `rgb(${Math.round(lerp(c1[0],c2[0],t))},${Math.round(lerp(c1[1],c2[1],t))},${Math.round(lerp(c1[2],c2[2],t))})`;}
+function cellColor(i,j){
+  const f=field;
+  if(layer==='sst'){const t=Math.max(0,Math.min(1,(f.sst[i][j]-4)/11));return mix([37,110,164],[214,92,69],t);}
+  if(layer==='chl'){const t=f.chl[i][j];return mix([233,241,244],[31,120,80],t);}
+  if(layer==='depth'){const t=Math.max(0,Math.min(1,f.depth[i][j]/650));return mix([201,224,235],[0,60,95],t);}
+  if(layer==='veda'){return f.veda[i][j]?'#d64545':'#e7eef2';}
+  if(layer==='ais'){const t=f.ais[i][j];return mix([238,244,247],[224,117,46],t);}
+  return '#dfe9ef';
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#eaf3f7';ctx.fillRect(0,0,W,H);
+  // costa (tierra) a la izquierda
+  ctx.fillStyle='#e6e0cf';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(mapX-14,0);
+  for(let y=0;y<=H;y+=20)ctx.lineTo(mapX-14+Math.sin(y*0.05)*8, y);
+  ctx.lineTo(0,H);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#8a7f63';ctx.font='bold 12px Segoe UI,Arial';ctx.save();ctx.translate(28,H/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText('COSTA / PUERTO',0,0);ctx.restore();
+  // puerto
+  ctx.fillStyle='#0e2a38';ctx.beginPath();ctx.arc(mapX-14, mapY+cellH*(PORT.j+0.5), 7,0,6.283);ctx.fill();
+  ctx.fillText('⚓', mapX-30, mapY+cellH*(PORT.j+0.5)+4);
+  // celdas
+  ctx.font='11px Segoe UI,Arial';ctx.textAlign='center';
+  for(let i=0;i<COLS;i++)for(let j=0;j<ROWS;j++){
+    const x=mapX+i*cellW, y=mapY+j*cellH;
+    ctx.fillStyle=cellColor(i,j);ctx.fillRect(x+1,y+1,cellW-2,cellH-2);
+    ctx.strokeStyle='rgba(255,255,255,.5)';ctx.strokeRect(x+1,y+1,cellW-2,cellH-2);
+    if(layer==='veda'&&field.veda[i][j]){ctx.fillStyle='#fff';ctx.fillText('🚫 veda',x+cellW/2,y+cellH/2+4);}
+    if(layer==='ais'){ // puntitos de flota
+      const n=Math.round(field.ais[i][j]*7);ctx.fillStyle='rgba(14,42,56,.55)';
+      for(let k=0;k<n;k++)ctx.fillRect(x+8+(k*7)%(cellW-16), y+8+Math.floor(k/4)*8, 3,3);
+    }
+  }
+  // celda pescada
+  if(fished){const {i,j}=fished, x=mapX+i*cellW,y=mapY+j*cellH;
+    ctx.strokeStyle='#0e2a38';ctx.lineWidth=3;ctx.strokeRect(x+2,y+2,cellW-4,cellH-4);ctx.lineWidth=1;
+    ctx.fillStyle='#0e2a38';ctx.font='bold 15px Segoe UI,Arial';ctx.fillText('🎣',x+cellW/2,y+cellH/2+6);}
+}
+
+function pick(e){
+  const rect=cv.getBoundingClientRect(), sx=W/rect.width;
+  const cx=(e.clientX-rect.left)*sx, cy=(e.clientY-rect.top)*(H/rect.height);
+  const i=Math.floor((cx-mapX)/cellW), j=Math.floor((cy-mapY)/cellH);
+  if(i<0||i>=COLS||j<0||j>=ROWS) return;
+  fished={i,j}; result(i,j); draw();
+}
+function result(i,j){
+  const f=field, s=SP[sp];
+  const ab=f.ab[sp][i][j];
+  const dist=Math.hypot(i-PORT.i,j-PORT.j);
+  const kg=Math.round(ab*3800);
+  const fuel=Math.round(dist*140);
+  const legal=!f.veda[i][j];
+  const score=Math.max(0, Math.round(legal ? (kg - fuel*0.6) / 34 : -20));
+  $('pre').hidden=true; $('res').hidden=false;
+  $('oKg').textContent=kg.toLocaleString('es-AR')+' kg';
+  $('oFuel').textContent='USD '+fuel.toLocaleString('es-AR');
+  $('oLegal').textContent=legal?'✅ zona habilitada':'❌ ¡en veda!';
+  $('oScore').textContent=(legal?score:0)+' / 100';
+  const e=$('estado');
+  const sstOk=Math.abs(f.sst[i][j]-s.sstOpt)<3.5, chlOk=f.chl[i][j]>0.45, depOk=Math.abs(f.depth[i][j]-s.depthOpt)<s.depthSd;
+  if(!legal){e.className='estado bad';e.innerHTML='❌ <b>Calaste en una veda.</b> Multa y decomiso: mirá la capa 🚫 antes de decidir. La legalidad no se negocia.';}
+  else if(ab>0.6){e.className='estado ok';e.innerHTML='✅ <b>Gran zona.</b> '+(sstOk?'SST en rango':'')+(chlOk?' · buena clorofila':'')+(depOk?' · profundidad ideal':'')+'. Cruzaste bien las capas: eso es pescar con datos, no de memoria.';}
+  else{e.className='estado';let falta=[];if(!sstOk)falta.push('la <b>temperatura</b> no es la ideal');if(!chlOk)falta.push('hay <b>poca clorofila</b> (poco alimento)');if(!depOk)falta.push('la <b>profundidad</b> no es la del hábitat');
+    e.innerHTML='◐ Zona floja: '+(falta.join(', ')||'faltó cruzar más capas')+'. Probá donde <b>coincidan</b> temperatura y clorofila.';}
+}
+
+function chips(){
+  $('sp').innerHTML=Object.keys(SP).map(k=>`<button class="chip sp ${k===sp?'on':''}" data-sp="${k}">${SP[k].nom}</button>`).join('');
+  $('sp').querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{sp=b.dataset.sp;if(fished)result(fished.i,fished.j);chips();draw();}));
+  const LY=[['sst','🌡️ SST'],['chl','🟢 Clorofila'],['depth','📉 Profundidad'],['veda','🚫 Vedas'],['ais','📡 Flota (AIS)']];
+  $('layers').innerHTML=LY.map(([k,t])=>`<button class="chip ${k===layer?'on':''}" data-ly="${k}">${t}</button>`).join('');
+  $('layers').querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{layer=b.dataset.ly;chips();draw();updateLegend();}));
+}
+function updateLegend(){
+  const L={sst:'Frío (azul) → cálido (rojo). Cada especie tiene su rango.',chl:'Más verde = más clorofila = más productividad (alimento).',depth:'Claro = somero → oscuro = profundo. Define el hábitat.',veda:'Rojo = zona vedada: no se puede pescar ahí.',ais:'Más naranja/puntos = más flota (dato AIS abierto).'}[layer];
+  $('legend').textContent=L||'';
+}
+cv.addEventListener('click',pick);
+$('nueva').addEventListener('click',()=>{gen();$('pre').hidden=false;$('res').hidden=true;draw();});
+gen(); chips(); updateLegend(); draw();
+</script>
+</body>
+</html>
