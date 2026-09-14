@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · El pulso de la granja (calidad de agua + alerta predictiva)</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --naranja:#e0752d; --rojo:#d64545; --amar:#e0a92d; --gris2:#8aa0ab;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 14px;max-width:74ch}
+  .lead b{color:var(--tinta)}
+  .alert{border-radius:12px;padding:12px 15px;font-weight:700;font-size:14px;margin-bottom:12px;border:1px solid}
+  .alert.calm{background:#eef4f7;border-color:var(--linea);color:var(--gris)}
+  .alert.warn{background:#fff4e2;border-color:#f2d29a;color:#9a6314}
+  .alert.crit{background:#fdecec;border-color:#f3c6c6;color:#b52d2d}
+  .stage{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:10px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  canvas{width:100%;height:auto;display:block;border-radius:9px}
+  .gauges{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  .gg{flex:1 1 150px;background:var(--panel);border:1px solid var(--linea);border-radius:12px;padding:11px 13px}
+  .gg .k{font-size:11.5px;font-weight:800;color:var(--gris);text-transform:uppercase;letter-spacing:.04em}
+  .gg .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;margin:2px 0}
+  .gg .bar{height:8px;border-radius:5px;background:#eef3f5;overflow:hidden}
+  .gg .bar>i{display:block;height:100%}
+  .grid{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px}
+  .col{flex:1 1 380px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 10px;font-weight:800}
+  .act{display:flex;gap:8px;flex-wrap:wrap}
+  .act button{flex:1 1 auto;border:1px solid var(--linea);background:var(--fondo);border-radius:10px;padding:11px 10px;font-weight:800;font-size:13.5px;cursor:pointer}
+  .act button.on{background:var(--verde);border-color:var(--verde);color:#fff}
+  .act button.amber.on{background:var(--naranja);border-color:var(--naranja)}
+  .seg{display:flex;gap:6px;margin-top:8px}
+  .seg button{flex:1;border:1px solid var(--linea);background:var(--fondo);border-radius:8px;padding:8px;font-weight:700;font-size:13px;cursor:pointer}
+  .seg button.on{background:var(--azul);border-color:var(--azul);color:#fff}
+  .lbl{font-size:12px;font-weight:800;color:var(--gris2);text-transform:uppercase;letter-spacing:.04em;margin:12px 0 2px}
+  .rows .r{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--linea);font-size:13.5px}
+  .rows .r:last-child{border-bottom:0}
+  .rows .r .k{color:var(--gris)} .rows .r .v{font-weight:800;font-variant-numeric:tabular-nums}
+  .conx{margin-top:16px;font-size:13px}
+  .conx .c{display:flex;gap:11px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--linea)}
+  .conx .c:last-child{border-bottom:0}
+  .conx .tag{flex:0 0 auto;font-size:11px;font-weight:800;color:#fff;background:var(--azul-osc);border-radius:6px;padding:3px 8px;text-transform:uppercase}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🐟 Acuicultura · Simulador en tiempo real</div>
+  <h1>El pulso de la granja: calidad de agua</h1>
+  <p class="lead">En un cultivo, el <b>oxígeno disuelto</b> sube de día (fotosíntesis) y cae de noche (respiración) —
+  y el peligro es el <b>bajón de la madrugada</b>. Los sensores lo miden y un <b>modelo predice</b> el bajón antes de
+  que pase. Tu trabajo: mantener a los peces en zona segura sin desperdiciar energía. Alimentás para que crezcan,
+  pero más ración = más amonio y más demanda de oxígeno. Reaccioná a la alerta <b>antes</b> del rojo.</p>
+
+  <div class="alert calm" id="alert">Todo en orden. El modelo vigila el oxígeno…</div>
+
+  <div class="stage">
+    <canvas id="cv" width="900" height="280" aria-label="Oxígeno disuelto en el tiempo con proyección del modelo"></canvas>
+  </div>
+
+  <div class="gauges">
+    <div class="gg"><div class="k">💨 Oxígeno disuelto</div><div class="v" id="gO2v"></div><div class="bar"><i id="gO2"></i></div></div>
+    <div class="gg"><div class="k">🌡️ Temperatura</div><div class="v" id="gTv"></div><div class="bar"><i id="gT"></i></div></div>
+    <div class="gg"><div class="k">🧪 Amonio (NH₃)</div><div class="v" id="gNv"></div><div class="bar"><i id="gN"></i></div></div>
+    <div class="gg"><div class="k">🕐 Hora del día</div><div class="v" id="gClock"></div><div class="bar"><i id="gDay" style="background:var(--azul)"></i></div></div>
+  </div>
+
+  <div class="grid">
+    <div class="col">
+      <div class="panel">
+        <h2>Manejo</h2>
+        <div class="lbl">Aireación</div>
+        <div class="act"><button id="air">🌀 Aireador: apagado</button></div>
+        <div class="lbl">Ración de alimento</div>
+        <div class="seg" id="rac"></div>
+        <div class="lbl">Emergencia</div>
+        <div class="act"><button id="rec" class="amber">💧 Recambio de agua</button></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <h2>Estado del cultivo</h2>
+        <div class="rows">
+          <div class="r"><span class="k">Bienestar de los peces</span><span class="v" id="oWel"></span></div>
+          <div class="r"><span class="k">Crecimiento acumulado</span><span class="v" id="oGrow"></span></div>
+          <div class="r"><span class="k">Minutos en zona crítica</span><span class="v" id="oCrit"></span></div>
+          <div class="r"><span class="k">Energía del aireador</span><span class="v" id="oEner"></span></div>
+        </div>
+        <div class="alert calm" id="tip" style="margin:12px 0 0">Consejo: encendé el aireador <b>antes</b> del bajón de la madrugada, no cuando ya está en rojo.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel conx" style="margin-top:16px">
+    <h2>Cómo se conecta con el curso</h2>
+    <div class="c"><span class="tag">Clase 4</span><span>Oxígeno, temperatura, amonio, pH: <b>datos de sensores IoT</b> en tiempo real. Sin medir, no hay manejo.</span></div>
+    <div class="c"><span class="tag" style="background:#1f9d6b">Clase 6</span><span>La <b>alerta predictiva</b> es un modelo que proyecta la serie y anticipa el bajón — pasar de reaccionar a <b>prevenir</b>.</span></div>
+    <div class="c"><span class="tag" style="background:#e0752d">Clase 8</span><span><b>Optimización:</b> máximo crecimiento con mínimo consumo de energía, sin cruzar los umbrales críticos.</span></div>
+  </div>
+
+  <footer>
+    Modelo didáctico de calidad de agua en cultivo: el oxígeno sigue un ciclo diario (fotosíntesis/respiración),
+    la temperatura modula su saturación, la ración sube el amonio y la demanda de oxígeno. Umbrales de referencia:
+    O₂ crítico &lt;4 mg/L, amonio alto &gt;1 mg/L. Curso <b>IA Aplicada a la Producción Pesquera</b> ·
+    UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+// estado
+let t=6*60;            // minuto del día (arranca 6:00)
+let O2=6.5, NH3=0.3, welfare=100, grow=0, critMin=0, energia=0;
+let airOn=false, racion=1; // 0.5 baja / 1 normal / 1.5 alta
+const O2CRIT=4, O2SAFE=5, NH3HI=1;
+const hist=[]; // {t,O2}
+const HISTMAX=300;
+
+function tempAt(m){ return 18 + 4*Math.sin(2*Math.PI*(m-360)/1440); }         // pico ~15h
+function o2env(m){ return 6.4 + 2.1*Math.sin(2*Math.PI*(m-540)/1440); }       // pico tarde, valle madrugada
+function o2Target(m){
+  let x=o2env(m);
+  x -= Math.max(0,(tempAt(m)-18))*0.16;   // más calor, menos O2
+  x -= racion*0.5;                         // demanda por alimentación
+  if(airOn) x += 1.9;                      // aireador
+  return x;
+}
+// proyección del modelo: mínimo O2 previsto en las próximas 3 h (con manejo actual)
+function proyeccion(){
+  let minv=99, minAt=0, cur=O2;
+  for(let k=1;k<=36;k++){const m=(t+k*5)%1440; const tg=o2Target(m); cur+=(tg-cur)*0.06; if(cur<minv){minv=cur;minAt=k*5;}}
+  return {minv,minAt};
+}
+
+function step(dtMin){
+  t=(t+dtMin)%1440;
+  const tg=o2Target(t);
+  O2 += (tg-O2)*0.06*(dtMin/5);
+  NH3 += (racion*0.010 - 0.006)*(dtMin/5); NH3=Math.max(0.05,NH3);
+  if(airOn) energia += dtMin;
+  // bienestar
+  const malo = (O2<O2CRIT) || (NH3>NH3HI);
+  if(malo){ welfare -= 0.35*(dtMin/5); critMin += dtMin; }
+  else if(O2<O2SAFE){ welfare -= 0.08*(dtMin/5); }
+  else { welfare += 0.12*(dtMin/5); }
+  welfare=Math.max(0,Math.min(100,welfare));
+  grow += racion * (welfare/100) * 0.02*(dtMin/5);
+  hist.push({t,O2}); if(hist.length>HISTMAX) hist.shift();
+}
+
+function chart(){
+  const c=$('cv'),dpr=window.devicePixelRatio||1;
+  const w=c.clientWidth||c.parentElement.clientWidth,h=280;
+  c.width=w*dpr;c.height=h*dpr;c.style.height=h+'px';
+  const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
+  const mL=42,mR=14,mT=12,mB=24,pw=w-mL-mR,ph=h-mT-mB;
+  const ymin=2,ymax=10;
+  const Y=v=>mT+ph-(v-ymin)/(ymax-ymin)*ph;
+  x.fillStyle='#f7fbfc';x.fillRect(mL,mT,pw,ph);
+  // banda crítica (<4) y segura (>5)
+  x.fillStyle='rgba(214,69,69,.08)';x.fillRect(mL,Y(O2CRIT),pw,mT+ph-Y(O2CRIT));
+  x.fillStyle='rgba(31,157,107,.06)';x.fillRect(mL,mT,pw,Y(O2SAFE)-mT);
+  x.strokeStyle='#d9e4e9';x.strokeRect(mL,mT,pw,ph);
+  x.font='11px Segoe UI,Arial';x.fillStyle='#8aa0ab';x.textAlign='right';
+  [2,4,6,8,10].forEach(v=>{x.fillText(v,mL-5,Y(v)+3);x.strokeStyle='#eef3f5';x.beginPath();x.moveTo(mL,Y(v));x.lineTo(mL+pw,Y(v));x.stroke();});
+  x.strokeStyle='#d64545';x.setLineDash([5,4]);x.beginPath();x.moveTo(mL,Y(O2CRIT));x.lineTo(mL+pw,Y(O2CRIT));x.stroke();x.setLineDash([]);
+  x.fillStyle='#b52d2d';x.textAlign='left';x.fillText('crítico 4 mg/L',mL+4,Y(O2CRIT)-4);
+  // serie histórica (últimas ~5h) escalada a lo ancho
+  if(hist.length>1){
+    const n=hist.length;const X=i=>mL+i/(HISTMAX-1)*pw*0.72;
+    x.strokeStyle='#0a7fb4';x.lineWidth=2.4;x.beginPath();
+    hist.forEach((p,i)=>{const px=X(i),py=Y(p.O2);i?x.lineTo(px,py):x.moveTo(px,py);});x.stroke();
+    // proyección (dashed) desde el último punto
+    const pr=proyeccion();const lastX=X(n-1),lastY=Y(O2);
+    x.strokeStyle=pr.minv<O2CRIT?'#d64545':'#1f9d6b';x.setLineDash([5,4]);x.lineWidth=2;
+    x.beginPath();x.moveTo(lastX,lastY);x.lineTo(Math.min(mL+pw,lastX+pw*0.24),Y(pr.minv));x.stroke();x.setLineDash([]);
+    x.fillStyle='#0e2a38';x.beginPath();x.arc(lastX,lastY,4,0,6.283);x.fill();
+    x.fillStyle=pr.minv<O2CRIT?'#b52d2d':'#177a53';x.font='bold 11px Segoe UI,Arial';x.textAlign='left';
+    x.fillText('modelo →',Math.min(mL+pw-70,lastX+8),Y(pr.minv)-6);
+  }
+  x.fillStyle='#3f5a68';x.textAlign='center';x.font='11px Segoe UI,Arial';x.fillText('tiempo (histórico + proyección del modelo)',mL+pw/2,h-6);
+}
+
+function hud(){
+  const hh=Math.floor(t/60), mm=Math.floor(t%60);
+  $('gClock').textContent=String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');
+  $('gDay').style.width=(t/1440*100)+'%';
+  $('gO2v').textContent=O2.toFixed(1)+' mg/L';
+  const o2c=O2<O2CRIT?'#d64545':(O2<O2SAFE?'#e0a92d':'#1f9d6b');
+  $('gO2').style.width=Math.min(100,O2/10*100)+'%';$('gO2').style.background=o2c;
+  const T=tempAt(t);$('gTv').textContent=T.toFixed(1)+' °C';$('gT').style.width=Math.min(100,(T-12)/12*100)+'%';$('gT').style.background='#0a7fb4';
+  $('gNv').textContent=NH3.toFixed(2)+' mg/L';const nc=NH3>NH3HI?'#d64545':(NH3>0.6?'#e0a92d':'#1f9d6b');$('gN').style.width=Math.min(100,NH3/1.5*100)+'%';$('gN').style.background=nc;
+  $('oWel').textContent=Math.round(welfare)+'%';
+  $('oGrow').textContent=grow.toFixed(1);
+  $('oCrit').textContent=Math.round(critMin)+' min';
+  $('oEner').textContent=Math.round(energia)+' min';
+  // alerta predictiva
+  const pr=proyeccion();const a=$('alert');
+  if(O2<O2CRIT || NH3>NH3HI){a.className='alert crit';a.innerHTML='🚨 <b>Zona crítica AHORA.</b> '+(O2<O2CRIT?'Oxígeno bajo el umbral. ':'')+(NH3>NH3HI?'Amonio alto. ':'')+'Los peces se estresan: '+(O2<O2CRIT&&!airOn?'encendé el aireador':'bajá ración / recambio')+'.';}
+  else if(pr.minv<O2CRIT){a.className='alert warn';a.innerHTML='⚠️ <b>El modelo predice un bajón:</b> el oxígeno caería a '+pr.minv.toFixed(1)+' mg/L en ~'+pr.minAt+' min. Actuá ahora (aireador / menos ración) para llegar sin cruzar el rojo.';}
+  else{a.className='alert calm';a.innerHTML='✅ Todo en orden. Oxígeno proyectado mínimo: '+pr.minv.toFixed(1)+' mg/L. El modelo no ve riesgo en las próximas 3 h.';}
+}
+
+let last=0;
+function loop(ts){const dt=Math.min(3,(ts-last)/16.67||1);last=ts; step(9*dt); chart(); hud(); requestAnimationFrame(loop);}
+
+// controles
+$('air').addEventListener('click',()=>{airOn=!airOn;$('air').classList.toggle('on',airOn);$('air').textContent='🌀 Aireador: '+(airOn?'ENCENDIDO':'apagado');});
+$('rec').addEventListener('click',()=>{NH3=Math.max(0.05,NH3*0.3);O2=Math.min(10,O2+0.6);});
+(function(){const R=[['0.5','Baja'],['1','Normal'],['1.5','Alta']];
+  $('rac').innerHTML=R.map(([v,t2])=>`<button data-r="${v}" class="${+v===racion?'on':''}">${t2}</button>`).join('');
+  $('rac').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{racion=+b.dataset.r;$('rac').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));}));
+})();
+// warm-up para que el gráfico arranque con historia
+for(let i=0;i<120;i++) step(9);
+chart(); hud(); requestAnimationFrame(loop);
+</script>
+</body>
+</html>
