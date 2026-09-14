@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · ¿Dónde pongo la jaula? (sitio de cultivo)</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --naranja:#e0752d; --rojo:#d64545; --amar:#e0a92d; --gris2:#8aa0ab;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 14px;max-width:74ch}
+  .lead b{color:var(--tinta)}
+  .stage{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:10px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  canvas{width:100%;height:auto;display:block;border-radius:9px;cursor:crosshair}
+  .grid{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px}
+  .col{flex:1 1 380px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 10px;font-weight:800}
+  .sub{font-size:11.5px;font-weight:800;color:var(--gris2);text-transform:uppercase;letter-spacing:.05em;margin:12px 0 6px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{font-size:13px;font-weight:700;border:1px solid var(--linea);background:var(--fondo);border-radius:20px;padding:7px 13px;cursor:pointer}
+  .chip.on{background:var(--azul);border-color:var(--azul);color:#fff}
+  .chip.sp.on{background:var(--azul-osc);border-color:var(--azul-osc)}
+  .legend{font-size:12px;color:var(--gris);margin-top:8px;min-height:1.2em}
+  .rows .r{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--linea);font-size:13.5px}
+  .rows .r:last-child{border-bottom:0}
+  .rows .r .k{color:var(--gris)} .rows .r .v{font-weight:800}
+  .total{margin-top:10px;background:var(--tinta);color:#fff;border-radius:10px;padding:11px 14px;display:flex;justify-content:space-between;align-items:baseline}
+  .total .k{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;opacity:.85} .total .v{font-size:20px;font-weight:800}
+  .estado{margin-top:10px;font-size:13px;border-radius:10px;padding:10px 12px;border:1px solid;background:#f4f8fa;border-color:var(--linea)}
+  .estado.ok{background:#eaf6ec;border-color:#bfe3cb} .estado.ok b{color:var(--verde)}
+  .estado.bad{background:#fdecec;border-color:#f3c6c6} .estado.bad b{color:var(--rojo)}
+  .btn{width:100%;margin-top:12px;border:0;border-radius:10px;background:var(--azul);color:#fff;font-weight:800;font-size:14px;padding:11px;cursor:pointer}
+  .btn:hover{background:var(--azul-osc)}
+  .conx{margin-top:16px;font-size:13px}
+  .conx .c{display:flex;gap:11px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--linea)}
+  .conx .c:last-child{border-bottom:0}
+  .conx .tag{flex:0 0 auto;font-size:11px;font-weight:800;color:#fff;background:var(--azul-osc);border-radius:6px;padding:3px 8px;text-transform:uppercase}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🐟 Acuicultura · Simulador de decisión</div>
+  <h1>¿Dónde pongo la jaula?</h1>
+  <p class="lead">Elegir el sitio de un cultivo es cruzar capas: la <b>corriente</b> tiene que ser <b>justa</b>
+  (mucha te deforma la jaula, poca no oxigena), la <b>temperatura</b> en el rango de la especie, la
+  <b>profundidad</b> suficiente para el fondeo, y cerca de la <b>costa</b> para operar barato — pero sin
+  <b>conflictos de uso</b>. Ninguna capa sola alcanza: hay que cruzarlas. Elegí especie, leé el mar y tocá una
+  celda para instalar.</p>
+
+  <div class="stage">
+    <canvas id="cv" width="900" height="440" aria-label="Mapa para elegir sitio de cultivo"></canvas>
+  </div>
+
+  <div class="grid">
+    <div class="col">
+      <div class="panel">
+        <h2>Tu decisión</h2>
+        <div class="sub">🐟 Especie a cultivar</div>
+        <div class="chips" id="sp"></div>
+        <div class="sub">🗂️ Capa de datos</div>
+        <div class="chips" id="layers"></div>
+        <div class="legend" id="legend"></div>
+        <button class="btn" id="nueva">🔄 Nueva zona</button>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <h2>Idoneidad del sitio</h2>
+        <div id="pre" style="font-size:13.5px;color:var(--gris)">Tocá una celda del mapa para instalar la jaula ahí.</div>
+        <div id="res" hidden>
+          <div class="rows">
+            <div class="r"><span class="k">🌊 Corriente</span><span class="v" id="oCur"></span></div>
+            <div class="r"><span class="k">🌡️ Temperatura</span><span class="v" id="oTemp"></span></div>
+            <div class="r"><span class="k">📉 Profundidad</span><span class="v" id="oDep"></span></div>
+            <div class="r"><span class="k">🚢 Logística (distancia)</span><span class="v" id="oLog"></span></div>
+          </div>
+          <div class="total"><span class="k">Idoneidad del sitio</span><span class="v" id="oScore"></span></div>
+          <div class="estado" id="estado"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel conx" style="margin-top:16px">
+    <h2>Cómo se conecta con el curso</h2>
+    <div class="c"><span class="tag">Clase 4</span><span>Corriente, temperatura y profundidad son <b>datos de sensores y cartas</b>. El sitio se elige con datos, no con corazonada.</span></div>
+    <div class="c"><span class="tag" style="background:#1f9d6b">Otros simuladores</span><span>La corriente de este mapa es la que <b>deforma la jaula</b> (simulador de la jaula) y define la <b>oxigenación</b> (calidad de agua). Todo conecta.</span></div>
+    <div class="c"><span class="tag" style="background:#e0752d">Clase 8</span><span><b>Optimización con restricciones:</b> mejor idoneidad posible respetando profundidad mínima y sin conflictos de uso.</span></div>
+  </div>
+
+  <footer>
+    Modelo didáctico de selección de sitio acuícola: idoneidad = ajuste de temperatura × corriente (ventana óptima)
+    × profundidad, penalizada por distancia a costa y conflictos de uso. Zonas y datos ilustrativos.
+    Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cv=$('cv'), ctx=cv.getContext('2d'); const W=900,H=440;
+const COLS=7, ROWS=5;
+const mapX=120, mapY=20, cellW=(W-mapX-20)/COLS, cellH=(H-mapY-20)/ROWS;
+
+const SP={
+  trucha:{nom:'Trucha',tempOpt:14,tempSd:3,curOpt:0.45,curSd:0.28,depthMin:15,col:'#0a7fb4'},
+  mejillon:{nom:'Mejillón',tempOpt:15,tempSd:5,curOpt:0.65,curSd:0.32,depthMin:8,col:'#e8623a'}
+};
+let sp='trucha', layer='cur', field=null, chosen=null;
+
+function gen(){
+  const f={cur:[],temp:[],depth:[],conf:[]};
+  for(let i=0;i<COLS;i++){f.cur[i]=[];f.temp[i]=[];f.depth[i]=[];f.conf[i]=[];
+    for(let j=0;j<ROWS;j++){
+      const off=i/(COLS-1);
+      f.cur[i][j]=Math.max(0.05,0.15+off*1.1 + (Math.random()*0.3-0.15));   // corriente sube mar afuera
+      f.temp[i][j]=11+((ROWS-1-j)/(ROWS-1))*8 + (Math.random()*1.4-0.7);    // 11..19 °C, cálido arriba
+      f.depth[i][j]=6+off*90 + (Math.random()*10-5);                        // 6..96 m
+      f.conf[i][j]=false;
+    }
+  }
+  for(let k=0;k<2;k++){const i=Math.floor(Math.random()*COLS),j=Math.floor(Math.random()*ROWS);f.conf[i][j]=true;}
+  field=f; chosen=null;
+}
+function gauss(x,mu,sd){return Math.exp(-((x-mu)**2)/(2*sd*sd));}
+function idoneidad(i,j){
+  const s=SP[sp],f=field;
+  const tf=gauss(f.temp[i][j],s.tempOpt,s.tempSd);
+  const cf=gauss(f.cur[i][j],s.curOpt,s.curSd);                 // ventana óptima de corriente
+  const df=1/(1+Math.exp(-(f.depth[i][j]-s.depthMin)/4)) * (f.depth[i][j]>80?0.75:1); // suficiente pero no excesiva
+  return Math.max(0,Math.min(1, tf*cf*df));
+}
+
+function mix(c1,c2,t){return `rgb(${Math.round(c1[0]+(c2[0]-c1[0])*t)},${Math.round(c1[1]+(c2[1]-c1[1])*t)},${Math.round(c1[2]+(c2[2]-c1[2])*t)})`;}
+function cellColor(i,j){
+  const f=field;
+  if(layer==='cur'){const t=Math.max(0,Math.min(1,f.cur[i][j]/1.4));return mix([223,239,244],[10,82,126],t);}
+  if(layer==='temp'){const t=Math.max(0,Math.min(1,(f.temp[i][j]-10)/10));return mix([37,110,164],[214,92,69],t);}
+  if(layer==='depth'){const t=Math.max(0,Math.min(1,f.depth[i][j]/100));return mix([201,224,235],[0,60,95],t);}
+  if(layer==='conf'){return f.conf[i][j]?'#d64545':'#e7eef2';}
+  if(layer==='idon'){const t=idoneidad(i,j);return mix([245,238,220],[31,157,107],t);}
+  return '#dfe9ef';
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#eaf3f7';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#e6e0cf';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(mapX-14,0);
+  for(let y=0;y<=H;y+=20)ctx.lineTo(mapX-14+Math.sin(y*0.05)*8,y);
+  ctx.lineTo(0,H);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#8a7f63';ctx.font='bold 12px Segoe UI,Arial';ctx.save();ctx.translate(28,H/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText('COSTA',0,0);ctx.restore();
+  ctx.font='11px Segoe UI,Arial';ctx.textAlign='center';
+  for(let i=0;i<COLS;i++)for(let j=0;j<ROWS;j++){
+    const x=mapX+i*cellW,y=mapY+j*cellH;
+    ctx.fillStyle=cellColor(i,j);ctx.fillRect(x+1,y+1,cellW-2,cellH-2);
+    ctx.strokeStyle='rgba(255,255,255,.5)';ctx.strokeRect(x+1,y+1,cellW-2,cellH-2);
+    if(layer==='conf'&&field.conf[i][j]){ctx.fillStyle='#fff';ctx.fillText('⚠ uso',x+cellW/2,y+cellH/2+4);}
+  }
+  if(chosen){const {i,j}=chosen,x=mapX+i*cellW,y=mapY+j*cellH;
+    ctx.strokeStyle='#0e2a38';ctx.lineWidth=3;ctx.strokeRect(x+2,y+2,cellW-4,cellH-4);ctx.lineWidth=1;
+    ctx.font='bold 16px Segoe UI,Arial';ctx.fillStyle='#0e2a38';ctx.fillText('🐟',x+cellW/2,y+cellH/2+6);}
+}
+function pick(e){
+  const rect=cv.getBoundingClientRect(),sx=W/rect.width;
+  const cx=(e.clientX-rect.left)*sx,cy=(e.clientY-rect.top)*(H/rect.height);
+  const i=Math.floor((cx-mapX)/cellW),j=Math.floor((cy-mapY)/cellH);
+  if(i<0||i>=COLS||j<0||j>=ROWS)return;
+  chosen={i,j};result(i,j);draw();
+}
+function result(i,j){
+  const f=field,s=SP[sp];
+  const cur=f.cur[i][j],temp=f.temp[i][j],dep=f.depth[i][j],conf=f.conf[i][j];
+  const idon=idoneidad(i,j);
+  const dist=i; const logMalus=dist*4;
+  let score=Math.round(idon*100 - logMalus);
+  if(conf) score=0;
+  score=Math.max(0,Math.min(100,score));
+  const ok=(x)=>x?'✅':'◐';
+  const curOk=Math.abs(cur-s.curOpt)<s.curSd, tempOk=Math.abs(temp-s.tempOpt)<s.tempSd, depOk=dep>=s.depthMin&&dep<=80;
+  $('pre').hidden=true;$('res').hidden=false;
+  $('oCur').textContent=cur.toFixed(2)+' m/s '+ok(curOk);
+  $('oTemp').textContent=temp.toFixed(1)+' °C '+ok(tempOk);
+  $('oDep').textContent=Math.round(dep)+' m '+ok(depOk);
+  $('oLog').textContent=(dist<=2?'cerca ✅':(dist<=4?'media ◐':'lejos ✗'));
+  $('oScore').textContent=score+' / 100';
+  const e=$('estado');
+  if(conf){e.className='estado bad';e.innerHTML='❌ <b>Zona con conflicto de uso.</b> No se puede instalar (área protegida / navegación / otro uso). Mirá la capa ⚠ antes de decidir.';}
+  else if(score>=70){e.className='estado ok';e.innerHTML='✅ <b>Buen sitio.</b> Corriente, temperatura y profundidad acompañan, y está bien ubicado. Cruzaste las capas: así se elige un sitio de cultivo.';}
+  else{let m=[];if(!curOk)m.push(cur>s.curOpt?'<b>corriente muy fuerte</b> (te deforma la jaula)':'<b>corriente muy débil</b> (mala oxigenación)');if(!tempOk)m.push('la <b>temperatura</b> no es la ideal');if(!depOk)m.push('la <b>profundidad</b> no alcanza o es excesiva');if(dist>4)m.push('está <b>lejos de la costa</b> (opera caro)');
+    e.className='estado';e.innerHTML='◐ Sitio flojo: '+(m.join(', ')||'faltó cruzar capas')+'. Buscá donde <b>coincidan</b> todas.';}
+}
+function chips(){
+  $('sp').innerHTML=Object.keys(SP).map(k=>`<button class="chip sp ${k===sp?'on':''}" data-sp="${k}">${SP[k].nom}</button>`).join('');
+  $('sp').querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{sp=b.dataset.sp;if(chosen)result(chosen.i,chosen.j);chips();draw();}));
+  const LY=[['cur','🌊 Corriente'],['temp','🌡️ Temperatura'],['depth','📉 Profundidad'],['conf','⚠ Conflictos'],['idon','🎯 Idoneidad']];
+  $('layers').innerHTML=LY.map(([k,t])=>`<button class="chip ${k===layer?'on':''}" data-ly="${k}">${t}</button>`).join('');
+  $('layers').querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{layer=b.dataset.ly;chips();draw();leg();}));
+}
+function leg(){
+  $('legend').textContent={cur:'Claro→azul = más corriente. La especie quiere una ventana justa, ni mucha ni poca.',temp:'Azul frío → rojo cálido. Cada especie tiene su rango.',depth:'Claro somero → oscuro profundo. Necesitás profundidad para el fondeo.',conf:'Rojo = conflicto de uso: no se puede instalar ahí.',idon:'Verde = sitio idóneo (cruce de todas las capas). ¡Ojo, es la respuesta!'}[layer]||'';
+}
+cv.addEventListener('click',pick);
+$('nueva').addEventListener('click',()=>{gen();$('pre').hidden=false;$('res').hidden=true;draw();});
+gen();chips();leg();draw();
+</script>
+</body>
+</html>
