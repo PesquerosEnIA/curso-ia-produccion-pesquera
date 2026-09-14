@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · El ojo y la IA — control de calidad de fillets</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --naranja:#e0752d; --rojo:#d64545; --amar:#e0a92d; --gris2:#8aa0ab;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 14px;max-width:74ch}
+  .lead b{color:var(--tinta)}
+  .grid{display:flex;flex-wrap:wrap;gap:16px}
+  .col{flex:1 1 380px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 10px;font-weight:800}
+  canvas{width:100%;height:auto;display:block;border-radius:9px;background:#eef4f7}
+  .ask{font-size:14px;font-weight:700;margin:12px 0 8px;text-align:center}
+  .btns{display:flex;gap:8px}
+  .btns button{flex:1;border:1px solid var(--linea);background:var(--fondo);border-radius:10px;padding:12px 8px;font-weight:800;font-size:14px;cursor:pointer}
+  .btns button:hover{border-color:var(--azul)}
+  .btns button.gA{color:#177a53} .btns button.gB{color:#b26a1a} .btns button.gR{color:#b52d2d}
+  .reveal{margin-top:12px;font-size:13.5px;border-radius:10px;padding:11px 13px;border:1px solid;background:#f4f8fa;border-color:var(--linea)}
+  .reveal.ok{background:#eaf6ec;border-color:#bfe3cb} .reveal.bad{background:#fdecec;border-color:#f3c6c6}
+  .reveal b{font-weight:800}
+  .next{width:100%;margin-top:10px;border:0;border-radius:10px;background:var(--azul);color:#fff;font-weight:800;font-size:14px;padding:11px;cursor:pointer}
+  .next:hover{background:var(--azul-osc)}
+  table.cm{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:4px}
+  table.cm th,table.cm td{border:1px solid var(--linea);padding:7px 6px;text-align:center}
+  table.cm th{background:#f4f8fa;color:var(--gris);font-weight:800}
+  table.cm td.diag{background:#eaf6ec;font-weight:800;color:#177a53}
+  table.cm td.err{background:#fbeee0;color:#9a6314}
+  table.cm td.danger{background:#fdecec;color:#b52d2d;font-weight:800}
+  .rows .r{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--linea);font-size:13.5px}
+  .rows .r:last-child{border-bottom:0}
+  .rows .r .k{color:var(--gris)} .rows .r .v{font-weight:800;font-variant-numeric:tabular-nums}
+  .conx{margin-top:16px;font-size:13px}
+  .conx .c{display:flex;gap:11px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--linea)}
+  .conx .c:last-child{border-bottom:0}
+  .conx .tag{flex:0 0 auto;font-size:11px;font-weight:800;color:#fff;background:var(--verde);border-radius:6px;padding:3px 8px;text-transform:uppercase}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">👁️ Unidad 7 · Visión artificial</div>
+  <h1>El ojo y la IA: control de calidad</h1>
+  <p class="lead">Clasificá cada fillet en <b>Grado A</b>, <b>B</b> o <b>Rechazo</b> mirando color, manchas
+  (hematomas), parásitos y <i>gaping</i> (aberturas del músculo). Después la <b>visión artificial</b> da su
+  veredicto y se arma la <b>matriz de confusión</b>: dónde acierta y dónde se equivoca. El error caro es la
+  <b>mala aprobada</b> (rechazo real que la IA deja pasar): esa llega al cliente.</p>
+
+  <div class="grid">
+    <div class="col">
+      <div class="panel">
+        <h2>Pieza en la cinta</h2>
+        <canvas id="cv" width="480" height="280" aria-label="Fillet a inspeccionar"></canvas>
+        <div class="ask" id="ask">¿Qué grado le ponés?</div>
+        <div class="btns" id="btns">
+          <button class="gA" data-g="A">🟢 Grado A</button>
+          <button class="gB" data-g="B">🟡 Grado B</button>
+          <button class="gR" data-g="R">🔴 Rechazo</button>
+        </div>
+        <div class="reveal" id="reveal" hidden></div>
+        <button class="next" id="next" hidden>Siguiente pieza →</button>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="panel">
+        <h2>Matriz de confusión de la IA</h2>
+        <table class="cm" id="cm">
+          <tr><th rowspan="2" colspan="2" style="background:#fff;border:0"></th><th colspan="3">La IA dijo…</th></tr>
+          <tr><th>A</th><th>B</th><th>Rechazo</th></tr>
+          <tr><th rowspan="3" style="writing-mode:vertical-rl;transform:rotate(180deg)">Verdadero</th><th>A</th><td id="c_AA">0</td><td id="c_AB">0</td><td id="c_AR">0</td></tr>
+          <tr><th>B</th><td id="c_BA">0</td><td id="c_BB">0</td><td id="c_BR">0</td></tr>
+          <tr><th>Rechazo</th><td id="c_RA">0</td><td id="c_RB">0</td><td id="c_RR">0</td></tr>
+        </table>
+        <p style="font-size:12px;color:var(--gris);margin:8px 0 0">Diagonal verde = acierto. La celda roja (rechazo real → la IA dijo A) es el <b>error peligroso</b>.</p>
+        <div class="rows" style="margin-top:10px">
+          <div class="r"><span class="k">Piezas inspeccionadas</span><span class="v" id="oN">0</span></div>
+          <div class="r"><span class="k">Tu acierto</span><span class="v" id="oYou">—</span></div>
+          <div class="r"><span class="k">Acierto de la IA</span><span class="v" id="oAi">—</span></div>
+          <div class="r"><span class="k">⚠️ Malas aprobadas por la IA</span><span class="v" id="oFN">0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel conx" style="margin-top:16px">
+    <h2>Cómo se conecta con el curso</h2>
+    <div class="c"><span class="tag">Unidad 7</span><span>La cámara + modelo de <b>visión artificial</b> clasifica por color, forma y textura — lo mismo que hacés con el ojo, pero a velocidad de cinta.</span></div>
+    <div class="c"><span class="tag" style="background:#0a7fb4">Clase 6</span><span>La <b>matriz de confusión</b> mide un clasificador: aciertos en la diagonal, y el balance entre falsos positivos y negativos (precisión/recall).</span></div>
+    <div class="c"><span class="tag" style="background:#e0752d">Operación</span><span><b>Humano en el bucle:</b> la IA sugiere y ordena la línea, pero las piezas dudosas las confirma una persona. Nadie deja pasar una mala.</span></div>
+  </div>
+
+  <footer>
+    Modelo didáctico de inspección de fillets: el grado surge de frescura (color), hematomas, parásitos y gaping;
+    la IA "mide" esos rasgos con un margen de error, mayor en los casos límite. En el espíritu de HACCP/SENASA.
+    Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cv=$('cv'),ctx=cv.getContext('2d'); const W=480,H=280;
+function fit(){const w=cv.clientWidth||W;const r=window.devicePixelRatio||1;cv.width=w*r;cv.height=w*H/W*r;ctx.setTransform(r*w/W,0,0,r*w/W,0,0);}
+window.addEventListener('resize',()=>{fit();if(piece)drawFillet();});
+
+let piece=null, answered=false;
+let N=0, youOk=0, aiOk=0, fn=0;
+const CM={A:{A:0,B:0,R:0},B:{A:0,B:0,R:0},R:{A:0,B:0,R:0}};
+
+function gen(){
+  const frescura=0.55+Math.random()*0.45;
+  const bruises=Math.random()<0.5?0:1+Math.floor(Math.random()*3);
+  const parasites=Math.random()<0.6?0:1+Math.floor(Math.random()*3);
+  const gaping=Math.random()<0.5?0:Math.random()*0.6;
+  const q=Math.max(0,Math.min(1, frescura - bruises*0.11 - parasites*0.14 - gaping*0.35));
+  const grade = q>=0.72?'A':(q>=0.5?'B':'R');
+  // IA: mide q con ruido (más error cerca de los límites)
+  const meas=q+(Math.random()*2-1)*0.11;
+  const ai = meas>=0.72?'A':(meas>=0.5?'B':'R');
+  return {frescura,bruises,parasites,gaping,q,grade,ai,
+    // posiciones fijas de defectos
+    bpos:Array.from({length:bruises},()=>[0.25+Math.random()*0.5,0.3+Math.random()*0.4,6+Math.random()*7]),
+    ppos:Array.from({length:parasites},()=>[0.2+Math.random()*0.6,0.25+Math.random()*0.5]),
+    gpos:Array.from({length:gaping>0?2+Math.floor(gaping*4):0},()=>[0.3+Math.random()*0.4,0.25+Math.random()*0.5])
+  };
+}
+function drawFillet(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#eef4f7';ctx.fillRect(0,0,W,H);
+  const cx=W/2,cy=H/2, w=W*0.78,h=H*0.52;
+  // forma de fillet (clip)
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(cx-w/2,cy);
+  ctx.quadraticCurveTo(cx-w*0.3,cy-h/2, cx,cy-h*0.42);
+  ctx.quadraticCurveTo(cx+w*0.35,cy-h*0.36, cx+w/2,cy-h*0.10);
+  ctx.quadraticCurveTo(cx+w*0.40,cy+h*0.30, cx,cy+h*0.44);
+  ctx.quadraticCurveTo(cx-w*0.32,cy+h/2, cx-w/2,cy);
+  ctx.closePath();
+  ctx.clip();
+  // color de carne según frescura
+  const f=piece.frescura;
+  const g=ctx.createLinearGradient(0,cy-h/2,0,cy+h/2);
+  const r1=Math.round(240-(1-f)*40), g1=Math.round(150-(1-f)*70), b1=Math.round(150-(1-f)*70);
+  g.addColorStop(0,`rgb(${r1+8},${g1+16},${b1+20})`);g.addColorStop(0.5,`rgb(${r1},${g1},${b1})`);g.addColorStop(1,`rgb(${r1-14},${g1-10},${b1-8})`);
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // miotomos (líneas del músculo)
+  ctx.strokeStyle='rgba(200,120,110,.5)';ctx.lineWidth=2;
+  for(let k=-3;k<=4;k++){const x=cx+k*w*0.11;ctx.beginPath();ctx.moveTo(x,cy-h/2);ctx.quadraticCurveTo(x-14,cy,x,cy+h/2);ctx.stroke();}
+  // banda de piel plateada abajo
+  ctx.fillStyle='rgba(180,190,200,.5)';ctx.fillRect(0,cy+h*0.34,W,10);
+  // gaping (aberturas)
+  ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=3;
+  piece.gpos.forEach(([px,py])=>{const x=cx-w/2+px*w,y=cy-h/2+py*h;ctx.beginPath();ctx.moveTo(x-10,y);ctx.lineTo(x+10,y+4);ctx.stroke();});
+  // hematomas
+  piece.bpos.forEach(([px,py,rr])=>{const x=cx-w/2+px*w,y=cy-h/2+py*h;
+    const rg=ctx.createRadialGradient(x,y,1,x,y,rr);rg.addColorStop(0,'rgba(90,40,60,.9)');rg.addColorStop(1,'rgba(90,40,60,0)');ctx.fillStyle=rg;ctx.beginPath();ctx.arc(x,y,rr,0,6.283);ctx.fill();});
+  // parásitos
+  piece.ppos.forEach(([px,py])=>{const x=cx-w/2+px*w,y=cy-h/2+py*h;ctx.strokeStyle='rgba(60,40,30,.9)';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(x,y,3.2,0,6.283);ctx.stroke();ctx.fillStyle='rgba(60,40,30,.8)';ctx.beginPath();ctx.arc(x,y,1.2,0,6.283);ctx.fill();});
+  ctx.restore();
+  // contorno
+  ctx.strokeStyle='rgba(14,42,56,.25)';ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(cx-w/2,cy);
+  ctx.quadraticCurveTo(cx-w*0.3,cy-h/2, cx,cy-h*0.42);
+  ctx.quadraticCurveTo(cx+w*0.35,cy-h*0.36, cx+w/2,cy-h*0.10);
+  ctx.quadraticCurveTo(cx+w*0.40,cy+h*0.30, cx,cy+h*0.44);
+  ctx.quadraticCurveTo(cx-w*0.32,cy+h/2, cx-w/2,cy);
+  ctx.closePath();ctx.stroke();
+}
+const NAME={A:'Grado A',B:'Grado B',R:'Rechazo'};
+function answer(g){
+  if(answered) return; answered=true;
+  N++; if(g===piece.grade)youOk++; if(piece.ai===piece.grade)aiOk++;
+  CM[piece.grade][piece.ai]++;
+  if(piece.grade==='R'&&piece.ai!=='R')fn++;
+  const rv=$('reveal');const youRight=g===piece.grade, aiRight=piece.ai===piece.grade;
+  const dang=piece.grade==='R'&&piece.ai==='A';
+  rv.hidden=false; rv.className='reveal '+(dang?'bad':(aiRight?'ok':''));
+  rv.innerHTML=`Vos: <b>${NAME[g]}</b> ${youRight?'✓':'✗'} · Verdadero: <b>${NAME[piece.grade]}</b> · IA: <b>${NAME[piece.ai]}</b> ${aiRight?'✓':'✗'}`+
+    (dang?'<br>🚨 <b>La IA aprobó una pieza de rechazo.</b> Ese es el error que un humano tiene que atrapar.':
+     (!aiRight?'<br>La IA se equivocó: caso límite. Por eso las dudosas las confirma una persona.':''));
+  $('btns').querySelectorAll('button').forEach(b=>b.disabled=true);
+  $('next').hidden=false; updateCM();
+}
+function updateCM(){
+  for(const tr of ['A','B','R'])for(const pr of ['A','B','R']){
+    const cell=$('c_'+tr+pr);cell.textContent=CM[tr][pr];
+    cell.className = tr===pr?'diag':((tr==='R'&&pr==='A')?'danger':(CM[tr][pr]>0?'err':''));
+  }
+  $('oN').textContent=N;
+  $('oYou').textContent=N?Math.round(youOk/N*100)+'%':'—';
+  $('oAi').textContent=N?Math.round(aiOk/N*100)+'%':'—';
+  $('oFN').textContent=fn;
+}
+function nextPiece(){
+  piece=gen(); answered=false; $('reveal').hidden=true; $('next').hidden=true;
+  $('btns').querySelectorAll('button').forEach(b=>b.disabled=false);
+  drawFillet();
+}
+$('btns').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>answer(b.dataset.g)));
+$('next').addEventListener('click',nextPiece);
+fit(); nextPiece();
+</script>
+</body>
+</html>
