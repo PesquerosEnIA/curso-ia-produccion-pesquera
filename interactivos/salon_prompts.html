@@ -103,16 +103,10 @@ body{background:var(--abismo);color:var(--carta);font-family:'Archivo',system-ui
    ============================================================ */
 const PROMPTS = [
   {
-    fecha:"16/09", autor:"(ejemplo) Ana Rébora", tecnica:"CAR",
-    tarea:"Resumen de captura por especie desde un parte de pesca desordenado.",
-    prompt:"Sos el asistente de a bordo del pesquero.\nCONTEXTO: te paso un parte de pesca escrito a mano, en texto libre y con abreviaturas.\nACCIÓN: extraé las especies y los kg de cada una, sumá el total y detectá cualquier dato que no cierre.\nRESULTADO: devolvé una tabla en markdown ordenada de mayor a menor kg, y una línea final con el total. Si algo es ambiguo, marcalo con ⚠ y no lo inventes.\n\nParte:\n\"\"\"\n{pegar el parte acá}\n\"\"\"",
-    porque:"Usa <strong>CAR</strong> con roles y formato de salida explícito, y —clave— le prohíbe inventar: pide marcar lo ambiguo. Reutilizable con cualquier parte."
-  },
-  {
-    fecha:"17/09", autor:"(ejemplo) Bruno Lértora", tecnica:"Few-Shot",
-    tarea:"Clasificar mensajes del grupo en 'consulta técnica' / 'aviso operativo' / 'otro'.",
-    prompt:"Clasificá cada mensaje en una de tres categorías, siguiendo estos ejemplos:\n\nMensaje: \"¿A cuánto está la SST en el 41.3.2?\" → consulta técnica\nMensaje: \"El San Rafael zarpa 6am\" → aviso operativo\nMensaje: \"Buenos días a todos\" → otro\n\nAhora clasificá:\nMensaje: \"{texto}\" →",
-    porque:"<strong>Few-Shot</strong> bien hecho: tres ejemplos que fijan el criterio y el formato de salida exacto. El modelo generaliza sin explicaciones de más."
+    fecha:"16/09", autor:"Paula Moirondo Danovaro", tecnica:"Con contexto",
+    tarea:"«Traductor de partes»: convertir un registro de captura desordenado en una tabla limpia.",
+    prompt:"Actuá como un asistente en procesamiento y limpieza de datos de pesca marítima. Tu tarea es analizar anotaciones de campo o registros de captura desorganizados y estructurarlos en una tabla limpia y consistente. Generá una tabla con especie, captura, zona y hora. Si un dato no está explícito, no asumas un valor: marcalo como dudoso.",
+    porque:"Rol claro, tarea precisa y <strong>formato de salida definido</strong> (especie · captura · zona · hora). Y lo que lo hace ganador: la <strong>regla anti-alucinación</strong> —marcar lo dudoso en vez de inventarlo—. Un prompt reutilizable con cualquier parte."
   }
 ];
 
