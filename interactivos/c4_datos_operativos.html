@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El sistema de datos de una operación pesquera — Clase 4</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --naranja:#e0752d; --rojo:#d64545; --amar:#e0a92d; --gris2:#8aa0ab;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 16px;max-width:74ch}
+  .lead b{color:var(--tinta)}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04);margin-bottom:16px}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 4px;font-weight:800}
+  .psub{font-size:13px;color:var(--gris);margin:0 0 14px}
+  .cats{display:flex;flex-wrap:wrap;gap:12px}
+  .cat{flex:1 1 260px;border:1px solid var(--linea);border-radius:12px;padding:13px 15px;background:var(--fondo)}
+  .cat .ct{font-size:13.5px;font-weight:800;margin-bottom:8px}
+  .cat .tb{display:flex;justify-content:space-between;font-size:12.5px;color:var(--gris);padding:3px 0;border-bottom:1px dashed var(--linea)}
+  .cat .tb:last-child{border-bottom:0}
+  .cat .tb b{color:var(--tinta);font-variant-numeric:tabular-nums}
+  .tot{margin-top:12px;font-size:13px;color:var(--gris)}
+  .tot b{color:var(--azul-osc);font-size:16px}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .tabs button{border:1px solid var(--linea);background:var(--fondo);border-radius:20px;padding:8px 15px;font-weight:700;font-size:13.5px;cursor:pointer}
+  .tabs button.on{background:var(--azul);border-color:var(--azul);color:#fff}
+  .bars .row{display:grid;grid-template-columns:100px 1fr auto;gap:10px;align-items:center;margin:9px 0;font-size:13.5px}
+  .bars .nm{font-weight:700}
+  .bars .track{background:#eef3f5;border-radius:6px;height:20px;overflow:hidden}
+  .bars .fill{height:100%;background:linear-gradient(90deg,#0a7fb4,#00527e);border-radius:6px}
+  .bars .val{font-weight:800;font-variant-numeric:tabular-nums;color:var(--azul-osc)}
+  .fleet{display:flex;flex-wrap:wrap;gap:12px}
+  .ship{flex:1 1 260px;border:1px solid var(--linea);border-radius:12px;padding:13px 15px}
+  .ship .nm{font-size:15px;font-weight:800}
+  .ship .mt{font-family:ui-monospace,monospace;font-size:12px;color:var(--gris2)}
+  .ship .r{display:flex;justify-content:space-between;font-size:13px;color:var(--gris);padding:3px 0}
+  .ship .r b{color:var(--tinta)}
+  .tag{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:20px;margin-top:6px}
+  .tag.fresquero{background:#e4f4ec;color:#177a53} .tag.congelador{background:#eaf3f8;color:#075d86} .tag.potero{background:#fdf3e6;color:#b26a1a}
+  .recon .hl{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px}
+  .recon .st{flex:1 1 150px;background:var(--fondo);border:1px solid var(--linea);border-radius:12px;padding:12px 14px}
+  .recon .st .v{font-size:22px;font-weight:800}
+  .recon .st .k{font-size:12px;color:var(--gris)}
+  table.rec{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.rec th,table.rec td{border-bottom:1px solid var(--linea);padding:7px 6px;text-align:right}
+  table.rec th{color:var(--gris);font-weight:800;text-align:right}
+  table.rec td.l,table.rec th.l{text-align:left}
+  td.pos{color:var(--verde);font-weight:800} td.neg{color:var(--rojo);font-weight:800}
+  .conx .c{display:flex;gap:11px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--linea);font-size:13px}
+  .conx .c:last-child{border-bottom:0}
+  .conx .tag2{flex:0 0 auto;font-size:11px;font-weight:800;color:#fff;background:var(--azul-osc);border-radius:6px;padding:3px 8px;text-transform:uppercase}
+  .conx .tag2.d6{background:var(--verde)} .conx .tag2.d8{background:var(--naranja)} .conx .tag2.d1{background:var(--azul)}
+  footer{margin-top:6px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🗄️ Clase 4 · El dato operativo</div>
+  <h1>El sistema de datos de una operación pesquera</h1>
+  <p class="lead">Además de los sensores ambientales (SST, clorofila, AIS), una empresa pesquera genera un
+  <b>Small Data operativo</b> enorme: partes de pesca, lances, descargas, control de calidad, comercialización.
+  Este es un sistema real (sintético) de <b>29 tablas</b> que cubren toda la cadena. Recorrelo: de dónde salen los
+  datos, cómo se organizan, y por qué el valor aparece al <b>cruzarlos</b> (por ejemplo, lo declarado a bordo contra
+  lo pesado en descarga).</p>
+
+  <div class="panel">
+    <h2>El modelo de datos</h2>
+    <p class="psub">Toda la operación, tabla por tabla. Cada una es una fuente de datos que alimenta modelos y decisiones.</p>
+    <div class="cats" id="cats"></div>
+    <div class="tot">Total aproximado: <b id="totRows">—</b> registros en el sistema. El dato ya existe — el desafío es integrarlo y usarlo.</div>
+  </div>
+
+  <div class="panel">
+    <h2>Explorá los datos</h2>
+    <div class="tabs" id="tabs">
+      <button data-t="cap" class="on">🎣 Captura por especie</button>
+      <button data-t="flota">🚢 La flota</button>
+      <button data-t="recon">⚖️ Reconciliación</button>
+    </div>
+    <div id="cap"><div class="bars" id="bars"></div><p class="psub" style="margin-top:12px">kg declarados por especie (temporada). Fuente: <code>get_resumen_captura_por_especie</code>.</p></div>
+    <div id="flota" hidden><div class="fleet" id="fleet"></div></div>
+    <div id="recon" hidden class="recon">
+      <div class="hl">
+        <div class="st"><div class="v" id="rExc">—</div><div class="k">excepciones detectadas</div></div>
+        <div class="st"><div class="v" id="rLances">—</div><div class="k">lances recientes (30 días)</div></div>
+        <div class="st"><div class="v">±15%</div><div class="k">umbral de alerta declarado vs. pesado</div></div>
+      </div>
+      <p class="psub">Cuando lo <b>declarado a bordo</b> difiere de lo <b>pesado en descarga</b> más que el umbral, salta una excepción. Es el corazón de la <b>trazabilidad</b>. Las mayores diferencias:</p>
+      <table class="rec"><thead><tr><th class="l">Embarcación</th><th class="l">Especie</th><th>Declarado</th><th>Pesado</th><th>Dif.</th></tr></thead><tbody id="recBody"></tbody></table>
+    </div>
+  </div>
+
+  <div class="panel conx">
+    <h2>Cómo se conecta con el curso</h2>
+    <div class="c"><span class="tag2">Clase 4</span><span>Acá conviven <b>sensores</b> (<code>lecturas_satelitales</code>) y <b>muestreo de tallas</b> (16.695 filas, que enlazan con la selectividad). Small data operativo + big data ambiental = el cuadro completo.</span></div>
+    <div class="c"><span class="tag2 d6">Clase 6</span><span>El <b>modelo predictivo</b> se alimenta de estos datos: predecir captura por especie, o CPUE por barco.</span></div>
+    <div class="c"><span class="tag2 d8">Clase 8</span><span>Un <b>agente</b> puede auditar las excepciones de reconciliación y armar el informe solo — el caso de "agentes de IA".</span></div>
+    <div class="c"><span class="tag2 d1">Clase 1</span><span>"Un dato que no se integra es un archivo": este sistema es la transformación digital en acción.</span></div>
+  </div>
+
+  <footer>
+    Datos <b>sintéticos</b> tomados en vivo de un <b>MCP del curso</b> ("curso pesca fishy", de Damián Giacone) — un
+    servidor de herramientas que un asistente de IA puede consultar en lenguaje natural. Snapshot embebido para el
+    aula. Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+  </footer>
+</div>
+
+<script>
+const DATA={"especies":[{"n":"Calamar","l":48,"kg":24756},{"n":"Pescadilla","l":39,"kg":23575},{"n":"Langostino","l":42,"kg":21265},{"n":"Vieira","l":38,"kg":20428},{"n":"Merluza","l":33,"kg":18348}],"flota":[{"m":"PM-0187","n":"Cruz del Sur","pat":"Hugo Aráoz","esl":19.8,"bod":12000,"tipo":"fresquero"},{"m":"PM-0231","n":"Don Alberto","pat":"Roberto Sosa","esl":22.5,"bod":15000,"tipo":"fresquero"},{"m":"PM-0245","n":"Estrella Azul","pat":"Marcelo Duarte","esl":24.1,"bod":17000,"tipo":"congelador"},{"m":"PM-0310","n":"Nueva Esperanza","pat":"Carlos Yulán","esl":23.0,"bod":16000,"tipo":"potero"},{"m":"PM-0198","n":"San Rafael","pat":"Julián Pérez","esl":20.6,"bod":13500,"tipo":"fresquero"}],"exc_total":131,"reciente_total":103,"exc":[{"emb":"Cruz del Sur","esp":"Pescadilla","decl":814,"pes":936,"dif":122,"pct":15.0},{"emb":"Nueva Esperanza","esp":"Pescadilla","decl":749,"pes":861,"dif":112,"pct":15.0},{"emb":"Don Alberto","esp":"Calamar","decl":692,"pes":795,"dif":103,"pct":14.9},{"emb":"San Rafael","esp":"Pescadilla","decl":640,"pes":545,"dif":-95,"pct":-14.8},{"emb":"Don Alberto","esp":"Pescadilla","decl":494,"pes":567,"dif":73,"pct":14.8},{"emb":"Cruz del Sur","esp":"Vieira","decl":592,"pes":505,"dif":-87,"pct":-14.7}]};
+const CATS=[
+ {t:'🎣 Captura y flota',tb:[['embarcaciones',5],['lances',200],['plan_captura',100],['muestreo_tallas',16695],['especies_tallas_minimas',5]]},
+ {t:'📡 Sensores',tb:[['lecturas_satelitales',100],['senales_planta',null]]},
+ {t:'🏭 Proceso y planta',tb:[['descargas',200],['controles_calidad',200],['lotes_producto',167],['cajones',5565],['plan_produccion',200],['mantenimiento',200],['registro_produccion',null]]},
+ {t:'🚚 Comercialización',tb:[['despachos',38],['clientes',10],['pedidos',60],['pedido_items',57],['facturas',19],['productos',8]]},
+ {t:'🧠 Documentos / IA',tb:[['documentos',5],['documento_chunks',2341]]},
+ {t:'📊 Vistas analíticas',tb:[['vista_capturas_recientes',null],['vista_excepciones_reconciliacion',null],['vista_reconciliacion_capturas',null],['vista_resumen_por_especie',null]]}
+];
+const $=id=>document.getElementById(id);
+const nf=n=>n.toLocaleString('es-AR');
+// modelo de datos
+let total=0;
+$('cats').innerHTML=CATS.map(c=>{
+  return `<div class="cat"><div class="ct">${c.t}</div>${c.tb.map(([n,r])=>{if(r)total+=r;return `<div class="tb"><span>${n}</span><b>${r?nf(r):'·'}</b></div>`}).join('')}</div>`;
+}).join('');
+$('totRows').textContent=nf(total)+'+';
+// captura por especie (barras)
+const maxKg=Math.max(...DATA.especies.map(e=>e.kg));
+$('bars').innerHTML=DATA.especies.map(e=>`<div class="row"><span class="nm">${e.n}</span><div class="track"><div class="fill" style="width:${Math.round(e.kg/maxKg*100)}%"></div></div><span class="val">${nf(e.kg)} kg</span></div>`).join('');
+// flota
+$('fleet').innerHTML=DATA.flota.map(f=>`<div class="ship"><div class="nm">${f.n}</div><div class="mt">${f.m} · patrón ${f.pat}</div><div class="r"><span>Eslora</span><b>${f.esl} m</b></div><div class="r"><span>Bodega</span><b>${nf(f.bod)} kg</b></div><span class="tag ${f.tipo}">${f.tipo}</span></div>`).join('');
+// reconciliación
+$('rExc').textContent=DATA.exc_total;
+$('rLances').textContent=DATA.reciente_total;
+$('recBody').innerHTML=DATA.exc.map(e=>`<tr><td class="l">${e.emb}</td><td class="l">${e.esp}</td><td>${nf(e.decl)}</td><td>${nf(e.pes)}</td><td class="${e.dif>=0?'pos':'neg'}">${e.dif>=0?'+':''}${e.dif} (${e.pct}%)</td></tr>`).join('');
+// tabs
+$('tabs').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+  $('tabs').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  ['cap','flota','recon'].forEach(id=>$(id).hidden = id!==b.dataset.t);
+}));
+</script>
+</body>
+</html>
