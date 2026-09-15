@@ -103,10 +103,10 @@ body{background:var(--abismo);color:var(--carta);font-family:'Archivo',system-ui
    ============================================================ */
 const PROMPTS = [
   {
-    fecha:"16/09", autor:"Paula Moirondo Danovaro", tecnica:"Con contexto",
-    tarea:"«Traductor de partes»: convertir un registro de captura desordenado en una tabla limpia.",
-    prompt:"Actuá como un asistente en procesamiento y limpieza de datos de pesca marítima. Tu tarea es analizar anotaciones de campo o registros de captura desorganizados y estructurarlos en una tabla limpia y consistente. Generá una tabla con especie, captura, zona y hora. Si un dato no está explícito, no asumas un valor: marcalo como dudoso.",
-    porque:"Rol claro, tarea precisa y <strong>formato de salida definido</strong> (especie · captura · zona · hora). Y lo que lo hace ganador: la <strong>regla anti-alucinación</strong> —marcar lo dudoso en vez de inventarlo—. Un prompt reutilizable con cualquier parte."
+    fecha:"(ejemplo)", autor:"—", tecnica:"CAR",
+    tarea:"Así se verá cada ganador. El primero se suma cuando cierre la ronda.",
+    prompt:"Sos el asistente de a bordo del pesquero.\nCONTEXTO: te paso un parte de pesca escrito a mano, en texto libre y con abreviaturas.\nACCIÓN: extraé las especies y los kg de cada una, sumá el total y detectá cualquier dato que no cierre.\nRESULTADO: devolvé una tabla en markdown ordenada de mayor a menor kg. Si algo es ambiguo, marcalo con ⚠ y no lo inventes.",
+    porque:"<em>(Ejemplo de formato.)</em> Estructura clara, formato de salida explícito y la regla de no inventar. El ganador real entra al cerrar el Prompt of the Day."
   }
 ];
 
