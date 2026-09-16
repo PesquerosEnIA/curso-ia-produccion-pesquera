@@ -103,10 +103,16 @@ body{background:var(--abismo);color:var(--carta);font-family:'Archivo',system-ui
    ============================================================ */
 const PROMPTS = [
   {
-    fecha:"(ejemplo)", autor:"—", tecnica:"CAR",
-    tarea:"Así se verá cada ganador. El primero se suma cuando cierre la ronda.",
-    prompt:"Sos el asistente de a bordo del pesquero.\nCONTEXTO: te paso un parte de pesca escrito a mano, en texto libre y con abreviaturas.\nACCIÓN: extraé las especies y los kg de cada una, sumá el total y detectá cualquier dato que no cierre.\nRESULTADO: devolvé una tabla en markdown ordenada de mayor a menor kg. Si algo es ambiguo, marcalo con ⚠ y no lo inventes.",
-    porque:"<em>(Ejemplo de formato.)</em> Estructura clara, formato de salida explícito y la regla de no inventar. El ganador real entra al cerrar el Prompt of the Day."
+    fecha:"16/09", autor:"Carla Campos", tecnica:"CAR",
+    tarea:"«Traductor de partes»: resumen de captura por especie desde un parte desordenado. — 🏆 Ganadora del 1er Prompt of the Day.",
+    prompt:"Actuá como asistente especializado en informes de pesca a bordo. A partir del siguiente parte de pesca desordenado, redactá un resumen de captura por especie listo para incorporar al informe.\n\nIdentificá todas las especies y sus cantidades. Unificá abreviaturas o variantes evidentes del mismo nombre. Si una especie aparece varias veces, sumá solo las cantidades que correspondan a capturas distintas y evitá duplicados. Conservá las unidades originales y no inventes, completes ni estimes datos faltantes.\n\nSi encontrás información ambigua, contradictoria, aproximada o incompleta, marcala como «REVISAR» y explicá brevemente el motivo. Verificá las sumas antes de responder y presentá solo la información relevante en este formato:\n\nRESUMEN DE CAPTURA POR ESPECIE\n- [Especie]: [cantidad] [unidad]\nTOTAL GENERAL: [cantidad y unidad] (incluir solo si todas las cantidades pueden sumarse de forma válida).\nOBSERVACIONES:\n- [Dato a revisar y motivo] (omitir si no hay).\n\nParte de pesca: [PEGAR ACÁ EL PARTE DESORDENADO]",
+    porque:"El prompt más robusto: rol claro, unifica abreviaturas, prohíbe inventar y —lo clave— pide <strong>verificar las sumas</strong> y marcar lo dudoso como «REVISAR» <strong>con el motivo</strong>. Formato de salida definido y probado con un parte trampa (especies repetidas, datos faltantes, total que no cerraba)."
+  },
+  {
+    fecha:"16/09", autor:"Sabrina Ojeda", tecnica:"Few-Shot",
+    tarea:"Mención especial — el mismo reto, llevado a herramienta de fiscalización + export a Excel.",
+    prompt:"Actuá como experto en biología marina, cartografía náutica, logística pesquera y fiscalización marítima en Argentina. Analizá el parte de pesca y estructuralo en una tabla ordenada, detectando anomalías o posibles infracciones (vedas, zonas cerradas).\n\nColumnas: Especie (nombre común + científico en cursiva) · Kilogramos · Zona (coordenadas; si el parte da una subárea, inferí el rango representativo e indicalo) · Hora · Observaciones/Desvíos (⚠️ con el motivo, o «Ok»).\n\nCriterios de desvío: infracción de veda / zona cerrada, nombres ambiguos, bycatch excesivo, volúmenes atípicos, incoherencias geográfico-temporales.\n\nSalida: generá un Excel (.xlsx) solo con la tabla — encabezados azul náutico (#1F4E78) con texto blanco, separador de miles en kg, celdas de Observaciones en verde («Ok») o coral (desvíos), y una fila final TOTAL con =SUM(...).\n\n[Texto del parte de pesca a procesar]\n\n(Prompt abreviado del original.)",
+    porque:"Convirtió el reto en una <strong>herramienta de fiscalización</strong>: nombres científicos, detección de <strong>vedas</strong> y anomalías, y hasta un <strong>Excel formateado</strong> que ella misma testeó. Ambición y ejecución de sobra."
   }
 ];
 
