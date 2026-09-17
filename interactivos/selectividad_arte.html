@@ -123,7 +123,7 @@ const DISP=[
   {id:'copo',   nm:'Copo desnudo',  L50:42.6, RS:5.7,  col:'#8aa0ab', desc:'Copo de malla sin dispositivo selectivo. L50 alto: libera juveniles… pero también mucho comercial (se te va captura legal).'},
   {id:'dejupa', nm:'DEJUPA',        L50:35.9, RS:14.6, col:'#0a7fb4', desc:'Grilla selectiva desarrollada en Argentina para la pesquería de langostino. Su L50 cae justo sobre la talla mínima.'},
   {id:'flexi',  nm:'Flexigrid',     L50:37.4, RS:11.9, col:'#1f9d6b', desc:'Grilla flexible de selección. L50 apenas por encima de la talla mínima: protege juveniles reteniendo comercial.'},
-  {id:'tango',  nm:'Red tangonera', L50:29.9, RS:7.2,  col:'#e0752d', desc:'Red tangonera sin dispositivo. L50 por debajo de la talla mínima: retiene juveniles de merluza (bycatch sublegal).'}
+  {id:'tango',  nm:'Red tangonera', L50:29.9, RS:7.2, decr:true, col:'#e0752d', desc:'Red tangonera sin dispositivo. Selectividad decreciente (al revés que las grillas): retiene la merluza chica —los juveniles— y suelta la grande. Bycatch sublegal.'}
 ];
 let sel='tango'; // arranca en el peor caso, para que haya algo que mejorar
 
@@ -139,12 +139,12 @@ const POP=(()=>{
 })();
 
 // Ojiva logística de retención: pequeños escapan, grandes se retienen
-const ret=(L,L50,RS)=>1/(1+Math.exp(-Math.log(9)*(L-L50)/RS));
+const ret=(L,L50,RS,decr)=>{const s=1/(1+Math.exp(-Math.log(9)*(L-L50)/RS));return decr?1-s:s;};
 
 function metrics(d){
   let juvTot=0,juvRet=0,comTot=0,comRet=0;
   POP.forEach(b=>{
-    const r=ret(b.L,d.L50,d.RS);
+    const r=ret(b.L,d.L50,d.RS,d.decr);
     if(b.L<TALLA){juvTot+=b.p;juvRet+=b.p*r;} else {comTot+=b.p;comRet+=b.p*r;}
   });
   const libPct=(1-juvRet/juvTot)*100;      // juveniles liberados
@@ -177,7 +177,7 @@ function render(){
   $('oLegal').textContent=r.legal?'✅ protege la talla':'❌ retiene sublegal';
   $('oScore').textContent=Math.round(r.score)+' / 100';
   const box=$('optBox');
-  if(d.id==='tango'){box.className='opt warn';box.innerHTML='❌ <b>Retiene merluza por debajo de talla.</b> El L50 (29,9 cm) queda por debajo de los 35 cm: entran juveniles. Probá una <b>grilla selectiva</b>.';}
+  if(d.id==='tango'){box.className='opt warn';box.innerHTML='❌ <b>Selectividad decreciente:</b> retiene la merluza chica (juveniles) y suelta la grande — justo al revés de lo que querés. Entra bycatch sublegal. Probá una <b>grilla selectiva</b>.';}
   else if(d.id==='copo'){box.className='opt';box.innerHTML='◐ Libera juveniles, pero su L50 (42,6 cm) es <b>tan alto</b> que también deja escapar comercial: sostenible pero perdés captura legal.';}
   else{box.className='opt';box.innerHTML='✅ <b>El L50 cae sobre la talla mínima</b>: libera lo sublegal y retiene lo comercial. Esto es selectividad bien resuelta — y sale de datos, no de intuición.';}
   renderDevs();
@@ -211,23 +211,23 @@ function draw(d){
   if(!compare){
     // barras: liberada (celeste) + retenida (rojo) según dispositivo
     const bw=(X(14)-X(12))*0.82;
-    POP.forEach(b=>{const x=X(b.L),yTop=Yp(b.p),hh=(mT+ph)-yTop,r=ret(b.L,d.L50,d.RS);
+    POP.forEach(b=>{const x=X(b.L),yTop=Yp(b.p),hh=(mT+ph)-yTop,r=ret(b.L,d.L50,d.RS,d.decr);
       ctx.fillStyle='#cfe0e8';ctx.fillRect(x-bw/2,yTop,bw,hh);
       ctx.fillStyle='#d64545';ctx.fillRect(x-bw/2,yTop,bw,hh*r);});
     // ojiva del dispositivo
-    line(ctx,d.L50,d.RS,d.col,2.6,X,Yr,Lmin,Lmax);
+    line(ctx,d.L50,d.RS,d.decr,d.col,2.6,X,Yr,Lmin,Lmax);
   }else{
     // solo las 4 ojivas
-    DISP.forEach(x=>line(ctx,x.L50,x.RS,x.col,x.id===sel?3:1.6,X,Yr,Lmin,Lmax));
+    DISP.forEach(x=>line(ctx,x.L50,x.RS,x.decr,x.col,x.id===sel?3:1.6,X,Yr,Lmin,Lmax));
   }
   // línea talla mínima
   ctx.strokeStyle='#3f5a68';ctx.setLineDash([5,4]);ctx.lineWidth=1.4;
   ctx.beginPath();ctx.moveTo(X(TALLA),mT);ctx.lineTo(X(TALLA),mT+ph);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='#3f5a68';ctx.textAlign='left';ctx.fillText('35 cm',X(TALLA)+4,mT+11);
 }
-function line(ctx,L50,RS,col,wid,X,Yr,Lmin,Lmax){
+function line(ctx,L50,RS,decr,col,wid,X,Yr,Lmin,Lmax){
   ctx.strokeStyle=col;ctx.lineWidth=wid;ctx.beginPath();
-  for(let L=Lmin;L<=Lmax;L+=0.5){const x=X(L),y=Yr(ret(L,L50,RS));L===Lmin?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+  for(let L=Lmin;L<=Lmax;L+=0.5){const x=X(L),y=Yr(ret(L,L50,RS,decr));L===Lmin?ctx.moveTo(x,y):ctx.lineTo(x,y);}
   ctx.stroke();
 }
 

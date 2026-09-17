@@ -46,4 +46,4 @@ Un CSV por dispositivo con la **proporción retenida observada** y la **curva aj
 
 ## ⚠ Hallazgo — la tangonera tiene selectividad decreciente
 
-Las grillas (DEJUPA, Flexigrid) y el copo tienen ojiva **creciente** (peces chicos escapan, grandes se retienen). La **tangonera es al revés**: su retención de merluza **decrece** con la talla (retiene los chicos, suelta los grandes) — confirmado por la columna S(L) de esa hoja. Los interactivos representan la tangonera con ojiva creciente por simplicidad; **a confirmar con Ariel** si conviene corregir el simulador para reflejar la dirección real (cambia qué tallas retiene, no la conclusión de que retiene juveniles). El resto de los datos y parámetros están verificados.
+Las grillas (DEJUPA, Flexigrid) y el copo tienen ojiva **creciente** (peces chicos escapan, grandes se retienen). La **tangonera es al revés**: su retención de merluza **decrece** con la talla (retiene los chicos, suelta los grandes) — confirmado por la columna S(L) de esa hoja. ✅ El simulador `selectividad_arte.html` ya está **corregido** para mostrar la tangonera con su ojiva decreciente real. El resto de los datos y parámetros están verificados.
