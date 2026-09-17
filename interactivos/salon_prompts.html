@@ -100,6 +100,8 @@ body{background:var(--abismo);color:var(--carta);font-family:'Archivo',system-ui
      tarea    la consigna del día (corta)
      prompt   el prompt ganador, tal cual (se muestra en bloque de código)
      porque   1-2 líneas de por qué ganó. Admite <strong>.
+   El badge "Nuevo" se pone solo en todas las entradas que comparten
+   la fecha del último elemento del array.
    ============================================================ */
 const PROMPTS = [
   {
@@ -113,11 +115,30 @@ const PROMPTS = [
     tarea:"Mención especial — el mismo reto, llevado a herramienta de fiscalización + export a Excel.",
     prompt:"Actuá como experto en biología marina, cartografía náutica, logística pesquera y fiscalización marítima en Argentina. Analizá el parte de pesca y estructuralo en una tabla ordenada, detectando anomalías o posibles infracciones (vedas, zonas cerradas).\n\nColumnas: Especie (nombre común + científico en cursiva) · Kilogramos · Zona (coordenadas; si el parte da una subárea, inferí el rango representativo e indicalo) · Hora · Observaciones/Desvíos (⚠️ con el motivo, o «Ok»).\n\nCriterios de desvío: infracción de veda / zona cerrada, nombres ambiguos, bycatch excesivo, volúmenes atípicos, incoherencias geográfico-temporales.\n\nSalida: generá un Excel (.xlsx) solo con la tabla — encabezados azul náutico (#1F4E78) con texto blanco, separador de miles en kg, celdas de Observaciones en verde («Ok») o coral (desvíos), y una fila final TOTAL con =SUM(...).\n\n[Texto del parte de pesca a procesar]\n\n(Prompt abreviado del original.)",
     porque:"Convirtió el reto en una <strong>herramienta de fiscalización</strong>: nombres científicos, detección de <strong>vedas</strong> y anomalías, y hasta un <strong>Excel formateado</strong> que ella misma testeó. Ambición y ejecución de sobra."
+  },
+  {
+    fecha:"17/09", autor:"Nicolás Córdoba", tecnica:"Con contexto",
+    tarea:"«El dato que no cierra»: detectar diferencias entre lo declarado a bordo y lo pesado en descarga, ordenarlas por gravedad y explicarlas sin acusar a nadie. — 🏆 Ganador del POTD del 17/09.",
+    prompt:"Sos el asistente de producción que asiste al encargado de planta durante el control de descarga en el muelle. Tu trabajo es comparar, lance por lance, lo que el patrón declaró a bordo contra lo que efectivamente se pesó al descargar, y avisarle al personal qué mirar con más atención primero.\n\nPunto de partida importante: Una diferencia entre lo declarado y lo pesado NO es sinónimo de fraude. La gran mayoría de los casos son errores de tipeo, redondeos, pérdida de agua/hielo, mezcla de cajones entre lances, o una balanza que necesita calibración. El informe tiene que sonar a un aviso preventivo (\"che, prestale atención a esto\") y no a una acusación.\n\nClasificá las discrepancias según su porcentaje de desvío:\n- Tolerable (≤ 5%): Deshielo normal, escurridura o redondeo. Sin alerta.\n- Moderado (5% - 15%): Posible error de tipeo, tara o falta de calibración. Sugerir verificación rápida.\n- Crítico (> 15%): Prioridad máxima. Pedir recheck inmediato del lance.\n\n1. Resumen de Alerta (1 oración): Mencionar el lance con mayor diferencia absoluta/porcentual y la acción principal.\n2. Tabla de Prioridad (ordenada obligatoriamente de mayor a menor gravedad):\n| Prioridad | Lance | Declarado vs. Pesado | Diferencia | Severidad | Causa probable a verificar |\n3. Nota operativa rápida: Máximo 2 viñetas concisas con acciones puntuales para el personal de muelle.\n\n[DATOS DE ENTRADA]\n[Pegar aquí la planilla o listado de lances declarados vs. pesados]",
+    porque:"Resolvió la parte difícil de la consigna: <strong>qué es «grave»</strong>. Puso una escala operativa (≤5% tolerable · 5-15% moderado · &gt;15% crítico) que coincide con el umbral ±15% del propio material del curso, y ancló cada tramo en causas del oficio: deshielo, tara, mezcla de cajones, balanza sin calibrar. Blindó el tono con un párrafo explícito de «esto no es una acusación». Y lo <strong>probó contra los datos reales</strong> de la base del curso: sus cinco lances y porcentajes coinciden exactamente. Escrito para el lector real — el encargado en el muelle, con frío y ruido, que necesita leer la prioridad de un vistazo."
+  },
+  {
+    fecha:"17/09", autor:"Claudio Muñoz", tecnica:"Con contexto",
+    tarea:"Mención especial — el mismo reto, pensado como sistema: Pareto de gravedad sobre las bases de flota y calidad de la empresa.",
+    prompt:"Sos un asistente del gerente general de la empresa, quien tiene a cargo flota y producción.\n\nQuiero comparar una lista de lances con lo declarado a bordo vs. lo pesado en descarga de esta temporada, por barco. Que ordenes de mayor a menor las diferencias. Que armes un diagrama de Pareto por su gravedad, basado en nuestro sistema de calidad.\n\nLos datos están en la base de datos de flota, en la base de datos de calidad de ingreso a planta y en nuestro manual de calidad, que están en el sistema integrado Fishing Corp, a la cual tenés acceso.\n\nY que me envíes una alerta del barco y la gravedad de esa diferencia.",
+    porque:"El único que preguntó <strong>dónde viven los datos</strong>: no le pega un listado al asistente, lo apunta a la base de flota, a la de calidad de ingreso a planta y al manual de calidad. Pide <strong>Pareto</strong> —priorizar los pocos casos que explican la mayor parte del desvío— y cierra con una alerta accionable. Pensamiento de sistema, no de prompt suelto: así se ve un asistente conectado a la empresa."
+  },
+  {
+    fecha:"17/09", autor:"Carla Campos", tecnica:"CAR",
+    tarea:"Mención especial — el mismo reto, con el método más disciplinado: reglas anti-invención, tono neutral y «REVISAR» para lo que no cierra.",
+    prompt:"Actuá como asistente de análisis de datos de una operación pesquera.\n\nVas a recibir una lista de lances con los kilos declarados a bordo y los kilos pesados en descarga. Tu tarea es detectar las diferencias que conviene revisar, ordenarlas de mayor a menor importancia y explicar, en lenguaje simple, por qué llaman la atención.\n\nPara cada lance:\n1. Compará los kilos declarados a bordo con los kilos pesados en descarga.\n2. Calculá la diferencia en kilos y la diferencia porcentual respecto de lo declarado.\n3. Ordená los casos de mayor a menor según la diferencia porcentual absoluta. Si dos casos tienen valores similares, priorizá el de mayor diferencia en kilos.\n4. Indicá claramente si en descarga hubo más o menos kilos que los declarados.\n5. Explicá cada caso «en criollo»: con palabras comunes, frases breves y sin términos técnicos innecesarios.\n6. Mantené un tono neutral. Una diferencia puede deberse a un error de registro, pesaje, carga, merma u otra causa. No asumas fraude, intención ni responsabilidad.\n7. Si faltan datos o no se puede hacer un cálculo con seguridad, marcá el caso como «REVISAR» y explicá qué dato falta.\n8. No inventes datos ni causas.\n\nPresentá la respuesta así:\n\nANÁLISIS DE DIFERENCIAS\n1. Lance [número]\n- Declarado a bordo:\n- Pesado en descarga:\n- Diferencia:\n- Diferencia porcentual:\n- ¿Por qué conviene revisarlo?: [explicación breve y simple]\n\nAl final agregá:\n\nRESUMEN\n- Casos que conviene revisar primero:\n- Datos faltantes o inconsistentes:\n- Aclaración: las diferencias detectadas indican casos a revisar; por sí solas no permiten determinar la causa.\n\nDatos: [PEGAR AQUÍ LA LISTA DE LANCES]",
+    porque:"El prompt más disciplinado del día: ocho reglas numeradas, desempate de orden (<strong>si dos casos empatan en %, gana el de más kilos</strong>), «REVISAR» para lo que falta, prohibición explícita de inventar causas y una <strong>aclaración final</strong> de que una diferencia no determina la causa. Lo probó con lances de diferencias grandes, chicas y datos faltantes. Rigor de ingeniería de prompts."
   }
 ];
 
 const $lista=document.getElementById('lista'), $filtros=document.getElementById('filtros');
 const tecnicas=[...new Set(PROMPTS.map(p=>p.tecnica))];
+const ultimaFecha=PROMPTS[PROMPTS.length-1].fecha;
 let filtro='todas';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -138,7 +159,7 @@ function render(){
   const lista=filtro==='todas'?PROMPTS:PROMPTS.filter(p=>p.tecnica===filtro);
   if(!lista.length){$lista.innerHTML='<p class="vacio">Todavía no hay prompts para esa técnica.</p>';return;}
   $lista.innerHTML=lista.map((p,i)=>{
-    const nuevo=PROMPTS.indexOf(p)===PROMPTS.length-1?'<span class="nuevo">Nuevo</span>':'';
+    const nuevo=p.fecha===ultimaFecha?'<span class="nuevo">Nuevo</span>':'';
     return `<article class="prompt">
       <div class="marca"><span>${esc(p.fecha)}</span><span><span class="tecnica">${esc(p.tecnica)}</span>${nuevo}</span></div>
       <p class="autor">Prompt de ${esc(p.autor)}</p>
