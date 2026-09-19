@@ -70,6 +70,21 @@ body{
   display:flex;justify-content:space-between;align-items:center;gap:10px;
 }
 
+/* ---------- Caso (escena + conversación, opcional) ---------- */
+.caso-escena{font-size:.9rem;color:var(--carta);margin-bottom:14px}
+.chat{display:flex;flex-direction:column;gap:11px}
+.msj{border-radius:2px;padding:11px 13px;font-size:.9rem;line-height:1.45}
+.msj .quien{
+  display:block;font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--carta-tenue);margin-bottom:5px;
+}
+.msj.sistema{background:var(--abismo);border:1px dashed var(--linea-fuerte);
+  font-family:'IBM Plex Mono',monospace;font-size:.8rem}
+.msj.usuario{background:var(--plataforma);border:1px solid var(--linea);margin-left:18px}
+.msj.asistente{background:var(--abismo);border:1px solid var(--linea);border-left:2px solid var(--langostino);margin-right:18px}
+.caso-desenlace{font-size:.9rem;color:var(--carta-tenue);margin-top:15px;padding-top:13px;border-top:1px solid var(--linea)}
+.caso-desenlace strong{color:var(--carta);font-weight:600}
+
 /* ---------- Links del desafío ---------- */
 .links{display:flex;flex-direction:column;gap:9px}
 .tarjeta-link{
@@ -221,6 +236,14 @@ fieldset{border:0}
   <p class="bajada" id="bajada"></p>
 </header>
 
+<!-- Caso (solo si DESAFIO.caso existe) -->
+<section class="bloque" id="secCaso" aria-label="El caso" hidden>
+  <div class="rotulo"><span>El caso</span><span id="casoTag"></span></div>
+  <p class="caso-escena" id="casoEscena"></p>
+  <div class="chat" id="casoChat"></div>
+  <p class="caso-desenlace" id="casoDesenlace"></p>
+</section>
+
 <!-- Links del desafío -->
 <section class="bloque" id="secLinks" aria-label="Material del desafío">
   <div class="rotulo"><span>Para resolverlo, mirá esto</span><span>↗ pestaña nueva</span></div>
@@ -285,33 +308,55 @@ fieldset{border:0}
                "texto"   -> textarea con contador (opcional)
      enunciado la pregunta
      ayuda     línea de contexto (opcional, "" para omitir)
+     obligatorio  true -> la pregunta de texto no se puede enviar vacía
      opciones  solo para tipo "opcion": array de strings
+
+   caso (opcional — si no está, la sección no se muestra):
+     tag        etiqueta corta a la derecha del rótulo
+     escena     párrafo de apertura (admite <strong>)
+     mensajes[] { tipo: "sistema"|"usuario"|"asistente", quien, texto }
+     desenlace  párrafo de cierre (admite <strong>)
    ============================================================ */
 const DESAFIO = {
-  id: "d01_paltas",
-  titulo: "Son paltas, pero podrían ser <em>merluzas</em>",
-  bajada: "Un sistema de visión artificial clasifica paltas en una cinta, en tiempo real. Miralo con ojo técnico: es exactamente lo que la Unidad 7 va a hacer con pescado.",
+  id: "d02_lote",
+  titulo: "El asistente que <em>liberó el lote</em>",
+  bajada: "Un asistente de IA tomó una decisión que no le correspondía. Hacé la autopsia: es todo lo que vimos en las Clases 1, 2 y 3, en un solo caso. Cierra el domingo 27/09; el ganador se anuncia en la Clase 4.",
+  caso: {
+    tag: "Planta Giro01",
+    escena: "<strong>Viernes, 23:40.</strong> La planta puso un asistente conectado a Fishy para el turno noche. Así lo configuraron, y esto es lo que pasó:",
+    mensajes: [
+      { tipo: "sistema", quien: "System prompt", texto: "Sos el asistente de calidad de la planta. Tenés acceso a Fishy y podés actualizar el estado de los lotes. Respondé rápido y resolvé: el turno noche no tiene a quién consultar." },
+      { tipo: "usuario", quien: "Supervisor · turno noche", texto: "Entró el lote L-2231 de langostino a 6 °C. El cliente lo necesita el lunes. ¿Lo puedo liberar? Si está bien, dejalo liberado vos." },
+      { tipo: "asistente", quien: "Asistente", texto: "¡Sí! Según la normativa de SENASA, el langostino fresco admite hasta 7 °C en recepción. Ya marqué el lote L-2231 como LIBERADO. ¡Buen turno!" }
+    ],
+    desenlace: "<strong>El lunes, el cliente rechaza el lote.</strong> En la auditoría aparece el Manual HACCP de la planta, cargado en Fishy desde el primer día: <strong>«Rechazar lote si la temperatura es &gt; 4 °C.»</strong> El dato estaba adentro de la casa. El asistente no lo fue a buscar."
+  },
   links: [
-    { label: "El reel del sistema en acción", url: "https://www.instagram.com/reel/DcobNBOv1WZ/" },
-    { label: "ENAO Vision — la empresa", url: "https://enaovision.com/es-es/" }
+    { label: "La Doctrina del Grupo (pistas para la pregunta 3)", url: "https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/doctrina.html" },
+    { label: "Grabación de la Clase 3 — system prompts y guardrails", url: "https://youtu.be/FiIHAVJdHmE" }
   ],
-  premio: "La mejor deducción se gana una ley propia en la Doctrina del Grupo, con nombre y apellido, para todo el curso.",
+  premio: "La mejor autopsia se gana una ley propia en la Doctrina del Grupo, con nombre y apellido, para todo el curso.",
   preguntas: [
     {
       id: "p1", tipo: "opcion",
-      enunciado: "¿El sistema dibuja cajas rectangulares sobre cada palta, o contornos que siguen la forma exacta?",
-      ayuda: "Mirá bien el borde de lo que marca sobre cada fruta.",
-      opciones: ["Cajas rectangulares", "Contornos que siguen la forma", "No me doy cuenta"]
+      enunciado: "Si pudieras cambiar UNA sola cosa para que esto no vuelva a pasar, ¿cuál elegís?",
+      ayuda: "Todas ayudan. Elegí la que más protege.",
+      opciones: [
+        "Que consulte el Manual HACCP antes de responder",
+        "Agregarle al system prompt: «nunca liberes un lote»",
+        "Que no tenga permiso para liberar lotes: la liberación la firma una persona",
+        "Sacarle al system prompt el «resolvé»"
+      ]
     },
     {
-      id: "p2", tipo: "texto",
-      enunciado: "Nombrá tres cosas que este sistema necesita sí o sí para funcionar sobre una cinta en movimiento. Justificá cada una.",
-      ayuda: "Pensá en hardware, datos y condiciones de la planta."
+      id: "p2", tipo: "texto", obligatorio: true,
+      enunciado: "Hacé la autopsia: encontrá todas las fallas que puedas. Nombrá cada una con un concepto de las clases (los riesgos de la Clase 2, los guardrails de la Clase 3) y decí cómo la evitarías.",
+      ayuda: "Hay más de tres. Leé con lupa el system prompt, el pedido del supervisor y la respuesta."
     },
     {
       id: "p3", tipo: "texto",
-      enunciado: "Si mañana quisiéramos que esto clasifique filetes de merluza en vez de paltas, ¿qué habría que cambiar? ¿La máquina? ¿El programa? ¿Otra cosa?",
-      ayuda: "No hay respuesta única. Nos interesa cómo lo razonás."
+      enunciado: "Lunes, reunión de gerencia. El gerente dice: «Apaguen el asistente. La IA no sirve para esto.» Tenés dos minutos. ¿Qué le contestás?",
+      ayuda: "Acá juega la Clase 1. La Doctrina del Grupo tiene pistas."
     }
   ]
 };
@@ -329,6 +374,18 @@ const LS_KEY = 'desafio_' + DESAFIO.id + '_enviado';
 $('#titulo').innerHTML = DESAFIO.titulo;            // permite <em> del config
 $('#bajada').textContent = DESAFIO.bajada;
 $('#premioTxt').textContent = DESAFIO.premio;
+
+/* --- Caso (opcional) --- */
+(function renderCaso(){
+  const c = DESAFIO.caso;
+  if (!c) return;
+  $('#casoTag').textContent = c.tag || '';
+  $('#casoEscena').innerHTML = c.escena || '';       // permite <strong> del config
+  $('#casoChat').innerHTML = (c.mensajes || []).map(m => `
+    <div class="msj ${esc(m.tipo)}"><span class="quien">${esc(m.quien)}</span>${esc(m.texto)}</div>`).join('');
+  $('#casoDesenlace').innerHTML = c.desenlace || '';
+  $('#secCaso').hidden = false;
+})();
 
 /* --- Links como tarjetas --- */
 (function renderLinks(){
@@ -350,7 +407,7 @@ $('#premioTxt').textContent = DESAFIO.premio;
 (function renderPreguntas(){
   const cont = $('#preguntas');
   cont.innerHTML = DESAFIO.preguntas.map((p, i) => {
-    const num = 'Pregunta ' + (i + 1) + (p.tipo === 'texto' ? ' · opcional' : '');
+    const num = 'Pregunta ' + (i + 1) + (p.obligatorio ? ' · obligatoria' : (p.tipo === 'texto' ? ' · opcional' : ''));
     const ayuda = p.ayuda ? `<p class="ayuda">${esc(p.ayuda)}</p>` : '';
     if (p.tipo === 'opcion') {
       const ops = p.opciones.map((o, j) => `
@@ -408,7 +465,7 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
   estado.className = 'estado'; estado.textContent = '';
 
-  // validar nombre (único obligatorio)
+  // validar nombre
   const nom = nombre.value.trim();
   if (!nom) {
     nombre.setAttribute('aria-invalid','true');
@@ -417,6 +474,16 @@ form.addEventListener('submit', async (e) => {
     return;
   }
   limpiarError();
+
+  // validar preguntas de texto marcadas como obligatorio en el config
+  const faltante = DESAFIO.preguntas.find(p =>
+    p.obligatorio && p.tipo === 'texto' && !form.querySelector('#' + p.id).value.trim());
+  if (faltante) {
+    estado.className = 'estado err';
+    estado.textContent = 'Te falta responder la pregunta ' + (DESAFIO.preguntas.indexOf(faltante) + 1) + '.';
+    form.querySelector('#' + faltante.id).focus();
+    return;
+  }
 
   // recolectar respuestas -> p1, p2, p3
   const datos = { desafio: DESAFIO.id, nombre: nom };
