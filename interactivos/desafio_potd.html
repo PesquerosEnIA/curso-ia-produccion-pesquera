@@ -289,15 +289,16 @@ fieldset{border:0}
    ============================================================ */
 const DESAFIO = {
   // 👉 Cambiá el id cada día (potd_AAAAMMDD) para separar las entradas en la hoja.
-  id: "potd_20260917",
+  id: "potd_20260921",
   titulo: "Prompt <em>of the Day</em>",
   // La consigna del día (editá esto cada día):
-  bajada: "🎯 Consigna de hoy — «El dato que no cierra»: escribí el prompt para que un asistente, mirando una lista de lances con lo declarado a bordo vs. lo pesado en descarga, detecte los casos sospechosos (diferencias grandes), los ordene por gravedad y explique en criollo por qué son una alerta — sin acusar a nadie, solo señalando qué conviene revisar. Gana el más claro, robusto y con buen criterio.",
+  bajada: "🎓 ¡Feliz día del estudiante! La consigna de hoy la trajo Damián sin proponérselo: se le pinchó una goma y el auto se lo avisó antes de que se notara. Ayer estuvo en una fábrica de bolsones, llena de telares automáticos con sus PLCs y sus SCADAs… todos desconectados entre sí. El jefe de producción camina la planta para saber cómo viene el proceso, y a veces llega tarde. Parar un telar cuesta cinco días de trabajo re-enhebrando mil hilos. 🎯 Consigna — «La goma pinchada»: escribí el prompt del asistente que avisa ANTES. Tu barco y tu planta ya tienen los sensores: vibración de motores, presión de bombas, temperatura de túneles, flujo de agua. El asistente tiene que mirar el historial, decir qué se está yendo de línea antes de que rompa, decir con qué criterio lo decidió, y traducir la alerta a plata: lo que cuesta atenderlo hoy contra lo que cuesta la parada. Gana quien convierta datos que ya existen en una decisión que se toma a tiempo.",
   links: [
-    { label: "El problema en contexto (reconciliación)", url: "https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/c4_datos_operativos.html" },
-    { label: "Guía de prompting (referencia)", url: "https://docs.anthropic.com/es/docs/build-with-claude/prompt-engineering/overview" }
+    { label: "«El yacaré, el sensor y el misterio del saber» — el post de Damián", url: "https://www.linkedin.com/posts/damian-adolfo-giacone_el-yacar%C3%A9-el-sensor-y-el-misterio-del-saber-activity-7507098974282141696-EEcq" },
+    { label: "Los datos que ya tenés: sensores y mantenimiento en Fishy", url: "https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/c4_datos_operativos.html" },
+    { label: "Sigue abierto: el Desafío de la semana", url: "https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/desafio.html" }
   ],
-  premio: "El mejor prompt del día entra en el Salón de Prompts, con tu nombre y la técnica que usaste — para todo el curso.",
+  premio: "Día del estudiante: hoy entran DOS al Salón de Prompts. Y el mejor se corre en vivo contra los datos reales de mantenimiento en la Clase 4.",
   preguntas: [
     {
       id: "p1", tipo: "texto", obligatorio: true,
@@ -312,8 +313,8 @@ const DESAFIO = {
     },
     {
       id: "p3", tipo: "texto",
-      enunciado: "¿Qué respuesta lograste y por qué tu prompt funciona?",
-      ayuda: "Contanos el resultado y qué lo hace bueno (opcional pero suma)."
+      enunciado: "¿Qué señal definiste para disparar la alerta, y por qué esa?",
+      ayuda: "El umbral, la tendencia o el cruce de datos que usaste. Si lo probaste, contanos qué respondió (opcional, pero suma)."
     }
   ]
 };
