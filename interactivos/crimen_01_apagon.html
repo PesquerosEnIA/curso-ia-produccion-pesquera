@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El apagón del Don Alberto · Crímenes del Golfo</title>
+<meta name="description" content="Expediente 01: un barco apagó su AIS seis horas. Revisá la escena, cruzá los datos y presentá tu acusación.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --abismo:#07161F;
+  --sonda:#0E2C3D;
+  --plataforma:#164055;
+  --carta:#EFE6D2;
+  --carta-tenue:#B9AE96;
+  --langostino:#E8623A;
+  --marea:#48B39C;
+  --boya:#F0B441;
+  --transito:#6FA8DC;
+  --linea:rgba(239,230,210,.14);
+  --linea-fuerte:rgba(239,230,210,.28);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+body{background:var(--abismo);color:var(--carta);font-family:'Archivo',system-ui,sans-serif;line-height:1.5;padding:22px 16px 70px}
+:focus-visible{outline:2px solid var(--boya);outline-offset:3px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.mono{font-family:'IBM Plex Mono',monospace}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--carta-tenue)}
+h1{font-family:'Archivo Black',sans-serif;font-size:clamp(1.7rem,5vw,2.5rem);line-height:1.02;letter-spacing:-.02em;text-transform:uppercase;margin:.45rem 0 .6rem}
+h1 em{font-style:normal;color:var(--langostino)}
+.bajada{font-size:.98rem;color:var(--carta);max-width:70ch}
+.bajada b{color:var(--boya);font-weight:600}
+.instr{font-size:.86rem;color:var(--carta-tenue);margin-top:.5rem;max-width:70ch}
+h2{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--boya);font-weight:600;margin-bottom:10px}
+.panel{background:var(--sonda);border:1px solid var(--linea);border-radius:14px;padding:16px}
+
+/* ---------- Escena ---------- */
+.escena-marco{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--linea-fuerte);background:#0b2433}
+.escena-marco svg{display:block;width:100%;height:auto}
+.obj{cursor:zoom-in}
+.obj .hit{fill:transparent}
+.obj:hover .dib,.obj:focus-visible .dib{filter:drop-shadow(0 0 6px rgba(240,180,65,.95)) brightness(1.12)}
+.obj:focus{outline:none}
+.obj.pulso .dib{animation:pulso 1.4s ease-in-out 2}
+@keyframes pulso{50%{filter:drop-shadow(0 0 14px rgba(240,180,65,1)) brightness(1.3)}}
+.badge{display:none}
+.obj.hallada .badge{display:inline}
+.barra{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+.contador{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--carta-tenue)}
+.contador b{color:var(--boya);font-size:1rem}
+.pistas{display:flex;gap:4px;margin-top:6px}
+.pistas span{width:22px;height:5px;border-radius:1px;background:var(--plataforma)}
+.pistas span.on{background:var(--boya)}
+button{font-family:'IBM Plex Mono',monospace;font-size:.78rem;letter-spacing:.04em;cursor:pointer;border-radius:8px;border:1px solid var(--linea-fuerte);background:transparent;color:var(--carta);padding:9px 13px;min-height:40px}
+button:hover{border-color:var(--boya);color:var(--boya)}
+button.primario{background:var(--langostino);border-color:var(--langostino);color:#fff;font-weight:600}
+button.primario:hover{filter:brightness(1.08);color:#fff}
+button:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+/* ---------- Libreta ---------- */
+.libreta{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.nota{border:1px dashed var(--linea-fuerte);border-radius:10px;padding:9px 11px;font-size:.82rem;color:var(--carta-tenue);min-height:54px}
+.nota.on{border-style:solid;border-color:var(--linea-fuerte);color:var(--carta);cursor:pointer;background:rgba(239,230,210,.03)}
+.nota.on:hover{border-color:var(--boya)}
+.nota .n{font-family:'IBM Plex Mono',monospace;font-size:.66rem;color:var(--boya);letter-spacing:.1em}
+.nota .t{display:block;font-weight:600;margin-top:2px}
+
+/* ---------- Mesa de cruce ---------- */
+.mesa{display:flex;flex-wrap:wrap;gap:16px}
+.mesa .mapa{flex:1 1 420px;min-width:0}
+.mesa .capas{flex:1 1 220px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.mapa svg{width:100%;height:auto;display:block;border-radius:10px;background:#0a2233}
+.capa{display:flex;align-items:flex-start;gap:10px;font-size:.86rem;padding:8px 10px;border:1px solid var(--linea);border-radius:10px;cursor:pointer}
+.capa input{margin-top:3px;accent-color:var(--boya);width:18px;height:18px;flex:none}
+.capa.bloq{opacity:.45;cursor:not-allowed}
+.capa small{display:block;color:var(--carta-tenue);font-size:.74rem}
+.nota-mesa{font-size:.8rem;color:var(--carta-tenue);margin-top:4px}
+
+/* ---------- Acusación ---------- */
+.paso{margin-top:6px}
+.paso p.q{font-weight:600;margin-bottom:8px}
+.opciones{display:flex;flex-direction:column;gap:8px}
+.op{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--linea);border-radius:10px;cursor:pointer;font-size:.9rem}
+.op:hover{border-color:var(--linea-fuerte)}
+.op input{margin-top:3px;accent-color:var(--langostino);width:18px;height:18px;flex:none}
+.op.bloq{opacity:.4;cursor:not-allowed}
+.op small{display:block;color:var(--carta-tenue);font-size:.74rem}
+.aviso-sel{font-size:.78rem;color:var(--carta-tenue);margin-top:6px}
+
+/* ---------- Veredicto ---------- */
+.veredicto{display:none}
+.veredicto.show{display:block}
+.sello{font-family:'Archivo Black',sans-serif;text-transform:uppercase;font-size:1.5rem;line-height:1.05;margin:4px 0 6px}
+.puntaje{font-family:'IBM Plex Mono',monospace;font-size:.85rem;color:var(--carta-tenue)}
+.puntaje b{color:var(--boya);font-size:1.3rem}
+.vtexto{margin:10px 0 14px;font-size:.93rem;max-width:72ch}
+.sol{display:flex;flex-direction:column;gap:8px}
+.sol .it{border-left:3px solid var(--linea-fuerte);padding:6px 0 6px 12px;font-size:.86rem}
+.sol .it .r{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600}
+.r-solida{color:var(--marea)} .it.solida{border-color:var(--marea)}
+.r-contexto{color:var(--transito)} .it.contexto{border-color:var(--transito)}
+.r-indicio{color:var(--boya)} .it.indicio{border-color:var(--boya)}
+.r-trampa,.r-coartada{color:var(--langostino)} .it.trampa,.it.coartada{border-color:var(--langostino)}
+.leyes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:14px}
+.ley{background:var(--abismo);border:1px solid var(--linea);border-radius:10px;padding:12px;font-weight:600;font-size:.92rem}
+.ley span{display:block;font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:.66rem;color:var(--carta-tenue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.fishy{margin-top:14px;font-size:.86rem;border:1px solid var(--marea);border-radius:10px;padding:12px;background:rgba(72,179,156,.07)}
+.fishy code{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--marea)}
+
+/* ---------- Modal ficha ---------- */
+.modal{position:fixed;inset:0;background:rgba(3,10,15,.78);display:none;align-items:flex-start;justify-content:center;padding:24px 12px;overflow-y:auto;z-index:10}
+.modal.show{display:flex}
+.ficha{background:var(--carta);color:#1b1a16;border-radius:12px;max-width:560px;width:100%;padding:20px 18px 18px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.ficha .cerrar{position:absolute;top:10px;right:10px;background:transparent;color:#1b1a16;border:1px solid rgba(0,0,0,.2);min-height:36px;padding:4px 10px}
+.ficha .cerrar:hover{color:var(--langostino);border-color:var(--langostino)}
+.ficha .exp{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#6d6452}
+.ficha h3{font-family:'Archivo Black',sans-serif;font-size:1.25rem;line-height:1.1;margin:4px 40px 10px 0;text-transform:uppercase}
+.ficha p{font-size:.92rem;margin:8px 0}
+.ficha table{width:100%;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:.76rem;margin:8px 0}
+.ficha th,.ficha td{text-align:left;padding:5px 6px;border-bottom:1px solid rgba(0,0,0,.12)}
+.ficha th{font-weight:600;color:#6d6452}
+.ficha .alerta{color:#b3261e;font-weight:600}
+.ficha .ok{color:#1f7a63;font-weight:600}
+.chip{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.06em;padding:3px 8px;border-radius:99px;margin-top:6px}
+.chip.fishy{background:#d6efe8;color:#135b4b;border:0;margin:6px 0 0;padding:3px 8px}
+.chip.didac{background:#f7e4b8;color:#6b4a07}
+.ficha .pregunta{border-left:3px solid var(--langostino);padding:4px 0 4px 10px;font-style:italic;color:#4a4436}
+.ficha svg{width:100%;height:auto;display:block;border-radius:8px;background:#0a2233;margin:8px 0}
+.ficha .mini svg{background:#fff;border:1px solid rgba(0,0,0,.1)}
+
+footer{font-size:.76rem;color:var(--carta-tenue);border-top:1px solid var(--linea);padding-top:12px;line-height:1.6}
+footer a{color:var(--carta)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Crímenes del Golfo · Expediente 01 · Clase 4 — Datos y sensores</div>
+    <h1>El apagón del <em>Don Alberto</em></h1>
+    <p class="bajada">Martes 8 de septiembre, 23:40. El <b>Don Alberto (PM-0231)</b> descargó hoy <b>839 kg de langostino</b>, declarados en el rectángulo CH:108. En los papeles todo cierra. Pero ayer, durante <b>seis horas</b>, el barco desapareció de las pantallas.</p>
+    <p class="instr">Tocá los objetos de la oficina: cada uno es un dato. Algunos prueban, otros engañan. Cruzalos en la mesa y presentá tu acusación. <b style="color:var(--carta)">Solo podés usar lo que encontraste.</b></p>
+  </header>
+
+  <!-- ================= ESCENA ================= -->
+  <section>
+    <div class="escena-marco">
+      <svg id="escena" viewBox="0 0 1000 640" role="img" aria-label="Oficina de inspección pesquera de noche, con objetos que son pistas">
+        <defs>
+          <linearGradient id="gPared" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#12364d"/><stop offset="1" stop-color="#0b2433"/></linearGradient>
+          <linearGradient id="gCielo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050f16"/><stop offset="1" stop-color="#10324a"/></linearGradient>
+          <linearGradient id="gMesa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d2c20"/><stop offset="1" stop-color="#221811"/></linearGradient>
+          <radialGradient id="gLuz" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#F0B441" stop-opacity=".28"/><stop offset="1" stop-color="#F0B441" stop-opacity="0"/></radialGradient>
+          <pattern id="pCorcho" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#8a6a45"/><circle cx="2" cy="3" r=".9" fill="#7a5b39"/><circle cx="6" cy="6" r=".7" fill="#9b7a52"/></pattern>
+          <linearGradient id="gSST" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b5fa8"/><stop offset=".45" stop-color="#48B39C"/><stop offset=".75" stop-color="#F0B441"/><stop offset="1" stop-color="#E8623A"/></linearGradient>
+        </defs>
+
+        <!-- Pared y mesa -->
+        <rect width="1000" height="440" fill="url(#gPared)"/>
+        <rect y="392" width="1000" height="4" fill="#0a1f2c" opacity=".6"/>
+        <rect y="430" width="1000" height="210" fill="url(#gMesa)"/>
+        <rect y="430" width="1000" height="12" fill="#4a3627"/>
+        <ellipse cx="860" cy="520" rx="260" ry="150" fill="url(#gLuz)"/>
+
+        <!-- Ventana al puerto (ambiente) -->
+        <g aria-hidden="true">
+          <rect x="40" y="40" width="300" height="250" fill="url(#gCielo)"/>
+          <circle cx="282" cy="88" r="17" fill="#EFE6D2"/><circle cx="289" cy="83" r="15" fill="#08192a"/>
+          <g fill="#EFE6D2" opacity=".8"><circle cx="70" cy="70" r="1.3"/><circle cx="120" cy="55" r="1"/><circle cx="160" cy="95" r="1.2"/><circle cx="230" cy="60" r="1"/><circle cx="95" cy="120" r=".9"/><circle cx="215" cy="125" r="1.1"/></g>
+          <rect x="40" y="198" width="300" height="92" fill="#0a2233"/>
+          <g stroke="#1d4a63" stroke-width="1.5"><line x1="50" y1="268" x2="110" y2="268"/><line x1="150" y1="278" x2="230" y2="278"/><line x1="250" y1="262" x2="320" y2="262"/></g>
+          <!-- Barco -->
+          <line x1="150" y1="130" x2="150" y2="190" stroke="#8fa3ad" stroke-width="2"/>
+          <line x1="150" y1="135" x2="228" y2="192" stroke="#8fa3ad" stroke-width="1"/>
+          <rect x="112" y="168" width="52" height="30" fill="#d9d2c0"/>
+          <rect x="118" y="175" width="10" height="8" fill="#F0B441"/><rect x="134" y="175" width="10" height="8" fill="#F0B441"/>
+          <path d="M72 198 H262 L246 232 H86 Z" fill="#1c3b4f"/>
+          <path d="M78 214 H256 L250 224 H84 Z" fill="#E8623A"/>
+          <text x="132" y="210" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#EFE6D2">DON ALBERTO</text>
+          <text x="226" y="210" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#EFE6D2">PM-0231</text>
+          <circle cx="150" cy="130" r="3" fill="#F0B441"/>
+          <!-- Muelle y cajones -->
+          <rect x="40" y="232" width="300" height="14" fill="#3a3026"/>
+          <g fill="#E8623A" stroke="#7a2e18" stroke-width="1"><rect x="272" y="214" width="22" height="18"/><rect x="296" y="214" width="22" height="18"/><rect x="284" y="196" width="22" height="18"/></g>
+          <!-- Marco -->
+          <rect x="40" y="40" width="300" height="250" fill="none" stroke="#5b4a3a" stroke-width="10"/>
+          <line x1="190" y1="40" x2="190" y2="290" stroke="#5b4a3a" stroke-width="6"/>
+          <line x1="40" y1="165" x2="340" y2="165" stroke="#5b4a3a" stroke-width="6"/>
+        </g>
+
+        <!-- Reloj y almanaque -->
+        <g aria-hidden="true">
+          <circle cx="455" cy="68" r="30" fill="#EFE6D2" stroke="#5b4a3a" stroke-width="4"/>
+          <g stroke="#5b4a3a" stroke-width="2"><line x1="455" y1="42" x2="455" y2="47"/><line x1="455" y1="89" x2="455" y2="94"/><line x1="429" y1="68" x2="434" y2="68"/><line x1="476" y1="68" x2="481" y2="68"/></g>
+          <line x1="455" y1="68" x2="452.6" y2="54.2" stroke="#1b1a16" stroke-width="3.4" stroke-linecap="round"/>
+          <line x1="455" y1="68" x2="435.9" y2="79" stroke="#1b1a16" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="455" cy="68" r="2.5" fill="#E8623A"/>
+          <rect x="510" y="40" width="58" height="66" rx="4" fill="#EFE6D2"/>
+          <rect x="510" y="40" width="58" height="18" rx="4" fill="#E8623A"/>
+          <text x="539" y="53" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" font-weight="600" fill="#fff">SEP</text>
+          <text x="539" y="96" text-anchor="middle" font-family="Archivo Black,sans-serif" font-size="30" fill="#1b1a16">8</text>
+        </g>
+
+        <!-- 7 · Pantalla satelital (TRAMPA) -->
+        <g class="obj" data-id="satelite" tabindex="0" role="button" aria-label="Pantalla con mapa satelital de temperatura">
+          <rect class="hit" x="360" y="112" width="262" height="168"/>
+          <g class="dib">
+            <rect x="366" y="118" width="250" height="150" rx="6" fill="#111a20"/>
+            <rect x="376" y="128" width="230" height="118" fill="url(#gSST)"/>
+            <g opacity=".35" fill="#07161F"><rect x="376" y="128" width="46" height="40"/><rect x="468" y="168" width="46" height="38"/><rect x="560" y="206" width="46" height="40"/><rect x="422" y="206" width="46" height="40"/></g>
+            <g stroke="#07161F" stroke-opacity=".35"><line x1="422" y1="128" x2="422" y2="246"/><line x1="468" y1="128" x2="468" y2="246"/><line x1="514" y1="128" x2="514" y2="246"/><line x1="560" y1="128" x2="560" y2="246"/><line x1="376" y1="168" x2="606" y2="168"/><line x1="376" y1="206" x2="606" y2="206"/></g>
+            <rect x="382" y="133" width="92" height="16" rx="2" fill="#07161F" opacity=".75"/>
+            <text x="387" y="145" font-family="IBM Plex Mono,monospace" font-size="10" fill="#EFE6D2">SST · CH:108</text>
+            <text x="600" y="242" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#07161F">reconstruido</text>
+            <rect x="480" y="268" width="22" height="12" fill="#2a2a2a"/>
+          </g>
+          <g class="badge"><circle cx="612" cy="120" r="12" fill="#F0B441"/><text x="612" y="124" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">7</text></g>
+        </g>
+
+        <!-- Corcho -->
+        <rect x="648" y="36" width="322" height="286" rx="4" fill="url(#pCorcho)" stroke="#5b4a3a" stroke-width="8" aria-hidden="true"/>
+
+        <!-- 9 · Aviso de veda (CONTEXTO) -->
+        <g class="obj" data-id="aviso" tabindex="0" role="button" aria-label="Aviso amarillo clavado en el corcho">
+          <rect class="hit" x="664" y="52" width="146" height="126"/>
+          <g class="dib" transform="rotate(-3 737 115)">
+            <rect x="670" y="58" width="134" height="112" fill="#F0B441" stroke="#b3261e" stroke-width="4"/>
+            <text x="737" y="80" text-anchor="middle" font-family="Archivo Black,sans-serif" font-size="13" fill="#b3261e">AVISO</text>
+            <text x="737" y="98" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" font-weight="600" fill="#1b1a16">ÁREA DE VEDA</text>
+            <text x="737" y="113" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#1b1a16">juveniles de</text>
+            <text x="737" y="125" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#1b1a16">langostino</text>
+            <text x="737" y="152" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" font-weight="600" fill="#1b1a16">01/09 → 30/09</text>
+            <circle cx="737" cy="62" r="4" fill="#b3261e"/>
+          </g>
+          <g class="badge"><circle cx="806" cy="58" r="12" fill="#F0B441"/><text x="806" y="62" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">9</text></g>
+        </g>
+
+        <!-- 6 · Ticket de balanza (TRAMPA) -->
+        <g class="obj" data-id="balanza" tabindex="0" role="button" aria-label="Ticket de balanza clavado en el corcho">
+          <rect class="hit" x="818" y="50" width="92" height="170"/>
+          <g class="dib" transform="rotate(5 862 130)">
+            <path d="M828 58 H898 V210 l-6 5 -6 -5 -6 5 -6 -5 -6 5 -6 -5 -6 5 -6 -5 -6 5 -6 -5 -6 5 Z" fill="#f7f3ea"/>
+            <text x="863" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" font-weight="600" fill="#1b1a16">BALANZA</text>
+            <text x="863" y="92" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="7" fill="#1b1a16">MUELLE 2</text>
+            <line x1="834" y1="100" x2="892" y2="100" stroke="#1b1a16" stroke-dasharray="2 2"/>
+            <text x="834" y="114" font-family="IBM Plex Mono,monospace" font-size="7" fill="#1b1a16">PM-0231</text>
+            <text x="834" y="126" font-family="IBM Plex Mono,monospace" font-size="7" fill="#1b1a16">08/09/26</text>
+            <text x="834" y="140" font-family="IBM Plex Mono,monospace" font-size="7" fill="#1b1a16">LANGOST.</text>
+            <text x="892" y="158" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#1b1a16">839 kg</text>
+            <line x1="834" y1="168" x2="892" y2="168" stroke="#1b1a16" stroke-dasharray="2 2"/>
+            <text x="834" y="182" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1b1a16">OK ✓</text>
+            <circle cx="863" cy="62" r="4" fill="#2b5fa8"/>
+          </g>
+          <g class="badge"><circle cx="906" cy="56" r="12" fill="#F0B441"/><text x="906" y="60" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">6</text></g>
+        </g>
+
+        <!-- 8 · Hoja de rendimientos (INDICIO) -->
+        <g class="obj" data-id="rendimiento" tabindex="0" role="button" aria-label="Hoja con gráfico de barras de rendimientos">
+          <rect class="hit" x="680" y="182" width="184" height="134"/>
+          <g class="dib" transform="rotate(2 772 248)">
+            <rect x="688" y="190" width="168" height="118" fill="#EFE6D2"/>
+            <text x="772" y="206" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" font-weight="600" fill="#1b1a16">Langostino · CH:108</text>
+            <line x1="704" y1="292" x2="844" y2="292" stroke="#1b1a16"/>
+            <rect x="716" y="262" width="26" height="30" fill="#8fa3ad"/>
+            <rect x="759" y="215" width="26" height="77" fill="#E8623A"/>
+            <rect x="802" y="253" width="26" height="39" fill="#8fa3ad"/>
+            <text x="729" y="302" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1b1a16">05/09</text>
+            <text x="772" y="302" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1b1a16">07/09</text>
+            <text x="815" y="302" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1b1a16">11/09</text>
+            <circle cx="772" cy="194" r="4" fill="#48B39C"/>
+          </g>
+          <g class="badge"><circle cx="858" cy="192" r="12" fill="#F0B441"/><text x="858" y="196" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">8</text></g>
+        </g>
+
+        <!-- 2 · Impresora con reporte VMS (SÓLIDA) -->
+        <g class="obj" data-id="vms" tabindex="0" role="button" aria-label="Impresora con un reporte recién impreso">
+          <rect class="hit" x="48" y="318" width="214" height="134"/>
+          <g class="dib">
+            <g transform="rotate(-4 155 360)">
+              <rect x="92" y="322" width="126" height="78" fill="#ffffff"/>
+              <text x="102" y="338" font-family="IBM Plex Mono,monospace" font-size="9" font-weight="600" fill="#1b1a16">VMS · PM-0231</text>
+              <text x="102" y="350" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1b1a16">07/09  07:00  2,8 kn</text>
+              <text x="102" y="360" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1b1a16">07/09  09:00  3,1 kn</text>
+              <text x="102" y="370" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1b1a16">07/09  11:00  2,6 kn</text>
+              <ellipse cx="192" cy="360" rx="20" ry="13" fill="none" stroke="#b3261e" stroke-width="1.6"/>
+            </g>
+            <rect x="56" y="384" width="198" height="60" rx="9" fill="#c9c2b3"/>
+            <rect x="80" y="384" width="150" height="8" fill="#8a8476"/>
+            <rect x="72" y="408" width="40" height="8" rx="2" fill="#48B39C"/>
+            <circle cx="232" cy="412" r="4" fill="#E8623A"/>
+            <rect x="56" y="438" width="198" height="6" fill="#a39c8d"/>
+          </g>
+          <g class="badge"><circle cx="252" cy="330" r="12" fill="#F0B441"/><text x="252" y="334" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">2</text></g>
+        </g>
+
+        <!-- 1 · Monitor AIS (SÓLIDA) -->
+        <g class="obj" data-id="ais" tabindex="0" role="button" aria-label="Monitor con la traza AIS del barco">
+          <rect class="hit" x="372" y="284" width="276" height="186"/>
+          <g class="dib">
+            <rect x="378" y="290" width="264" height="156" rx="8" fill="#111a20"/>
+            <rect x="388" y="300" width="244" height="126" fill="#06202d"/>
+            <path d="M388 300 H410 C418 330 404 360 414 390 C420 405 412 418 414 426 H388 Z" fill="#1d3a2e"/>
+            <g fill="#6FA8DC"><circle cx="420" cy="410" r="2.4"/><circle cx="436" cy="392" r="2.4"/><circle cx="452" cy="372" r="2.4"/><circle cx="468" cy="352" r="2.4"/></g>
+            <g fill="#E8623A"><circle cx="486" cy="336" r="2.6"/><circle cx="496" cy="340" r="2.6"/><circle cx="503" cy="346" r="2.6"/><circle cx="510" cy="352" r="2.6"/></g>
+            <line x1="510" y1="352" x2="552" y2="368" stroke="#F0B441" stroke-width="1.6" stroke-dasharray="4 3"/>
+            <g fill="#6FA8DC"><circle cx="552" cy="368" r="2.6"/><circle cx="538" cy="388" r="2.4"/><circle cx="512" cy="404" r="2.4"/><circle cx="480" cy="416" r="2.4"/></g>
+            <text x="560" y="358" font-family="IBM Plex Mono,monospace" font-size="7.5" fill="#F0B441">⚠ SIN SEÑAL</text>
+            <text x="396" y="314" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#EFE6D2">AIS · PM-0231 · 07/09</text>
+            <rect x="496" y="446" width="28" height="16" fill="#2a2a2a"/>
+            <ellipse cx="510" cy="463" rx="52" ry="6" fill="#2a2a2a"/>
+          </g>
+          <g class="badge"><circle cx="640" cy="294" r="12" fill="#F0B441"/><text x="640" y="298" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">1</text></g>
+        </g>
+
+        <!-- 4 · Laptop telemetría motor (SÓLIDA) -->
+        <g class="obj" data-id="motor" tabindex="0" role="button" aria-label="Notebook con un gráfico de telemetría del motor">
+          <rect class="hit" x="672" y="340" width="248" height="136"/>
+          <g class="dib">
+            <rect x="708" y="348" width="176" height="110" rx="6" fill="#111a20"/>
+            <rect x="716" y="356" width="160" height="92" fill="#0d2a1f"/>
+            <text x="722" y="369" font-family="IBM Plex Mono,monospace" font-size="7.5" fill="#EFE6D2">MOTOR PM-0231 · vibración</text>
+            <line x1="722" y1="398" x2="870" y2="398" stroke="#E8623A" stroke-dasharray="3 3" stroke-width="1"/>
+            <polyline points="724,384 740,392 756,380 772,410 788,386 804,428 820,392 836,402 852,386 868,396" fill="none" stroke="#48B39C" stroke-width="1.8"/>
+            <circle cx="804" cy="428" r="3.5" fill="#F0B441"/>
+            <path d="M688 458 H904 L920 474 H672 Z" fill="#9aa3a8"/>
+            <rect x="770" y="462" width="52" height="5" rx="2" fill="#7d868b"/>
+          </g>
+          <g class="badge"><circle cx="884" cy="350" r="12" fill="#F0B441"/><text x="884" y="354" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">4</text></g>
+        </g>
+
+        <!-- 3 · Parte de pesca (SÓLIDA) -->
+        <g class="obj" data-id="parte" tabindex="0" role="button" aria-label="Portapapeles con el parte de pesca">
+          <rect class="hit" x="232" y="458" width="160" height="164"/>
+          <g class="dib" transform="rotate(-6 310 540)">
+            <rect x="250" y="470" width="122" height="144" rx="7" fill="#7a5a3a"/>
+            <rect x="258" y="486" width="106" height="122" fill="#ffffff"/>
+            <rect x="286" y="462" width="50" height="18" rx="3" fill="#b9bfc3"/>
+            <text x="311" y="502" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" font-weight="600" fill="#1b1a16">PARTE DE PESCA</text>
+            <text x="311" y="513" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1b1a16">PM-0231 · 07/09</text>
+            <line x1="264" y1="520" x2="358" y2="520" stroke="#1b1a16" stroke-width=".6"/>
+            <text x="264" y="534" font-family="IBM Plex Mono,monospace" font-size="7" fill="#1b1a16">10:40 CH:108 LAN</text>
+            <text x="264" y="548" font-family="IBM Plex Mono,monospace" font-size="7" fill="#1b1a16">11:45 CH:114 CAL</text>
+            <text x="264" y="562" font-family="IBM Plex Mono,monospace" font-size="7" fill="#1b1a16">12:45 CH:118 MER</text>
+            <path d="M266 580 q10 -8 20 0 t20 0 t20 0" fill="none" stroke="#2b5fa8" stroke-width="1.2"/>
+          </g>
+          <g class="badge"><circle cx="382" cy="468" r="12" fill="#F0B441"/><text x="382" y="472" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">3</text></g>
+        </g>
+
+        <!-- 5 · Bitácora (COARTADA) -->
+        <g class="obj" data-id="bitacora" tabindex="0" role="button" aria-label="Bitácora abierta sobre el escritorio">
+          <rect class="hit" x="436" y="492" width="224" height="124"/>
+          <g class="dib" transform="rotate(3 548 555)">
+            <path d="M448 506 Q498 496 548 510 V604 Q498 590 448 600 Z" fill="#EFE6D2" stroke="#b9ae96"/>
+            <path d="M548 510 Q598 496 648 506 V600 Q598 590 548 604 Z" fill="#e6dcc4" stroke="#b9ae96"/>
+            <line x1="548" y1="510" x2="548" y2="604" stroke="#8a7f68" stroke-width="1.5"/>
+            <text x="458" y="524" font-family="IBM Plex Mono,monospace" font-size="7.5" font-weight="600" fill="#1b1a16">Bitácora 07/09</text>
+            <g stroke="#2b5fa8" stroke-width="1" fill="none">
+              <path d="M458 536 q8 -4 16 0 t16 0 t16 0 t16 0 t16 0"/>
+              <path d="M458 548 q8 -4 16 0 t16 0 t16 0 t16 0"/>
+              <path d="M458 560 q8 -4 16 0 t16 0 t16 0 t16 0 t16 0"/>
+              <path d="M458 572 q8 -4 16 0 t16 0 t16 0"/>
+              <path d="M560 530 q8 -4 16 0 t16 0 t16 0 t16 0"/>
+              <path d="M560 542 q8 -4 16 0 t16 0 t16 0"/>
+            </g>
+            <text x="560" y="566" font-family="IBM Plex Mono,monospace" font-size="7" fill="#b3261e">corte eléctrico</text>
+          </g>
+          <g class="badge"><circle cx="652" cy="500" r="12" fill="#F0B441"/><text x="652" y="504" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">5</text></g>
+        </g>
+
+        <!-- Ambiente del escritorio -->
+        <g aria-hidden="true">
+          <rect x="908" y="508" width="46" height="54" rx="6" fill="#E8623A"/>
+          <path d="M954 520 q18 0 18 14 t-18 14" fill="none" stroke="#E8623A" stroke-width="6"/>
+          <ellipse cx="931" cy="510" rx="21" ry="5" fill="#3b2415"/>
+          <g transform="rotate(-25 150 560)"><circle cx="130" cy="560" r="26" fill="none" stroke="#b9bfc3" stroke-width="7"/><circle cx="130" cy="560" r="22" fill="#EFE6D2" opacity=".12"/><rect x="152" y="555" width="60" height="11" rx="5" fill="#5b3a22"/></g>
+          <rect x="700" y="560" width="120" height="6" rx="3" fill="#2b5fa8" transform="rotate(-12 760 563)"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="barra">
+      <div>
+        <div class="contador">Pistas encontradas: <b id="cuenta">0</b> / 9</div>
+        <div class="pistas" id="pistas" aria-hidden="true"></div>
+      </div>
+      <button id="linterna" type="button">🔦 Linterna (ver una pista)</button>
+    </div>
+  </section>
+
+  <!-- ================= LIBRETA ================= -->
+  <section class="panel">
+    <h2>Libreta del inspector</h2>
+    <div class="libreta" id="libreta"></div>
+  </section>
+
+  <!-- ================= MESA DE CRUCE ================= -->
+  <section class="panel">
+    <h2>Mesa de cruce · superponé los datos</h2>
+    <div class="mesa">
+      <div class="mapa" id="mesaMapa"></div>
+      <div class="capas" id="capas"></div>
+    </div>
+    <p class="nota-mesa">Mapa esquemático: la grilla usa los rectángulos de Fishy (CH:108 a CH:125), sin coordenadas reales. Cada capa se habilita cuando encontrás su pista.</p>
+  </section>
+
+  <!-- ================= ACUSACIÓN ================= -->
+  <section class="panel">
+    <h2>Tu acusación</h2>
+    <div class="paso">
+      <p class="q">1 · ¿Qué pasó con el Don Alberto el 07/09?</p>
+      <div class="opciones" id="opQue"></div>
+    </div>
+    <div class="paso" style="margin-top:16px">
+      <p class="q">2 · ¿Con qué pruebas lo sostenés ante la autoridad? <span style="font-weight:400;color:var(--carta-tenue)">(elegí hasta 3)</span></p>
+      <div class="opciones" id="opPruebas"></div>
+      <p class="aviso-sel" id="avisoSel"></p>
+    </div>
+    <div class="barra">
+      <span class="contador" id="estadoAcus">Respondé las dos preguntas.</span>
+      <button class="primario" id="acusar" type="button" disabled>⚖ Presentar acusación</button>
+    </div>
+  </section>
+
+  <!-- ================= VEREDICTO ================= -->
+  <section class="panel veredicto" id="veredicto" aria-live="polite">
+    <h2>Veredicto</h2>
+    <div class="sello" id="sello"></div>
+    <div class="puntaje">Puntaje: <b id="puntos"></b> / 100 · <span id="rango"></span></div>
+    <p class="vtexto" id="vtexto"></p>
+    <h2 style="margin-top:14px">La solución del expediente</h2>
+    <div class="sol" id="solucion"></div>
+    <div class="leyes">
+      <div class="ley"><span>Regla 1</span>Un dato solo, sospecha. Dos datos independientes, prueban.</div>
+      <div class="ley"><span>Regla 2</span>La ausencia de un dato también es dato.</div>
+      <div class="ley"><span>Regla 3</span>Un dato sin origen no prueba nada.</div>
+      <div class="ley"><span>Regla 4</span>La balanza mide cuánto, no dónde.</div>
+    </div>
+    <div class="fishy">🐟 <b>Verificalo vos en Fishy.</b> Con el conector de Fishy activo en Claude, pedile:<br>
+      <code>Mostrame los lances del Don Alberto (PM-0231) del 07/09/2026, su descarga y la telemetría del motor de esa semana.</code><br>
+      Los números del parte, la balanza, el motor, los rendimientos y el satélite salen de ahí.</div>
+    <div class="barra"><span></span><button id="reiniciar" type="button">↺ Volver a empezar</button></div>
+  </section>
+
+  <footer>
+    <b>Caso de ficción didáctica.</b> El parte de pesca, la descarga, la telemetría del motor, los rendimientos y la lectura satelital son registros reales de <b>Fishy</b>, la base sintética del curso (tablas <span class="mono">lances</span>, <span class="mono">descargas</span>, <span class="mono">mantenimiento</span>, <span class="mono">lecturas_satelitales</span>). La traza AIS, el reporte VMS, el área de veda y la bitácora son elementos del caso, construidos con la misma lógica del simulador <a href="dt11_ais_esfuerzo.html" target="_blank" rel="noopener">DT-011 · Rastro AIS</a> (regla de velocidad tipo Global Fishing Watch: 1–5 nudos = pesca). Sobre apagones de AIS en flotas reales: Welch et al. (2022), <i>Hot spots of unseen fishing vessels</i>, Science Advances.<br>
+    Inspirado en el formato de los <i>Crímenes ilustrados</i> de Modesto García. · Ariel Giamportone | PesquerosEnIA · UTN FRCh
+  </footer>
+</div>
+
+<!-- ================= FICHA (modal) ================= -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="fTitulo">
+  <div class="ficha">
+    <button class="cerrar" id="cerrar" type="button" aria-label="Cerrar">✕</button>
+    <div class="exp" id="fExp"></div>
+    <h3 id="fTitulo"></h3>
+    <div id="fCuerpo"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CRÍMENES DEL GOLFO · motor del expediente
+   Para un caso nuevo: cambiar la escena SVG (objetos .obj con data-id)
+   y los objetos CASO / EVIDENCIAS / PREGUNTA de abajo.
+   rol: solida | contexto | indicio | trampa | coartada
+   ============================================================ */
+
+const EVIDENCIAS = [
+  { id:'ais', n:1, titulo:'Traza AIS del barco', rol:'solida', puntos:20, capa:'ais',
+    fuente:'didac', fuenteTxt:'Dato del caso · lógica del simulador DT-011',
+    cuerpo: () => `
+      <p>El monitor muestra la huella AIS del Don Alberto el 07/09. Hasta las <b>06:10</b> navega lento en CH:108. Después, <b>nada</b>. Vuelve a aparecer a las <b>12:20</b>.</p>
+      ${mapa(new Set(['ais']),'f1')}
+      <table><tr><th>Evento</th><th>Hora</th><th>Velocidad</th></tr>
+      <tr><td>Última señal</td><td>06:10</td><td>2,9 kn</td></tr>
+      <tr><td>Reaparece</td><td>12:20</td><td>—</td></tr>
+      <tr><td>Distancia entre ambos puntos</td><td colspan="2">≈ 9 km</td></tr></table>
+      <p>9 km en 6 h 10 min dan <b>0,8 nudos de promedio</b>. Con la regla de velocidad (1–5 kn = pesca), el barco no se fue a ningún lado: <b>se quedó en la zona</b>.</p>
+      <p class="pregunta">¿Qué hacía un barco quieto, en silencio, durante seis horas?</p>` },
+
+  { id:'vms', n:2, titulo:'Reporte VMS impreso', rol:'solida', puntos:20, capa:'vms',
+    fuente:'didac', fuenteTxt:'Dato del caso · VMS regulatorio',
+    cuerpo: () => `
+      <p>El <b>VMS</b> es el sistema de monitoreo satelital regulatorio: va precintado a bordo, no es público y no depende del AIS. Mientras el AIS estaba apagado, el VMS siguió reportando:</p>
+      ${mapa(new Set(['vms']),'f2',true)}
+      <table><tr><th>Hora</th><th>Velocidad</th><th>Ubicación</th></tr>
+      <tr><td>07:00</td><td>2,8 kn</td><td class="alerta">sur de CH:108</td></tr>
+      <tr><td>09:00</td><td>3,1 kn</td><td class="alerta">sur de CH:108</td></tr>
+      <tr><td>11:00</td><td>2,6 kn</td><td class="alerta">sur de CH:108</td></tr></table>
+      <p>Entre 2,6 y 3,1 nudos: es <b>velocidad de arrastre</b>, no de navegación.</p>
+      <p class="pregunta">Es una fuente distinta del AIS. ¿Qué dicen las dos juntas?</p>` },
+
+  { id:'parte', n:3, titulo:'Parte de pesca del 07/09', rol:'solida', puntos:20, capa:'parte',
+    fuente:'fishy', fuenteTxt:'Fishy · tabla lances',
+    cuerpo: () => `
+      <p>Lo que el patrón declaró ese día:</p>
+      <table><tr><th>Hora</th><th>Rectángulo</th><th>Especie</th><th>kg</th></tr>
+      <tr><td>10:40</td><td>CH:108</td><td>Langostino</td><td>835</td></tr>
+      <tr><td>11:45</td><td>CH:114</td><td>Calamar</td><td>595</td></tr>
+      <tr><td>12:45</td><td>CH:118</td><td>Merluza</td><td>558</td></tr></table>
+      <p>Observación del lance de langostino: <i>«Jornada con condiciones variables, revisar detalle en bitácora.»</i></p>
+      ${mapa(new Set(['parte']),'f3')}
+      <p>Tres lances en <b>tres rectángulos distintos en 2 h 05 min</b>. Entre centros de rectángulo hay unos 27 km: para cumplir ese parte, el barco tendría que haberse movido a <b>más de 13 nudos</b> mientras arrastraba la red.</p>
+      <p class="pregunta">¿Un parte que no es físicamente posible es un error… o una coartada?</p>` },
+
+  { id:'motor', n:4, titulo:'Telemetría del motor', rol:'solida', puntos:20, capa:null,
+    fuente:'fishy', fuenteTxt:'Fishy · tabla mantenimiento',
+    cuerpo: () => `
+      <p>El sensor de vibración del motor del PM-0231 manda lecturas a tierra. Umbral de alerta: <b>6 mm/s</b>.</p>
+      <div class="mini">${barrasMotor()}</div>
+      <table><tr><th>Fecha</th><th>Hora (ARG)</th><th>Vibración</th><th>Estado</th></tr>
+      <tr><td>04/09</td><td>07:21</td><td>9,00 mm/s</td><td class="alerta">alerta</td></tr>
+      <tr><td><b>07/09</b></td><td><b>07:21</b></td><td><b>2,39 mm/s</b></td><td class="ok">normal</td></tr>
+      <tr><td>08/09</td><td>07:21</td><td>7,69 mm/s</td><td class="alerta">alerta</td></tr></table>
+      <p>Ojo con la hora: la base guarda <b>10:21 UTC</b>, que en Argentina son las <b>07:21</b>. Igual cae <b>en pleno apagón del AIS</b>. Ese día el motor andaba bien y <b>transmitía</b>.</p>
+      <p class="pregunta">Si a bordo «se cayó todo», ¿quién mandó esta lectura?</p>` },
+
+  { id:'bitacora', n:5, titulo:'Bitácora del patrón', rol:'coartada', puntos:-10, capa:null,
+    fuente:'didac', fuenteTxt:'Dato del caso · testimonio',
+    cuerpo: () => `
+      <p>La entrada del 07/09, escrita a mano:</p>
+      <p style="font-family:'IBM Plex Mono',monospace;font-size:.82rem;background:#fff;border:1px solid rgba(0,0,0,.12);padding:10px;border-radius:6px">06:00 — Corte eléctrico general a bordo. Sin comunicaciones.<br>12:15 — Se restablece la energía.<br>Lances según parte. Sin novedad.</p>
+      <p>Es la <b>versión del patrón</b>. Explicaría el apagón del AIS.</p>
+      <p class="pregunta">Una versión no es un dato: se contrasta. ¿Qué otras pistas la confirman… o la contradicen?</p>` },
+
+  { id:'balanza', n:6, titulo:'Ticket de balanza', rol:'trampa', puntos:-20, capa:null,
+    fuente:'fishy', fuenteTxt:'Fishy · tabla descargas (reconciliación)',
+    cuerpo: () => `
+      <p>La descarga del langostino, el 08/09 en el muelle:</p>
+      <table><tr><th>Declarado</th><th>Pesado</th><th>Diferencia</th><th>Estado</th></tr>
+      <tr><td>835 kg</td><td>839 kg</td><td>+4 kg (+0,5 %)</td><td class="ok">confirmado</td></tr></table>
+      <p>Cierra casi perfecto: está muy por debajo de las diferencias que la planta marca como excepción.</p>
+      <p class="pregunta">Los kilos coinciden. ¿Eso dice algo sobre <i>dónde</i> se pescaron?</p>` },
+
+  { id:'satelite', n:7, titulo:'Mapa satelital de temperatura', rol:'trampa', puntos:-20, capa:null,
+    fuente:'fishy', fuenteTxt:'Fishy · tabla lecturas_satelitales',
+    cuerpo: () => `
+      <p>La pantalla muestra la temperatura superficial (SST) de CH:108 para el 07/09:</p>
+      <table><tr><th>Campo</th><th>Valor</th></tr>
+      <tr><td>temperatura_c</td><td>11,3 °C</td></tr>
+      <tr><td>clorofila</td><td>2,15</td></tr>
+      <tr><td>sensor</td><td class="alerta">— (vacío)</td></tr>
+      <tr><td>nubosidad_pct</td><td class="alerta">— (vacío)</td></tr>
+      <tr><td>fuente</td><td class="alerta">«reconstruido, sin lectura original»</td></tr></table>
+      <p>Mirá el campo <b>fuente</b> con atención. En la esquina de la pantalla decía, chiquito: <i>reconstruido</i>.</p>
+      <p class="pregunta">¿Presentarías ante una autoridad un dato que nadie midió?</p>` },
+
+  { id:'rendimiento', n:8, titulo:'Rendimientos de langostino en CH:108', rol:'indicio', puntos:5, capa:null,
+    fuente:'fishy', fuenteTxt:'Fishy · tabla lances',
+    cuerpo: () => `
+      <p>Lances de langostino declarados en CH:108 esa semana:</p>
+      <table><tr><th>Fecha</th><th>Barco</th><th>kg</th></tr>
+      <tr><td>05/09</td><td>Estrella Azul</td><td>287</td></tr>
+      <tr><td><b>07/09</b></td><td><b>Don Alberto</b></td><td class="alerta"><b>835</b></td></tr>
+      <tr><td>11/09</td><td>Cruz del Sur</td><td>378</td></tr></table>
+      <p>El Don Alberto sacó <b>unas 2,5 veces más</b> que sus vecinos en el mismo rectángulo.</p>
+      <p class="pregunta">¿Un día excepcional prueba algo? ¿O solo te dice dónde mirar?</p>` },
+
+  { id:'aviso', n:9, titulo:'Aviso de área de veda', rol:'contexto', puntos:10, capa:'veda',
+    fuente:'didac', fuenteTxt:'Dato del caso · regla vigente',
+    cuerpo: () => `
+      <p>Clavado en el corcho desde el 1° de septiembre:</p>
+      <p style="background:#F0B441;border:3px solid #b3261e;padding:10px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:.82rem"><b>ÁREA DE VEDA TEMPORAL</b><br>Juveniles de langostino · franja sur de CH:108<br>Vigente del 01/09 al 30/09 · prohibido el arrastre</p>
+      ${mapa(new Set(['veda']),'f9')}
+      <p>Sin esta regla no hay infracción: define <b>dónde no se podía pescar</b>.</p>` }
+];
+
+const OPCIONES_QUE = [
+  { id:'falla', txt:'Tuvo una falla eléctrica: el AIS se cortó y pescó normal en CH:108.', sub:'La versión de la bitácora.' },
+  { id:'balanza', txt:'La balanza del puerto está mal calibrada y infló la descarga.', sub:'' },
+  { id:'veda', txt:'Apagó el AIS, arrastró dentro del área de veda y declaró la captura en CH:108.', sub:'', correcta:true },
+  { id:'frio', txt:'El agua estaba demasiado fría para langostino: la captura no puede ser de CH:108.', sub:'' }
+];
+
+/* ---------- Mapa esquemático (capas) ---------- */
+function mapa(capas, uid, detalle){
+  /* Grilla esquemática: rectángulos de Fishy de 100 px ≈ 27 km (10 km = 37 px) */
+  const R=[['CH:108',60,20],['CH:114',160,20],['CH:118',260,20],['CH:120',60,120],['CH:125',160,120]];
+  const T=(x,y,t,c,o='')=>`<text x="${x}" y="${y}" font-family="IBM Plex Mono,monospace" font-size="${o.fs||7.5}" fill="${c}" ${o.a?`text-anchor="${o.a}"`:''} ${o.w?'font-weight="600"':''}>${t}</text>`;
+  let s=`<svg viewBox="0 0 380 260" role="img" aria-label="Mapa esquemático de rectángulos de pesca">
+    <defs><pattern id="h${uid}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#E8623A" stroke-width="2" stroke-opacity=".5"/></pattern></defs>
+    <path d="M0 0 H32 C44 50 24 100 38 150 C50 200 28 230 34 260 H0 Z" fill="#1d3a2e"/>`;
+  R.forEach(([c,x,y])=>{s+=`<rect x="${x}" y="${y}" width="100" height="100" fill="none" stroke="#EFE6D2" stroke-opacity=".25"/>`+T(x+5,y+12,c,'#B9AE96',{fs:8});});
+  s+=`<circle cx="28" cy="236" r="4" fill="#F0B441"/>`+T(8,254,'Puerto','#F0B441')+
+     `<line x1="310" y1="245" x2="347" y2="245" stroke="#EFE6D2"/><line x1="310" y1="242" x2="310" y2="248" stroke="#EFE6D2"/><line x1="347" y1="242" x2="347" y2="248" stroke="#EFE6D2"/>`+T(328,238,'10 km','#EFE6D2',{a:'middle',fs:7});
+  if(capas.has('veda')){
+    s+=`<rect x="70" y="78" width="80" height="38" fill="url(#h${uid})" stroke="#E8623A" stroke-dasharray="4 3"/>`+T(110,113,'VEDA','#E8623A',{a:'middle',w:1});
+  }
+  if(capas.has('parte')){
+    s+=`<polyline points="130,32 230,32 330,32" fill="none" stroke="#F0B441" stroke-dasharray="3 3"/>`;
+    [[130,'10:40'],[230,'11:45'],[330,'12:45']].forEach(([x,t])=>{
+      s+=`<g stroke="#F0B441" stroke-width="2.2"><line x1="${x-5}" y1="27" x2="${x+5}" y2="37"/><line x1="${x-5}" y1="37" x2="${x+5}" y2="27"/></g>`+T(x+8,46,t,'#F0B441',{fs:7});});
+    s+=T(180,60,'27 km en 65 min','#F0B441',{a:'middle',fs:6.5})+T(280,60,'27 km en 60 min','#F0B441',{a:'middle',fs:6.5});
+  }
+  if(capas.has('ais')){
+    const tr=[[40,206],[46,176],[50,146],[56,116],[64,86],[76,58],[110,140],[88,170],[62,200],[40,226]];
+    tr.forEach(([x,y])=>{s+=`<circle cx="${x}" cy="${y}" r="2.6" fill="#6FA8DC"/>`;});
+    [[92,44],[104,48],[114,54],[122,62]].forEach(([x,y])=>{s+=`<circle cx="${x}" cy="${y}" r="2.8" fill="#E8623A"/>`;});
+    s+=`<line x1="122" y1="62" x2="134" y2="93" stroke="#F0B441" stroke-width="1.6" stroke-dasharray="3 3"/><circle cx="134" cy="93" r="3.2" fill="#6FA8DC" stroke="#EFE6D2" stroke-width=".8"/>`+
+       T(128,66,'06:10','#EFE6D2',{fs:7})+T(140,97,'12:20','#EFE6D2',{fs:7})+T(162,80,'⚠ 6 h 10 min sin señal','#F0B441',{fs:7});
+  }
+  if(capas.has('vms')){
+    [[94,94,'07:00'],[112,104,'09:00'],[124,90,'11:00']].forEach(([x,y,t])=>{
+      s+=`<path d="M${x} ${y-5} L${x+5} ${y+4} L${x-5} ${y+4} Z" fill="#48B39C" stroke="#07161F" stroke-width=".6"/>`;
+      if(detalle) s+=T(x-7,y+3,t,'#48B39C',{a:'end',fs:6.5});
+    });
+  }
+  return s+'</svg>';
+}
+
+function barrasMotor(){
+  const d=[['04/09',9.00],['07/09',2.39],['08/09',7.69]], H=90, max=10;
+  let s=`<svg viewBox="0 0 300 130" role="img" aria-label="Vibración del motor por día">`;
+  const y6=20+H-(6/max)*H;
+  s+=`<line x1="30" y1="${y6}" x2="290" y2="${y6}" stroke="#E8623A" stroke-dasharray="4 3"/><text x="288" y="${y6-4}" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="#b3261e">umbral 6 mm/s</text>`;
+  d.forEach(([f,v],i)=>{const x=60+i*80,h=(v/max)*H,y=20+H-h,c=v>6?'#E8623A':'#48B39C';
+    s+=`<rect x="${x}" y="${y}" width="44" height="${h}" fill="${c}"/><text x="${x+22}" y="${y-4}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#1b1a16">${v.toFixed(2).replace('.',',')}</text><text x="${x+22}" y="${20+H+13}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#1b1a16" ${i===1?'font-weight="600"':''}>${f}</text>`;});
+  s+=`<line x1="30" y1="${20+H}" x2="290" y2="${20+H}" stroke="#1b1a16"/>`;
+  return s+'</svg>';
+}
+
+/* ---------- Estado ---------- */
+const $=s=>document.querySelector(s);
+const halladas=new Set();
+const byId=Object.fromEntries(EVIDENCIAS.map(e=>[e.id,e]));
+let capasOn=new Set();
+let ultimoFoco=null;
+
+/* ---------- Escena ---------- */
+document.querySelectorAll('.obj').forEach(g=>{
+  const abrir=()=>abrirFicha(g.dataset.id);
+  g.addEventListener('click',abrir);
+  g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();abrir();}});
+});
+
+function abrirFicha(id){
+  const e=byId[id]; if(!e) return;
+  ultimoFoco=document.activeElement;
+  const nueva=!halladas.has(id);
+  halladas.add(id);
+  if(nueva && e.capa) capasOn.add(e.capa);
+  $('#fExp').textContent=`Pista ${e.n} de 9${nueva?' · nueva':''}`;
+  $('#fTitulo').textContent=e.titulo;
+  $('#fCuerpo').innerHTML=e.cuerpo()+`<span class="chip ${e.fuente==='fishy'?'fishy':'didac'}">${e.fuente==='fishy'?'🐟 ':'✎ '}${e.fuenteTxt}</span>`;
+  $('#modal').classList.add('show');
+  $('#cerrar').focus();
+  actualizar();
+}
+function cerrarFicha(){$('#modal').classList.remove('show'); if(ultimoFoco) ultimoFoco.focus();}
+$('#cerrar').addEventListener('click',cerrarFicha);
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')cerrarFicha();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#modal').classList.contains('show'))cerrarFicha();});
+
+$('#linterna').addEventListener('click',()=>{
+  const falta=EVIDENCIAS.filter(e=>!halladas.has(e.id));
+  if(!falta.length) return;
+  const g=document.querySelector(`.obj[data-id="${falta[Math.floor(Math.random()*falta.length)].id}"]`);
+  g.classList.remove('pulso'); void g.getBBox(); g.classList.add('pulso');
+  setTimeout(()=>g.classList.remove('pulso'),3000);
+});
+
+/* ---------- Render de paneles ---------- */
+const CAPAS=[
+  {id:'ais',ev:'ais',t:'Traza AIS',s:'Puntos azules = tránsito · naranjas = pesca'},
+  {id:'vms',ev:'vms',t:'Posiciones VMS',s:'Triángulos verdes, cada 2 horas'},
+  {id:'parte',ev:'parte',t:'Lances declarados',s:'Cruces amarillas del parte de pesca'},
+  {id:'veda',ev:'aviso',t:'Área de veda',s:'Franja rayada al sur de CH:108'}
+];
+
+function actualizar(){
+  $('#cuenta').textContent=halladas.size;
+  $('#pistas').innerHTML=EVIDENCIAS.map(e=>`<span class="${halladas.has(e.id)?'on':''}"></span>`).join('');
+  document.querySelectorAll('.obj').forEach(g=>g.classList.toggle('hallada',halladas.has(g.dataset.id)));
+  $('#linterna').disabled=halladas.size===EVIDENCIAS.length;
+
+  $('#libreta').innerHTML=EVIDENCIAS.map(e=>halladas.has(e.id)
+    ?`<div class="nota on" role="button" tabindex="0" data-id="${e.id}"><span class="n">PISTA ${e.n}</span><span class="t">${e.titulo}</span></div>`
+    :`<div class="nota"><span class="n">PISTA ${e.n}</span><span class="t">? · sin encontrar</span></div>`).join('');
+  document.querySelectorAll('.nota.on').forEach(n=>{
+    n.addEventListener('click',()=>abrirFicha(n.dataset.id));
+    n.addEventListener('keydown',ev=>{if(ev.key==='Enter'){abrirFicha(n.dataset.id);}});
+  });
+
+  $('#capas').innerHTML=CAPAS.map(c=>{const ok=halladas.has(c.ev);
+    return `<label class="capa ${ok?'':'bloq'}"><input type="checkbox" data-capa="${c.id}" ${ok?'':'disabled'} ${capasOn.has(c.id)&&ok?'checked':''}><span><b>${c.t}</b><small>${ok?c.s:'Encontrá la pista para habilitarla'}</small></span></label>`;}).join('');
+  document.querySelectorAll('#capas input').forEach(i=>i.addEventListener('change',()=>{
+    i.checked?capasOn.add(i.dataset.capa):capasOn.delete(i.dataset.capa); dibujarMesa();}));
+  dibujarMesa();
+  pintarPruebas();
+}
+function dibujarMesa(){ $('#mesaMapa').innerHTML=mapa(new Set([...capasOn].filter(c=>halladas.has(CAPAS.find(x=>x.id===c).ev))),'m'); }
+
+/* ---------- Acusación ---------- */
+$('#opQue').innerHTML=OPCIONES_QUE.map(o=>`<label class="op"><input type="radio" name="que" value="${o.id}"><span>${o.txt}${o.sub?`<small>${o.sub}</small>`:''}</span></label>`).join('');
+$('#opQue').addEventListener('change',validar);
+
+function pintarPruebas(){
+  const marcadas=new Set([...document.querySelectorAll('#opPruebas input:checked')].map(i=>i.value));
+  $('#opPruebas').innerHTML=EVIDENCIAS.map(e=>{const ok=halladas.has(e.id);
+    return `<label class="op ${ok?'':'bloq'}"><input type="checkbox" value="${e.id}" ${ok?'':'disabled'} ${marcadas.has(e.id)&&ok?'checked':''}><span>${ok?e.titulo:'Pista '+e.n+' · sin encontrar'}</span></label>`;}).join('');
+  document.querySelectorAll('#opPruebas input').forEach(i=>i.addEventListener('change',()=>{
+    const sel=document.querySelectorAll('#opPruebas input:checked');
+    if(sel.length>3){i.checked=false; $('#avisoSel').textContent='Máximo 3 pruebas: elegí las más fuertes.';}
+    else $('#avisoSel').textContent='';
+    validar();}));
+  validar();
+}
+function validar(){
+  const q=document.querySelector('input[name=que]:checked');
+  const n=document.querySelectorAll('#opPruebas input:checked').length;
+  $('#acusar').disabled=!(q&&n>0);
+  $('#estadoAcus').textContent=!q?'Respondé qué pasó.':(n===0?'Elegí al menos una prueba.':`${n} prueba${n>1?'s':''} seleccionada${n>1?'s':''}.`);
+}
+
+$('#acusar').addEventListener('click',()=>{
+  const q=OPCIONES_QUE.find(o=>o.id===document.querySelector('input[name=que]:checked').value);
+  const sel=[...document.querySelectorAll('#opPruebas input:checked')].map(i=>byId[i.value]);
+  const solidas=sel.filter(e=>e.rol==='solida');
+  const malas=sel.filter(e=>e.rol==='trampa'||e.rol==='coartada');
+  let pts=(q.correcta?40:0)+sel.reduce((a,e)=>a+e.puntos,0);
+  pts=Math.max(0,Math.min(100,pts));
+
+  let sello,texto,color;
+  if(!q.correcta){
+    color='var(--langostino)'; sello='Caso archivado… por error';
+    texto={falla:'Le creíste a la bitácora. Pero el VMS siguió reportando y el motor transmitió a las 07:21: a bordo no «se cayó todo».',
+           balanza:'La balanza es justamente lo único que cierra: +0,5 %. El problema no es cuánto se pescó, sino dónde.',
+           frio:'Esa temperatura sale de un dato «reconstruido, sin lectura original». Y aunque fuera real, la SST no prueba dónde estuvo un barco.'}[q.id];
+  } else if(malas.length){
+    color='var(--boya)'; sello='La defensa te desarmó';
+    texto=`Acertaste qué pasó, pero presentaste ${malas.map(e=>'«'+e.titulo.toLowerCase()+'»').join(' y ')} como prueba. `+
+      (malas.some(e=>e.id==='satelite')?'Un dato reconstruido no se sostiene ante nadie. ':'')+
+      (malas.some(e=>e.id==='balanza')?'La balanza cierra y juega a favor del patrón: mide cuánto, no dónde. ':'')+
+      (malas.some(e=>e.id==='bitacora')?'La bitácora es la versión del acusado: se contrasta, no se presenta como prueba. ':'');
+  } else if(solidas.length>=2){
+    color='var(--marea)'; sello='Caso cerrado';
+    texto=`Cruzaste ${solidas.length} fuentes independientes (${solidas.map(e=>e.titulo.toLowerCase()).join(', ')}). Cada una sola era una sospecha; juntas son una prueba.`+
+      (sel.some(e=>e.id==='aviso')?' Y sumaste la regla que define la infracción.':'');
+  } else {
+    color='var(--boya)'; sello='Sospecha fundada, sin prueba';
+    texto='Tenés razón sobre lo que pasó, pero con una sola fuente sólida el patrón tiene salida. Buscá una segunda fuente independiente que diga lo mismo.';
+  }
+  const rango=pts>=90?'Inspector/a de datos':pts>=60?'Buen olfato':pts>=30?'Aprendiz de sabueso':'La escena te engañó';
+
+  $('#sello').textContent=sello; $('#sello').style.color=color;
+  $('#puntos').textContent=pts; $('#rango').textContent=rango;
+  $('#vtexto').textContent=texto;
+  const ROL={solida:'Prueba sólida',contexto:'Contexto necesario',indicio:'Indicio',trampa:'Trampa',coartada:'Coartada'};
+  const EXP={
+    ais:'El hueco es un dato: 6 h 10 min y solo 9 km recorridos (0,8 kn). El barco no se fue: se quedó ahí.',
+    vms:'Fuente independiente del AIS: tres posiciones a 2,6–3,1 kn dentro del área de veda. Velocidad de arrastre.',
+    parte:'Tres lances en tres rectángulos en 2 h 05 exigen más de 13 nudos arrastrando la red. El parte no es físicamente posible.',
+    motor:'Desarma la coartada: si «se cayó todo», el motor no habría transmitido a las 07:21 (10:21 UTC en la base).',
+    bitacora:'Es la versión del acusado. Todo lo demás la contradice.',
+    balanza:'Pesó bien (+0,5 %). La balanza mide cuánto, no dónde: no exonera ni acusa.',
+    satelite:'«Reconstruido, sin lectura original»: sin sensor ni nubosidad. Un dato sin origen no prueba nada.',
+    rendimiento:'835 kg contra 287 y 378: te dice dónde mirar, pero un buen día existe. Sospecha, no prueba.',
+    aviso:'Sin la regla no hay infracción: define dónde no se podía pescar.'
+  };
+  $('#solucion').innerHTML=EVIDENCIAS.map(e=>`<div class="it ${e.rol}"><span class="r r-${e.rol}">${ROL[e.rol]}${sel.includes(e)?' · la presentaste':''}${halladas.has(e.id)?'':' · no la encontraste'}</span><br><b>${e.n}. ${e.titulo}.</b> ${EXP[e.id]}</div>`).join('');
+  $('#veredicto').classList.add('show');
+  $('#veredicto').scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+$('#reiniciar').addEventListener('click',()=>{
+  halladas.clear(); capasOn.clear();
+  document.querySelectorAll('input[name=que]').forEach(i=>i.checked=false);
+  $('#veredicto').classList.remove('show');
+  $('#opPruebas').innerHTML='';
+  actualizar();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+actualizar();
+</script>
+</body>
+</html>
