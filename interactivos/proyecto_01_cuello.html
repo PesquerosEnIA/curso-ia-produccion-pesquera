@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El cuello de botella · Proyectos del Golfo</title>
+<meta name="description" content="Proyecto 01: dimensioná la línea de filet de la planta para una semana real de descargas. Primero la semana normal, después el pico, después el imprevisto. Y al final, defendelo ante el directorio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --abismo:#07161F; --sonda:#0E2C3D; --plataforma:#164055; --carta:#EFE6D2; --carta-tenue:#B9AE96;
+  --langostino:#E8623A; --marea:#48B39C; --boya:#F0B441; --transito:#6FA8DC;
+  --linea:rgba(239,230,210,.14); --linea-fuerte:rgba(239,230,210,.28);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+body{background:var(--abismo);color:var(--carta);font-family:'Archivo',system-ui,sans-serif;line-height:1.5;padding:22px 16px 70px}
+:focus-visible{outline:2px solid var(--boya);outline-offset:3px}
+.wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.mono{font-family:'IBM Plex Mono',monospace}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--carta-tenue)}
+h1{font-family:'Archivo Black',sans-serif;font-size:clamp(1.7rem,5vw,2.5rem);line-height:1.02;letter-spacing:-.02em;text-transform:uppercase;margin:.45rem 0 .6rem}
+h1 em{font-style:normal;color:var(--boya)}
+.bajada{font-size:.98rem;max-width:72ch}
+.bajada b{color:var(--boya);font-weight:600}
+h2{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--boya);font-weight:600;margin-bottom:10px}
+.panel{background:var(--sonda);border:1px solid var(--linea);border-radius:14px;padding:16px}
+.small{font-size:.8rem;color:var(--carta-tenue)}
+button{font-family:'IBM Plex Mono',monospace;font-size:.78rem;cursor:pointer;border-radius:8px;border:1px solid var(--linea-fuerte);background:transparent;color:var(--carta);padding:8px 12px;min-height:40px}
+button:hover:not(:disabled){border-color:var(--boya);color:var(--boya)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.primario{background:var(--langostino);border-color:var(--langostino);color:#fff;font-weight:600}
+button.primario:hover:not(:disabled){filter:brightness(1.08);color:#fff}
+
+/* Encargo */
+.encargo{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px}
+.meta{border:1px solid var(--linea-fuerte);border-radius:10px;padding:10px 12px;background:rgba(7,22,31,.35)}
+.meta .k{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--carta-tenue)}
+.meta .v{font-weight:700;font-size:1.02rem;margin-top:2px}
+
+/* Etapas */
+.etapas{display:flex;gap:8px;flex-wrap:wrap}
+.etapa{flex:1 1 200px;text-align:left;padding:10px 12px;min-height:64px;border-radius:10px}
+.etapa .n{display:block;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--carta-tenue)}
+.etapa .t{display:block;font-family:'Archivo',sans-serif;font-weight:700;font-size:.9rem;margin-top:2px}
+.etapa .s{display:block;font-size:.7rem;margin-top:3px}
+.etapa[aria-pressed="true"]{border-color:var(--boya);background:rgba(240,180,65,.08)}
+.ok{color:var(--marea)} .mal{color:var(--langostino)} .med{color:var(--boya)}
+
+/* Escenario */
+.escenario{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}
+.escenario .txt{flex:1 1 320px;font-size:.92rem}
+.escenario table{flex:1 1 300px;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:.74rem}
+.escenario th,.escenario td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--linea)}
+.escenario th{color:var(--carta-tenue);font-weight:500}
+.alerta-box{border:1px solid var(--langostino);background:rgba(232,98,58,.08);border-radius:10px;padding:10px 12px;font-size:.88rem;margin-top:10px}
+
+/* Controles */
+.ctrls{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.ctrl{border:1px solid var(--linea);border-radius:10px;padding:10px 12px}
+.ctrl .lab{font-weight:600;font-size:.88rem}
+.ctrl .ayuda{font-size:.72rem;color:var(--carta-tenue);margin:2px 0 8px;min-height:2.1em}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:40px;padding:0;font-size:1.1rem}
+.stepper .val{font-family:'IBM Plex Mono',monospace;font-size:1.2rem;font-weight:600;min-width:2ch;text-align:center}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{min-height:36px;padding:5px 9px;font-size:.72rem}
+.seg button[aria-pressed="true"]{background:var(--boya);border-color:var(--boya);color:#07161F;font-weight:600}
+.costo-prev{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-top:12px}
+.costo-prev .c{font-family:'IBM Plex Mono',monospace;font-size:.84rem}
+.costo-prev .c b{font-size:1.05rem}
+
+/* Resultados */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+.kpi{border:1px solid var(--linea);border-radius:10px;padding:10px 12px}
+.kpi .k{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--carta-tenue)}
+.kpi .v{font-family:'Archivo Black',sans-serif;font-size:1.35rem;line-height:1.1;margin-top:3px}
+.kpi .d{font-size:.7rem;color:var(--carta-tenue)}
+.veredicto-etapa{font-weight:700;font-size:1rem;margin:4px 0 10px}
+.diag svg,.serie svg{width:100%;height:auto;display:block}
+.diag,.serie{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.diag svg,.serie svg{min-width:620px}
+.serie{margin-top:12px}
+.lectura{font-size:.88rem;margin-top:10px;border-left:3px solid var(--boya);padding:4px 0 4px 12px}
+.leg{display:flex;flex-wrap:wrap;gap:12px;font-size:.72rem;color:var(--carta-tenue);margin-top:4px}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+/* Defensa */
+.preg{margin-top:14px}
+.preg p.q{font-weight:600;margin-bottom:8px}
+.op{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border:1px solid var(--linea);border-radius:10px;cursor:pointer;font-size:.88rem;margin-bottom:6px}
+.op input{margin-top:3px;accent-color:var(--langostino);width:18px;height:18px;flex:none}
+.bloqueado{opacity:.45;pointer-events:none}
+.final{display:none}
+.final.show{display:block}
+.sello{font-family:'Archivo Black',sans-serif;text-transform:uppercase;font-size:1.5rem;line-height:1.05;margin:4px 0 6px}
+.desglose{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:12px 0}
+.fb{border-left:3px solid var(--linea-fuerte);padding:6px 0 6px 12px;font-size:.86rem;margin-top:8px}
+.fb.ok{border-color:var(--marea);color:var(--carta)} .fb.mal{border-color:var(--langostino);color:var(--carta)}
+.leyes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:14px}
+.ley{background:var(--abismo);border:1px solid var(--linea);border-radius:10px;padding:12px;font-weight:600;font-size:.92rem}
+.ley span{display:block;font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:.66rem;color:var(--carta-tenue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+details.param{margin-top:10px;font-size:.8rem;color:var(--carta-tenue)}
+details.param summary{cursor:pointer;color:var(--carta)}
+details.param table{border-collapse:collapse;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;width:100%}
+details.param td{padding:3px 6px;border-bottom:1px solid var(--linea)}
+footer{font-size:.76rem;color:var(--carta-tenue);border-top:1px solid var(--linea);padding-top:12px;line-height:1.6}
+footer a{color:var(--carta)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Proyectos del Golfo · Proyecto 01 · Clase 8 — Optimización</div>
+    <h1>El cuello <em>de botella</em></h1>
+    <p class="bajada">La gerencia de la planta Giro01 te encarga <b>dimensionar la línea de filet</b> de merluza y pescadilla: cuánta gente en cada puesto, cuántas horas, qué túnel y qué cámara. La vas a probar contra <b>semanas reales de descargas</b> de Fishy. Primero una semana normal. Después, el pico. Después, el imprevisto. Y al final vas a tener que defender tus números ante el directorio.</p>
+    <div class="encargo">
+      <div class="meta"><div class="k">Inocuidad</div><div class="v">0 kg fuera de control</div></div>
+      <div class="meta"><div class="k">Calidad</div><div class="v">≥ 95 % grado A</div></div>
+      <div class="meta"><div class="k">Presupuesto</div><div class="v">≤ USD 5.000 / semana</div></div>
+      <div class="meta"><div class="k">Criterio de desempate</div><div class="v">Mayor margen</div></div>
+    </div>
+  </header>
+
+  <!-- ETAPAS -->
+  <section class="panel">
+    <h2>Etapas del proyecto</h2>
+    <div class="etapas" id="etapas"></div>
+  </section>
+
+  <!-- ESCENARIO -->
+  <section class="panel">
+    <h2 id="escTit">Escenario</h2>
+    <div class="escenario">
+      <div class="txt" id="escTxt"></div>
+      <table id="escTabla"></table>
+    </div>
+    <div id="escExtra"></div>
+  </section>
+
+  <!-- LÍNEA / CONTROLES -->
+  <section class="panel">
+    <h2>Tu diseño de la línea</h2>
+    <div class="diag" id="diag"></div>
+    <div class="ctrls" id="ctrls" style="margin-top:12px"></div>
+    <div class="costo-prev">
+      <span class="c" id="costoPrev"></span>
+      <button class="primario" id="correr" type="button">▶ Correr la semana</button>
+    </div>
+    <details class="param"><summary>Ver los supuestos del modelo</summary><table id="tParam"></table></details>
+  </section>
+
+  <!-- RESULTADOS -->
+  <section class="panel" id="resPanel" hidden>
+    <h2 id="resTit">Resultados</h2>
+    <div class="veredicto-etapa" id="resVer"></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="serie" id="serie"></div>
+    <div class="leg"><span><i style="background:#48B39C"></i>kg esperando en cámara</span><span><i style="background:#E8623A"></i>kg en el muelle sin frío</span><span><i style="background:#F0B441"></i>capacidad de la cámara</span><span><i style="background:rgba(239,230,210,.15)"></i>horario de trabajo</span></div>
+    <p class="lectura" id="lectura"></p>
+  </section>
+
+  <!-- DEFENSA -->
+  <section class="panel" id="defensa">
+    <h2>Defensa ante el directorio</h2>
+    <p class="small" id="defAviso">Se habilita cuando corriste las tres etapas.</p>
+    <div id="defCuerpo" class="bloqueado"></div>
+    <div class="costo-prev"><span class="c" id="defEstado"></span><button class="primario" id="entregar" type="button" disabled>📑 Presentar el proyecto</button></div>
+  </section>
+
+  <!-- FINAL -->
+  <section class="panel final" id="final" aria-live="polite">
+    <h2>Informe del directorio</h2>
+    <div class="sello" id="fSello"></div>
+    <div class="small" id="fPuntos"></div>
+    <div class="desglose" id="fDesglose"></div>
+    <div id="fFeedback"></div>
+    <div class="leyes">
+      <div class="ley"><span>Regla 1</span>La capacidad de la línea es la de su eslabón más lento.</div>
+      <div class="ley"><span>Regla 2</span>Se dimensiona para el pico, no para el promedio.</div>
+      <div class="ley"><span>Regla 3</span>Mejorar lo que no es cuello de botella es gastar sin ganar.</div>
+      <div class="ley"><span>Regla 4</span>No produzcas lo que el eslabón siguiente no puede absorber.</div>
+    </div>
+    <div class="costo-prev"><span></span><button id="reiniciar" type="button">↺ Empezar de nuevo</button></div>
+  </section>
+
+  <footer>
+    <b>Modelo didáctico con datos reales de Fishy.</b> Las descargas de cada semana (fecha, barco, especie y kg pesados) salen de la vista <span class="mono">vista_reconciliacion_capturas</span>; el rendimiento de filet es el promedio de <span class="mono">registro_produccion</span> para los productos de filet. Productividades, capacidades, costos, precios y reglas de frescura son <b>valores de referencia del caso</b>: están a la vista en «Ver los supuestos del modelo» y se pueden ajustar. La hora de llegada de cada descarga es un supuesto (07, 09, 11 y 13 h). La regla de frío del muelle se inspira en el Manual HACCP de la planta cargado en Fishy.<br>
+    Serie: <a href="crimen_01_apagon.html" target="_blank" rel="noopener">Crímenes del Golfo</a> (detectar) → Proyectos del Golfo (dimensionar y decidir). · Ariel Giamportone | PesquerosEnIA · UTN FRCh
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   PROYECTOS DEL GOLFO · Proyecto 01 · El cuello de botella
+   PARÁMETROS: valores de referencia del caso (a validar).
+   ============================================================ */
+const PARAM = {
+  recepcion_kg_h_op: 300,   // lavado, pesaje y enhielado (kg materia prima / h por operario)
+  fileteado_kg_h_op: 30,    // fileteado manual (kg materia prima / h por operario)
+  empaque_kg_h_op: 100,     // empaque (kg producto / h por operario)
+  rendimiento: 0.686,       // promedio de filet en Fishy (registro_produccion)
+  turno_inicio: 6, horas_turno: 8,
+  costo_hora: 7, costo_hora_extra: 10.5,           // USD por operario
+  tunel: {150:{costo:0,t:'Actual · 150 kg/h'},250:{costo:900,t:'Alquiler módulo · 250 kg/h'},400:{costo:2200,t:'Túnel nuevo · 400 kg/h'}},
+  camara: {1000:{costo:0,t:'Actual · 1 t'},2000:{costo:300,t:'Ampliada · 2 t'},4000:{costo:700,t:'Grande · 4 t'}},
+  precioA: 7, precioB: 4.5,                          // USD / kg de producto
+  muelle_max_h: 4,        // pescado sin frío más de 4 h → fuera de control
+  camara_A_h: 24, camara_B_h: 48,                    // espera hasta el fileteado
+  filet_sin_congelar_h: 2 // filet esperando el túnel más de 2 h → baja a B
+};
+const PRESUPUESTO = 5000, PRESUPUESTO_EMERG = 5500;
+
+/* Descargas reales (Fishy): día relativo, barco, especie, kg pesados */
+const ESCENARIOS = {
+  normal:{ titulo:'Semana normal · 29/08 al 04/09', inicio:'2026-08-29', meta:95, presupuesto:PRESUPUESTO,
+    texto:'Una semana típica de la flota: <b>3.414 kg</b> de merluza y pescadilla, repartidos en cuatro días. Es tu punto de partida: dimensioná la línea para que funcione bien acá.',
+    descargas:[[1,'Estrella Azul','Pescadilla',516],[2,'San Rafael','Pescadilla',313],[2,'San Rafael','Pescadilla',644],[5,'San Rafael','Pescadilla',532],[5,'San Rafael','Merluza',806],[6,'Estrella Azul','Pescadilla',603]] },
+  pico:{ titulo:'Semana pico · 07/09 al 13/09', inicio:'2026-09-07', meta:95, presupuesto:PRESUPUESTO,
+    texto:'La semana más cargada del trimestre: <b>5.484 kg</b>. Y el lunes entran <b>cuatro barcos en la misma mañana: 2.319 kg</b>. Probá primero tu diseño tal como está.',
+    descargas:[[0,'Estrella Azul','Merluza',473],[0,'Don Alberto','Merluza',585],[0,'Estrella Azul','Merluza',722],[0,'Nueva Esperanza','Merluza',539],[3,'Don Alberto','Pescadilla',688],[3,'San Rafael','Merluza',266],[4,'San Rafael','Pescadilla',939],[6,'Cruz del Sur','Pescadilla',936],[6,'San Rafael','Pescadilla',336]] },
+  imprevisto:{ titulo:'Imprevisto · la semana pico, con el túnel parado', inicio:'2026-09-07', meta:90, presupuesto:PRESUPUESTO_EMERG, paro:[10,16],
+    texto:'Misma semana pico. Pero el lunes, justo con los cuatro barcos, <b>el túnel IQF se para de 10 a 16 h</b> por una falla (¿te acordás de «La noche del túnel»?). La gerencia te habilita un <b>presupuesto de emergencia de USD 5.500</b> y acepta <b>≥ 90 % grado A</b>. Además de la capacidad, ahora decidís una <b>política</b>: qué hace el fileteado mientras el túnel no anda.',
+    descargas:null }
+};
+ESCENARIOS.imprevisto.descargas = ESCENARIOS.pico.descargas;
+const HORAS_LLEGADA=[7,9,11,13];
+const DIAS_SEM=['dom','lun','mar','mié','jue','vie','sáb'];
+
+/* ---------- Simulación horaria ---------- */
+function simular(dis, escKey){
+  const E=ESCENARIOS[escKey], P=PARAM, dias=7, dren=3, H=24*(dias+dren);
+  const llegadas={}, porDia={};
+  E.descargas.forEach(([d,,,kg])=>{ porDia[d]=(porDia[d]||0); const h=d*24+HORAS_LLEGADA[porDia[d]++]; (llegadas[h]=llegadas[h]||[]).push(kg); });
+  const finTurno=P.turno_inicio+P.horas_turno*dis.turnos;
+  let muelle=[],camara=[],filq=[],empq=[];
+  let A=0,B=0,R=0,fuera=0,costo=0,hExtra=0;
+  const sat={rec:0,fil:0,iqf:0,emp:0,cam:0}, serieCam=[], serieMue=[], serieTrab=[];
+  const suma=a=>a.reduce((s,b)=>s+b.kg,0);
+  for(let h=0;h<H;h++){
+    const hd=h%24;
+    (llegadas[h]||[]).forEach(kg=>muelle.push({kg,t:h}));
+    const activo=hd>=P.turno_inicio && hd<finTurno;
+    const extra=!activo && hd>=finTurno && hd<finTurno+dis.extra && (muelle.length||camara.length||filq.length); // el producto ya congelado puede esperar al turno siguiente
+    const trab=activo||extra;
+    if(trab){ const n=dis.rec+dis.fil+dis.emp; costo+=n*(activo?P.costo_hora:P.costo_hora_extra); if(extra) hExtra++; }
+    const paro=E.paro && h>=E.paro[0] && h<E.paro[1];
+    // recepción: muelle → cámara
+    let cap=trab?dis.rec*P.recepcion_kg_h_op:0; const capRec=cap;
+    let libre=dis.cam-suma(camara);
+    while(muelle.length && cap>1e-9 && libre>1e-9){ const b=muelle[0], m=Math.min(b.kg,cap,libre); camara.push({kg:m,t:b.t}); b.kg-=m; cap-=m; libre-=m; if(b.kg<=1e-9) muelle.shift(); }
+    if(capRec>0 && cap<=1e-9) sat.rec++;
+    // fileteado: cámara → cola del túnel
+    cap=trab?dis.fil*P.fileteado_kg_h_op:0; if(paro && dis.frena) cap=0; const capFil=cap;
+    while(camara.length && cap>1e-9){ const b=camara[0], m=Math.min(b.kg,cap), esp=h-b.t;
+      const g= esp<=P.camara_A_h?'A':(esp<=P.camara_B_h?'B':'R');
+      if(g==='R') R+=m*P.rendimiento; else filq.push({kg:m*P.rendimiento,t:h,g});
+      b.kg-=m; cap-=m; if(b.kg<=1e-9) camara.shift(); }
+    if(capFil>0 && cap<=1e-9) sat.fil++;
+    // túnel IQF
+    cap=(trab && !paro)?dis.tunel:0; const capI=cap;
+    while(filq.length && cap>1e-9){ const b=filq[0], m=Math.min(b.kg,cap); let g=b.g; if(h-b.t>P.filet_sin_congelar_h && g==='A') g='B';
+      empq.push({kg:m,g}); b.kg-=m; cap-=m; if(b.kg<=1e-9) filq.shift(); }
+    if(capI>0 && cap<=1e-9) sat.iqf++;
+    // empaque
+    cap=trab?dis.emp*P.empaque_kg_h_op:0; const capE=cap;
+    while(empq.length && cap>1e-9){ const b=empq[0], m=Math.min(b.kg,cap); if(b.g==='A') A+=m; else B+=m; b.kg-=m; cap-=m; if(b.kg<=1e-9) empq.shift(); }
+    if(capE>0 && cap<=1e-9) sat.emp++;
+    // muelle sin frío
+    muelle=muelle.filter(b=>{ if(h-b.t>P.muelle_max_h){ fuera+=b.kg; R+=b.kg*P.rendimiento; return false;} return true; });
+    // filet que espera el túnel mientras está parado: sigue esperando (y se degrada a B)
+    const c=suma(camara); if(c>=0.95*dis.cam) sat.cam++;
+    if(h<24*dias+48){ serieCam.push(c); serieMue.push(suma(muelle)); serieTrab.push(trab?1:0); }
+  }
+  costo+=PARAM.tunel[dis.tunel].costo+PARAM.camara[dis.cam].costo;
+  const tot=A+B+R, pctA=tot?100*A/tot:0, valor=A*PARAM.precioA+B*PARAM.precioB;
+  const ordenSat=Object.entries(sat).sort((a,b)=>b[1]-a[1]);
+  return {A,B,R,fuera,costo,hExtra,pctA,valor,margen:valor-costo,sat,cuello:ordenSat[0][1]>0?ordenSat[0][0]:'fil',serieCam,serieMue,serieTrab,
+    ok: fuera<1 && pctA>=ESCENARIOS[escKey].meta && costo<=ESCENARIOS[escKey].presupuesto};
+}
+
+/* ---------- Estado ---------- */
+const $=s=>document.querySelector(s);
+const fmt=(x,d=0)=>x.toLocaleString('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const DIS0={rec:1,fil:4,emp:1,turnos:1,extra:0,tunel:150,cam:1000,frena:false};
+let dis={...DIS0}, etapa='normal', mejores={}, corridas={normal:0,pico:0,imprevisto:0}, primeraPico=null;
+const ORDEN=['normal','pico','imprevisto'];
+const NOMBRE={rec:'Recepción',fil:'Fileteado',iqf:'Túnel IQF',emp:'Empaque',cam:'Cámara de espera'};
+
+/* ---------- Etapas ---------- */
+function habilitada(k){ const i=ORDEN.indexOf(k); return i===0 || corridas[ORDEN[i-1]]>0; }
+function pintarEtapas(){
+  $('#etapas').innerHTML=ORDEN.map((k,i)=>{const m=mejores[k], hab=habilitada(k);
+    const s=!corridas[k]?(hab?'<span class="s med">sin correr</span>':'<span class="s">🔒 corré la etapa anterior</span>')
+      :(m&&m.ok?`<span class="s ok">✓ cumplida · margen USD ${fmt(m.margen)}</span>`:`<span class="s mal">✗ no cumple todavía (${corridas[k]} intento${corridas[k]>1?'s':''})</span>`);
+    return `<button class="etapa" type="button" data-k="${k}" aria-pressed="${etapa===k}" ${hab?'':'disabled'}><span class="n">Etapa ${i+1}</span><span class="t">${ESCENARIOS[k].titulo}</span>${s}</button>`;}).join('');
+  document.querySelectorAll('.etapa').forEach(b=>b.addEventListener('click',()=>{etapa=b.dataset.k; if(etapa!=='imprevisto') dis.frena=false; render(); $('#resPanel').hidden=true;}));
+}
+function pintarEscenario(){
+  const E=ESCENARIOS[etapa], ini=new Date(E.inicio+'T12:00:00');
+  $('#escTit').textContent='Escenario · '+E.titulo;
+  $('#escTxt').innerHTML=E.texto+`<p class="small" style="margin-top:8px">Meta de esta etapa: 0 kg fuera de control · ≥ ${E.meta} % grado A · costo ≤ USD ${fmt(E.presupuesto)}.</p>`;
+  const cnt={};
+  $('#escTabla').innerHTML='<tr><th>Día</th><th>Hora</th><th>Barco</th><th>Especie</th><th>kg</th></tr>'+E.descargas.map(([d,b,e,kg])=>{
+    const f=new Date(ini); f.setDate(f.getDate()+d); cnt[d]=(cnt[d]||0);
+    return `<tr><td>${DIAS_SEM[f.getDay()]} ${String(f.getDate()).padStart(2,'0')}/${String(f.getMonth()+1).padStart(2,'0')}</td><td>${String(HORAS_LLEGADA[cnt[d]++]).padStart(2,'0')}:00</td><td>${b}</td><td>${e}</td><td>${fmt(kg)}</td></tr>`;}).join('')
+    +`<tr><td colspan="4"><b>Total</b></td><td><b>${fmt(E.descargas.reduce((s,x)=>s+x[3],0))}</b></td></tr>`;
+  $('#escExtra').innerHTML = (etapa==='imprevisto'?'<div class="alerta-box">⚠ <b>Túnel IQF fuera de servicio el lunes de 10:00 a 16:00.</b> Elegí abajo la política del fileteado durante el paro.</div>':'');
+}
+
+/* ---------- Controles ---------- */
+function stepper(key,lab,ayuda,min,max){
+  return `<div class="ctrl"><div class="lab">${lab}</div><div class="ayuda">${ayuda}</div>
+    <div class="stepper"><button type="button" data-k="${key}" data-d="-1" aria-label="Menos">−</button><span class="val">${dis[key]}</span><button type="button" data-k="${key}" data-d="1" aria-label="Más">+</button><span class="small">operario${dis[key]>1?'s':''}</span></div></div>`;
+}
+function seg(key,lab,ayuda,opts){
+  return `<div class="ctrl"><div class="lab">${lab}</div><div class="ayuda">${ayuda}</div><div class="seg">${opts.map(([v,t])=>`<button type="button" data-seg="${key}" data-v="${v}" aria-pressed="${String(dis[key])===String(v)}">${t}</button>`).join('')}</div></div>`;
+}
+const LIM={rec:[1,4],fil:[2,12],emp:[1,4]};
+function pintarControles(){
+  let h=stepper('rec','Recepción',`Lava, pesa y enhiela: ${PARAM.recepcion_kg_h_op} kg/h por persona.`,1,4)
+   +stepper('fil','Fileteado',`Fileteado a mano: ${PARAM.fileteado_kg_h_op} kg/h de materia prima por persona.`,2,12)
+   +stepper('emp','Empaque',`Empaca producto congelado: ${PARAM.empaque_kg_h_op} kg/h por persona.`,1,4)
+   +seg('turnos','Turnos por día','Turno 1: 06 a 14 h. Turno 2: 14 a 22 h.',[[1,'1 turno'],[2,'2 turnos']])
+   +seg('extra','Horas extra por día','Solo se usan si queda pescado sin procesar. Cuestan 50 % más.',[[0,'0'],[1,'1 h'],[2,'2 h'],[3,'3 h'],[4,'4 h']])
+   +seg('tunel','Túnel IQF','Capacidad en kg de producto por hora.',Object.entries(PARAM.tunel).map(([v,o])=>[v,o.t+(o.costo?` · USD ${fmt(o.costo)}`:'')]))
+   +seg('cam','Cámara de espera (0–4 °C)','Guarda el pescado entero hasta filetearlo.',Object.entries(PARAM.camara).map(([v,o])=>[v,o.t+(o.costo?` · USD ${fmt(o.costo)}`:'')]));
+  if(etapa==='imprevisto') h+=seg('frena','Política durante el paro del túnel','¿Qué hace el fileteado mientras el túnel no congela?',[[false,'Sigue fileteando'],[true,'Se frena y el pescado espera entero en la cámara']]);
+  $('#ctrls').innerHTML=h;
+  $('#ctrls').querySelectorAll('button[data-d]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.k; dis[k]=Math.max(LIM[k][0],Math.min(LIM[k][1],dis[k]+(+b.dataset.d))); render();}));
+  $('#ctrls').querySelectorAll('button[data-seg]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.seg; let v=b.dataset.v; dis[k]= k==='frena'? v==='true' : +v; render();}));
+  const fijo=(dis.rec+dis.fil+dis.emp)*PARAM.horas_turno*dis.turnos*7*PARAM.costo_hora+PARAM.tunel[dis.tunel].costo+PARAM.camara[dis.cam].costo;
+  $('#costoPrev').innerHTML=`Costo fijo de la semana: <b>USD ${fmt(fijo)}</b> <span class="small">+ horas extra que se usen · presupuesto USD ${fmt(ESCENARIOS[etapa].presupuesto)}</span>`;
+  const P=PARAM;
+  $('#tParam').innerHTML=[
+    ['Recepción',`${P.recepcion_kg_h_op} kg/h por operario`],['Fileteado manual',`${P.fileteado_kg_h_op} kg/h de materia prima por operario`],['Empaque',`${P.empaque_kg_h_op} kg/h de producto por operario`],
+    ['Rendimiento de filet',`${fmt(P.rendimiento*100,1)} % (promedio en Fishy)`],['Turnos',`06–14 h y 14–22 h, 7 días`],['Costo operario',`USD ${P.costo_hora}/h · extra USD ${P.costo_hora_extra}/h`],
+    ['Precio producto',`A: USD ${P.precioA}/kg · B: USD ${P.precioB}/kg · rechazo: 0`],['Muelle sin frío',`más de ${P.muelle_max_h} h → fuera de control (se descarta)`],
+    ['Espera en cámara',`hasta ${P.camara_A_h} h → A · hasta ${P.camara_B_h} h → B · más → rechazo`],['Filet sin congelar',`más de ${P.filet_sin_congelar_h} h esperando el túnel → baja a B`],
+    ['Llegada de descargas','07, 09, 11 y 13 h (en orden)']].map(([a,b])=>`<tr><td>${a}</td><td>${b}</td></tr>`).join('');
+}
+
+/* ---------- Diagrama de la línea ---------- */
+function diagrama(r){
+  const W=940,H=150, est=[['muelle','Muelle',''],['rec','Recepción',dis.rec+' op'],['cam','Cámara',fmt(dis.cam/1000)+' t'],['fil','Fileteado',dis.fil+' op'],['iqf','Túnel IQF',dis.tunel+' kg/h'],['emp','Empaque',dis.emp+' op']];
+  const bw=120,gap=(W-est.length*bw)/(est.length-1);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Diagrama de la línea de filet">`;
+  est.forEach(([k,t,sub],i)=>{const x=i*(bw+gap), cuello=r&&r.cuello===k;
+    const satH=r&&r.sat[k]!==undefined?r.sat[k]:null;
+    const col=k==='muelle'?'#3a3026':(cuello?'#E8623A':'#164055');
+    s+=`<rect x="${x}" y="30" width="${bw}" height="78" rx="10" fill="${col}" stroke="${cuello?'#F0B441':'rgba(239,230,210,.25)'}" stroke-width="${cuello?3:1}"/>`
+      +`<text x="${x+bw/2}" y="58" text-anchor="middle" font-family="Archivo,sans-serif" font-weight="700" font-size="15" fill="#EFE6D2">${t}</text>`
+      +`<text x="${x+bw/2}" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#EFE6D2">${sub||(r&&r.fuera>0?'⚠ '+fmt(r.fuera)+' kg':'sin frío')}</text>`;
+    if(satH!==null) s+=`<text x="${x+bw/2}" y="99" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10.5" fill="${cuello?'#F0B441':'#B9AE96'}">${satH} h saturado</text>`;
+    if(cuello) s+=`<text x="${x+bw/2}" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#F0B441">⚠ CUELLO DE BOTELLA</text>`;
+    if(i<est.length-1) s+=`<path d="M${x+bw+6} 69 H${x+bw+gap-8}" stroke="#48B39C" stroke-width="3" marker-end="url(#fl)"/>`;});
+  s+=`<defs><marker id="fl" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#48B39C"/></marker></defs>`;
+  s+=`<text x="0" y="${H-8}" font-family="IBM Plex Mono,monospace" font-size="11" fill="#B9AE96">${r?'Horas saturadas = horas en que el puesto trabajó al 100 % y todavía quedaba trabajo (en la cámara: más del 95 % llena).':'Corré la semana para ver dónde se traba la línea.'}</text>`;
+  return s+'</svg>';
+}
+
+/* ---------- Serie horaria ---------- */
+function serie(r){
+  const n=r.serieCam.length, W=940,H=230,L=50,Rr=10,T=14,B=34, iw=W-L-Rr, ih=H-T-B;
+  const maxY=Math.max(dis.cam*1.1, ...r.serieCam, ...r.serieMue, 500);
+  const X=i=>L+i/(n-1)*iw, Y=v=>T+ih-(v/maxY)*ih;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Kilos esperando hora por hora">`;
+  r.serieTrab.forEach((t,i)=>{ if(t) s+=`<rect x="${X(i)}" y="${T}" width="${iw/(n-1)+0.5}" height="${ih}" fill="rgba(239,230,210,.07)"/>`; });
+  const area=(arr,col,op)=>{let p=`M${X(0)} ${Y(0)}`; arr.forEach((v,i)=>p+=` L${X(i).toFixed(1)} ${Y(v).toFixed(1)}`); p+=` L${X(n-1)} ${Y(0)} Z`; return `<path d="${p}" fill="${col}" fill-opacity="${op}" stroke="${col}" stroke-width="1.2"/>`;};
+  s+=area(r.serieCam,'#48B39C',.35)+area(r.serieMue,'#E8623A',.6);
+  s+=`<line x1="${L}" y1="${Y(dis.cam)}" x2="${W-Rr}" y2="${Y(dis.cam)}" stroke="#F0B441" stroke-dasharray="5 4"/>`;
+  [0,Math.round(maxY/2/100)*100,Math.round(maxY/100)*100].forEach(v=>{s+=`<text x="${L-6}" y="${Y(v)+4}" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="10" fill="#B9AE96">${fmt(v)}</text>`;});
+  const ini=new Date(ESCENARIOS[etapa].inicio+'T12:00:00');
+  for(let d=0; d<=Math.floor(n/24); d++){ const x=X(d*24); if(d*24>n-1) break; const f=new Date(ini); f.setDate(f.getDate()+d);
+    s+=`<line x1="${x}" y1="${T}" x2="${x}" y2="${T+ih}" stroke="rgba(239,230,210,.18)"/>`
+      +`<text x="${x+iw/(n-1)*12}" y="${H-12}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="${d>=7?'#6b7c84':'#B9AE96'}">${DIAS_SEM[f.getDay()]} ${String(f.getDate()).padStart(2,'0')}</text>`; }
+  s+=`<text x="${L}" y="${T-2}" font-family="IBM Plex Mono,monospace" font-size="10" fill="#B9AE96">kg de materia prima esperando</text>`;
+  return s+'</svg>';
+}
+
+/* ---------- Correr ---------- */
+function lecturaDe(r){
+  const E=ESCENARIOS[etapa], partes=[];
+  if(r.fuera>0) partes.push(`<b>${fmt(r.fuera)} kg quedaron en el muelle sin frío</b> más de ${PARAM.muelle_max_h} h y se descartaron: la línea no llegó a meterlos en la cámara a tiempo. Mirá el pico rojo del gráfico y a qué hora cae respecto del fin del turno.`);
+  if(r.pctA<E.meta) partes.push(`Solo ${fmt(r.pctA,1)} % salió grado A: pescado que esperó demasiado${etapa==='imprevisto'?' o filet que esperó el túnel sin congelarse':''}.`);
+  if(r.costo>E.presupuesto) partes.push(`Te pasaste del presupuesto por USD ${fmt(r.costo-E.presupuesto)}.`);
+  if(dis.tunel>150 && r.cuello!=='iqf' && etapa!=='imprevisto') partes.push(`Pagaste un túnel más grande, pero el túnel no era el cuello de botella: esa capacidad extra se queda esperando.`);
+  if(!partes.length) partes.push(`La línea aguantó. El puesto más exigido fue <b>${NOMBRE[r.cuello]}</b> (${r.sat[r.cuello]} h saturado): si la carga crece, es lo primero que se va a trabar.`);
+  return partes.join(' ');
+}
+$('#correr').addEventListener('click',()=>{
+  const r=simular(dis,etapa); corridas[etapa]++;
+  if(etapa==='pico' && primeraPico===null) primeraPico=r.ok;
+  const prev=mejores[etapa];
+  if(!prev || (r.ok && !prev.ok) || (r.ok===prev.ok && r.margen>prev.margen)) mejores[etapa]={...r,dis:{...dis}};
+  const E=ESCENARIOS[etapa];
+  $('#resPanel').hidden=false; $('#resPanel').style.opacity=1;
+  $('#resTit').textContent='Resultados · '+E.titulo+' · intento '+corridas[etapa];
+  $('#resVer').innerHTML=r.ok?'<span class="ok">✓ Cumple las metas de esta etapa.</span>'+(etapa!=='imprevisto'?' Pasá a la siguiente etapa cuando quieras.':'')
+    :'<span class="mal">✗ No cumple todavía.</span> Ajustá el diseño y volvé a correr.';
+  const kp=[['Fuera de control',fmt(r.fuera)+' kg',r.fuera<1?'ok':'mal','meta 0 kg'],['Grado A',fmt(r.pctA,1)+' %',r.pctA>=E.meta?'ok':'mal','meta ≥ '+E.meta+' %'],
+    ['Costo semanal','USD '+fmt(r.costo),r.costo<=E.presupuesto?'ok':'mal','presupuesto '+fmt(E.presupuesto)],['Margen','USD '+fmt(r.margen),'med','valor − costo'],
+    ['Producto','A '+fmt(r.A)+' · B '+fmt(r.B),'', 'kg de filet'],['Horas extra',r.hExtra+' h','','en la semana']];
+  $('#kpis').innerHTML=kp.map(([k,v,c,d])=>`<div class="kpi"><div class="k">${k}</div><div class="v ${c}">${v}</div><div class="d">${d}</div></div>`).join('');
+  $('#diag').innerHTML=diagrama(r);
+  $('#serie').innerHTML=serie(r);
+  $('#lectura').innerHTML=lecturaDe(r);
+  pintarEtapas(); pintarDefensa();
+  $('#resPanel').scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+/* ---------- Defensa ---------- */
+const PREGS=[
+  { id:'q1', q:'1 · En tu mejor diseño para la semana pico, ¿cuál es el cuello de botella de la línea?',
+    ops:()=>Object.entries(NOMBRE).map(([k,t])=>[k,t]), correcta:()=>mejores.pico?mejores.pico.cuello:'fil',
+    fbOk:c=>`Correcto: en tu diseño, <b>${NOMBRE[c]}</b> es el puesto que más horas pasó saturado. Es el que marca el ritmo de toda la línea.`,
+    fbMal:c=>`En tu mejor diseño de la semana pico, el puesto que más horas pasó saturado fue <b>${NOMBRE[c]}</b>. El cuello de botella no es el que parece más importante: es el que pasa más tiempo al 100 %.` },
+  { id:'q2', q:'2 · Un director propone comprar el túnel nuevo de 400 kg/h «para producir más». ¿Qué le contestás?',
+    ops:()=>[['a','Que sí: más capacidad siempre es más producción.'],['b','Que no mientras el túnel no sea el cuello de botella: la línea no va más rápido que su eslabón más lento, y esa capacidad quedaría ociosa.'],['c','Que sí, pero solo si además duplicamos el personal de fileteado.']],
+    correcta:()=>'b', fbOk:()=>'Exacto: mejorar lo que no es cuello de botella es gastar sin ganar.', fbMal:()=>'La producción de la línea la fija su eslabón más lento. Un túnel más grande detrás de un fileteado que no le da abasto queda esperando.' },
+  { id:'q3', q:'3 · Cuando el túnel se para, ¿qué conviene hacer con el fileteado?',
+    ops:()=>[['a','Seguir fileteando para no perder tiempo: después se congela todo junto.'],['b','Frenarlo y dejar el pescado entero en la cámara: el filet que no se puede congelar se degrada más rápido que el pescado entero enfriado.'],['c','Da igual: lo que importa es la capacidad total de la semana.']],
+    correcta:()=>'b', fbOk:()=>'Bien: no produzcas lo que el eslabón siguiente no puede absorber. La cámara es el colchón que te deja frenar sin perder.', fbMal:()=>'Filetear sin poder congelar genera producto que se degrada esperando. Frenar y usar la cámara como colchón protege la calidad (siempre que la cámara alcance).' },
+  { id:'q4', q:'4 · ¿Por qué un diseño que funciona en la semana normal puede fallar en la semana pico, aunque el total semanal «entre» en la capacidad?',
+    ops:()=>[['a','Porque la semana pico tiene más kilos en total.'],['b','Porque la carga no llega pareja: cuatro barcos la misma mañana superan lo que la línea procesa en un día, y lo que no entra en la cámara queda sin frío.'],['c','Porque los operarios rinden menos cuando hay más trabajo.']],
+    correcta:()=>'b', fbOk:()=>'Eso es: se dimensiona para el pico, no para el promedio. La cámara y las horas extra son las herramientas para absorber picos.', fbMal:()=>'El problema no es el total de la semana sino la concentración: 2.319 kg el mismo lunes. Se dimensiona para el pico, no para el promedio.' }
+];
+let resp={};
+function pintarDefensa(){
+  const listo=ORDEN.every(k=>corridas[k]>0);
+  $('#defAviso').textContent=listo?'Respondé las cuatro preguntas. Se evalúan contra tus propios resultados.':'Se habilita cuando corriste las tres etapas.';
+  $('#defCuerpo').classList.toggle('bloqueado',!listo);
+  $('#defCuerpo').innerHTML=PREGS.map(p=>`<div class="preg"><p class="q">${p.q}</p>${p.ops().map(([v,t])=>`<label class="op"><input type="radio" name="${p.id}" value="${v}" ${resp[p.id]===v?'checked':''} ${listo?'':'disabled'}><span>${t}</span></label>`).join('')}</div>`).join('');
+  $('#defCuerpo').querySelectorAll('input').forEach(i=>i.addEventListener('change',()=>{resp[i.name]=i.value; validarDef();}));
+  validarDef();
+}
+function validarDef(){
+  const listo=ORDEN.every(k=>corridas[k]>0), n=PREGS.filter(p=>resp[p.id]).length;
+  $('#entregar').disabled=!(listo && n===PREGS.length);
+  $('#defEstado').textContent=listo?`${n} de ${PREGS.length} respondidas.`:'';
+}
+$('#entregar').addEventListener('click',()=>{
+  const pts={normal:0,pico:0,imprevisto:0,defensa:0}, fb=[];
+  const m=mejores;
+  pts.normal=m.normal&&m.normal.ok?15:0;
+  if(m.pico&&m.pico.ok) pts.pico=25+Math.max(0,Math.min(5,Math.round((m.pico.margen-19000)/700)));
+  if(m.imprevisto&&m.imprevisto.ok) pts.imprevisto=20; else if(m.imprevisto&&m.imprevisto.fuera<1&&m.imprevisto.pctA>=80) pts.imprevisto=10;
+  PREGS.forEach(p=>{const c=p.correcta(), ok=resp[p.id]===c; if(ok) pts.defensa+=8.75; fb.push(`<div class="fb ${ok?'ok':'mal'}">${ok?'✓':'✗'} ${ok?p.fbOk(c):p.fbMal(c)}</div>`);});
+  pts.defensa=Math.round(pts.defensa);
+  const total=Math.min(100,pts.normal+pts.pico+pts.imprevisto+pts.defensa);
+  const sello=total>=85?'Proyecto aprobado':total>=60?'Aprobado con observaciones':total>=35?'Vuelva a presentar':'Proyecto rechazado';
+  $('#fSello').textContent=sello; $('#fSello').style.color=total>=85?'var(--marea)':total>=60?'var(--boya)':'var(--langostino)';
+  const intentos=corridas.normal+corridas.pico+corridas.imprevisto;
+  $('#fPuntos').innerHTML=`Puntaje: <b style="color:var(--boya);font-size:1.2rem">${total}</b> / 100 · ${intentos} simulaciones corridas`+(primeraPico===false?' · tu primer diseño no aguantó el pico (le pasó a casi todos)':'');
+  const cel=(t,v,max,d)=>`<div class="kpi"><div class="k">${t}</div><div class="v">${v}/${max}</div><div class="d">${d}</div></div>`;
+  const dd=k=>m[k]?`${m[k].ok?'✓':'✗'} ${fmt(m[k].pctA,1)} % A · USD ${fmt(m[k].costo)}`:'sin correr';
+  $('#fDesglose').innerHTML=cel('Semana normal',pts.normal,15,dd('normal'))+cel('Semana pico',pts.pico,30,dd('pico')+' · bonus por margen')+cel('Imprevisto',pts.imprevisto,20,dd('imprevisto'))+cel('Defensa',pts.defensa,35,'4 preguntas');
+  $('#fFeedback').innerHTML=fb.join('');
+  $('#final').classList.add('show'); $('#final').scrollIntoView({behavior:'smooth',block:'start'});
+});
+$('#reiniciar').addEventListener('click',()=>{dis={...DIS0}; etapa='normal'; mejores={}; corridas={normal:0,pico:0,imprevisto:0}; primeraPico=null; resp={};
+  $('#final').classList.remove('show'); $('#resPanel').hidden=true; render(); window.scrollTo({top:0,behavior:'smooth'});});
+
+function render(){ pintarEtapas(); pintarEscenario(); pintarControles(); $('#diag').innerHTML=diagrama(null); if(!$('#resPanel').hidden){ $('#resPanel').style.opacity=.45; $('#resVer').innerHTML='<span class="med">Cambiaste el diseño: estos resultados son del intento anterior. Volvé a correr la semana.</span>'; } pintarDefensa(); }
+render();
+</script>
+</body>
+</html>
