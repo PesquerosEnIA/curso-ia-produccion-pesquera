@@ -81,7 +81,14 @@ button.primario:hover:not(:disabled){filter:brightness(1.08);color:#fff}
 .kpi .d{font-size:.7rem;color:var(--carta-tenue)}
 .veredicto-etapa{font-weight:700;font-size:1rem;margin:4px 0 10px}
 .diag svg,.serie svg{width:100%;height:auto;display:block}
-.diag,.serie{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.diag,.serie,.planta{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.planta{border-radius:12px;border:1px solid var(--linea-fuerte)}
+.planta svg{width:100%;height:auto;display:block;min-width:640px}
+.reproductor{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
+.reproductor input[type=range]{flex:1 1 200px;accent-color:var(--boya);height:26px}
+.reproductor #play{width:44px;font-size:1rem}
+.ticker{font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:var(--carta);background:rgba(7,22,31,.5);border:1px solid var(--linea);border-radius:8px;padding:8px 10px;margin-top:8px;min-height:2.6em}
+.ticker b{color:var(--boya)}
 .diag svg,.serie svg{min-width:620px}
 .serie{margin-top:12px}
 .lectura{font-size:.88rem;margin-top:10px;border-left:3px solid var(--boya);padding:4px 0 4px 12px}
@@ -145,7 +152,13 @@ footer a{color:var(--carta)}
   <!-- LÍNEA / CONTROLES -->
   <section class="panel">
     <h2>Tu diseño de la línea</h2>
-    <div class="diag" id="diag"></div>
+    <div class="planta" id="planta"></div>
+    <div class="reproductor" id="repro" hidden>
+      <button type="button" id="play" aria-label="Reproducir o pausar">⏸</button>
+      <input type="range" id="scrub" min="0" max="0" value="0" aria-label="Hora de la semana">
+      <div class="seg"><button type="button" data-vel="6" aria-pressed="false">lento</button><button type="button" data-vel="14" aria-pressed="true">normal</button><button type="button" data-vel="40" aria-pressed="false">rápido</button></div>
+    </div>
+    <div class="ticker" id="ticker">Así está armada tu planta. Sumá gente o cambiá equipos y vas a ver el cambio. Después corré la semana y mirá cómo trabaja, hora por hora.</div>
     <div class="ctrls" id="ctrls" style="margin-top:12px"></div>
     <div class="costo-prev">
       <span class="c" id="costoPrev"></span>
@@ -159,6 +172,7 @@ footer a{color:var(--carta)}
     <h2 id="resTit">Resultados</h2>
     <div class="veredicto-etapa" id="resVer"></div>
     <div class="kpis" id="kpis"></div>
+    <div class="diag" id="diag"></div>
     <div class="serie" id="serie"></div>
     <div class="leg"><span><i style="background:#48B39C"></i>kg esperando en cámara</span><span><i style="background:#E8623A"></i>kg en el muelle sin frío</span><span><i style="background:#F0B441"></i>capacidad de la cámara</span><span><i style="background:rgba(239,230,210,.15)"></i>horario de trabajo</span></div>
     <p class="lectura" id="lectura"></p>
@@ -235,15 +249,15 @@ const DIAS_SEM=['dom','lun','mar','mié','jue','vie','sáb'];
 function simular(dis, escKey){
   const E=ESCENARIOS[escKey], P=PARAM, dias=7, dren=3, H=24*(dias+dren);
   const llegadas={}, porDia={};
-  E.descargas.forEach(([d,,,kg])=>{ porDia[d]=(porDia[d]||0); const h=d*24+HORAS_LLEGADA[porDia[d]++]; (llegadas[h]=llegadas[h]||[]).push(kg); });
+  E.descargas.forEach(([d,b,,kg])=>{ porDia[d]=(porDia[d]||0); const h=d*24+HORAS_LLEGADA[porDia[d]++]; (llegadas[h]=llegadas[h]||[]).push({kg,b}); });
   const finTurno=P.turno_inicio+P.horas_turno*dis.turnos;
   let muelle=[],camara=[],filq=[],empq=[];
   let A=0,B=0,R=0,fuera=0,costo=0,hExtra=0;
-  const sat={rec:0,fil:0,iqf:0,emp:0,cam:0}, serieCam=[], serieMue=[], serieTrab=[];
+  const sat={rec:0,fil:0,iqf:0,emp:0,cam:0}, serieCam=[], serieMue=[], serieTrab=[], frames=[];
   const suma=a=>a.reduce((s,b)=>s+b.kg,0);
   for(let h=0;h<H;h++){
     const hd=h%24;
-    (llegadas[h]||[]).forEach(kg=>muelle.push({kg,t:h}));
+    (llegadas[h]||[]).forEach(x=>muelle.push({kg:x.kg,t:h}));
     const activo=hd>=P.turno_inicio && hd<finTurno;
     const extra=!activo && hd>=finTurno && hd<finTurno+dis.extra && (muelle.length||camara.length||filq.length); // el producto ya congelado puede esperar al turno siguiente
     const trab=activo||extra;
@@ -253,33 +267,35 @@ function simular(dis, escKey){
     let cap=trab?dis.rec*P.recepcion_kg_h_op:0; const capRec=cap;
     let libre=dis.cam-suma(camara);
     while(muelle.length && cap>1e-9 && libre>1e-9){ const b=muelle[0], m=Math.min(b.kg,cap,libre); camara.push({kg:m,t:b.t}); b.kg-=m; cap-=m; libre-=m; if(b.kg<=1e-9) muelle.shift(); }
-    if(capRec>0 && cap<=1e-9) sat.rec++;
+    const sRec=capRec>0 && cap<=1e-9; if(sRec) sat.rec++;
     // fileteado: cámara → cola del túnel
     cap=trab?dis.fil*P.fileteado_kg_h_op:0; if(paro && dis.frena) cap=0; const capFil=cap;
     while(camara.length && cap>1e-9){ const b=camara[0], m=Math.min(b.kg,cap), esp=h-b.t;
       const g= esp<=P.camara_A_h?'A':(esp<=P.camara_B_h?'B':'R');
       if(g==='R') R+=m*P.rendimiento; else filq.push({kg:m*P.rendimiento,t:h,g});
       b.kg-=m; cap-=m; if(b.kg<=1e-9) camara.shift(); }
-    if(capFil>0 && cap<=1e-9) sat.fil++;
+    const sFil=capFil>0 && cap<=1e-9; if(sFil) sat.fil++;
     // túnel IQF
     cap=(trab && !paro)?dis.tunel:0; const capI=cap;
     while(filq.length && cap>1e-9){ const b=filq[0], m=Math.min(b.kg,cap); let g=b.g; if(h-b.t>P.filet_sin_congelar_h && g==='A') g='B';
       empq.push({kg:m,g}); b.kg-=m; cap-=m; if(b.kg<=1e-9) filq.shift(); }
-    if(capI>0 && cap<=1e-9) sat.iqf++;
+    const sIqf=capI>0 && cap<=1e-9; if(sIqf) sat.iqf++;
     // empaque
     cap=trab?dis.emp*P.empaque_kg_h_op:0; const capE=cap;
     while(empq.length && cap>1e-9){ const b=empq[0], m=Math.min(b.kg,cap); if(b.g==='A') A+=m; else B+=m; b.kg-=m; cap-=m; if(b.kg<=1e-9) empq.shift(); }
-    if(capE>0 && cap<=1e-9) sat.emp++;
+    const sEmp=capE>0 && cap<=1e-9; if(sEmp) sat.emp++;
     // muelle sin frío
     muelle=muelle.filter(b=>{ if(h-b.t>P.muelle_max_h){ fuera+=b.kg; R+=b.kg*P.rendimiento; return false;} return true; });
     // filet que espera el túnel mientras está parado: sigue esperando (y se degrada a B)
     const c=suma(camara); if(c>=0.95*dis.cam) sat.cam++;
-    if(h<24*dias+48){ serieCam.push(c); serieMue.push(suma(muelle)); serieTrab.push(trab?1:0); }
+    if(h<24*dias+48){ serieCam.push(c); serieMue.push(suma(muelle)); serieTrab.push(trab?1:0);
+      frames.push({h,trab,extra:!!extra,paro:!!paro,mue:suma(muelle),mueCal:muelle.some(b=>h-b.t>=2),cam:c,fil:suma(filq),filViejo:filq.some(b=>h-b.t>P.filet_sin_congelar_h),
+        emp:suma(empq),A,B,R,fuera,s:{rec:sRec,fil:sFil,iqf:sIqf,emp:sEmp,cam:c>=0.95*dis.cam},lleg:(llegadas[h]||[]).map(x=>x.b+' · '+fmt(x.kg)+' kg')}); }
   }
   costo+=PARAM.tunel[dis.tunel].costo+PARAM.camara[dis.cam].costo;
   const tot=A+B+R, pctA=tot?100*A/tot:0, valor=A*PARAM.precioA+B*PARAM.precioB;
   const ordenSat=Object.entries(sat).sort((a,b)=>b[1]-a[1]);
-  return {A,B,R,fuera,costo,hExtra,pctA,valor,margen:valor-costo,sat,cuello:ordenSat[0][1]>0?ordenSat[0][0]:'fil',serieCam,serieMue,serieTrab,
+  return {A,B,R,fuera,costo,hExtra,pctA,valor,margen:valor-costo,sat,cuello:ordenSat[0][1]>0?ordenSat[0][0]:'fil',serieCam,serieMue,serieTrab,frames,
     ok: fuera<1 && pctA>=ESCENARIOS[escKey].meta && costo<=ESCENARIOS[escKey].presupuesto};
 }
 
@@ -363,6 +379,110 @@ function diagrama(r){
   return s+'</svg>';
 }
 
+/* ---------- Planta ilustrada ---------- */
+function persona(x,y,op,trabajando){
+  const o=trabajando?1:.35;
+  return `<g opacity="${o}"><ellipse cx="${x}" cy="${y+2}" rx="9" ry="3" fill="#000" opacity=".25"/>
+    <rect x="${x-8}" y="${y-30}" width="16" height="30" rx="7" fill="#e9e4d8"/>
+    <rect x="${x-8}" y="${y-16}" width="16" height="16" rx="4" fill="#48B39C" opacity=".55"/>
+    <circle cx="${x}" cy="${y-37}" r="7" fill="#d8a67c"/>
+    <path d="M${x-8} ${y-39} q8 -9 16 0 z" fill="#fff"/>
+    <rect x="${x-3}" y="${y-44}" width="6" height="3" rx="1" fill="#fff"/></g>`;
+}
+function cajon(x,y,col,borde){ return `<rect x="${x}" y="${y}" width="30" height="16" rx="2" fill="${col}" stroke="${borde}" stroke-width="1"/><rect x="${x+2}" y="${y+1}" width="26" height="3" fill="#fff" opacity=".7"/>`; }
+function planta(fr, fPrev){
+  const W=1000,H=540, dia=!fr || (fr.h%24>=6 && fr.h%24<20), trab=fr?fr.trab:true;
+  const sat=fr?fr.s:{};
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Planta ilustrada: muelle, recepción, cámara, fileteado, túnel IQF y empaque">
+  <defs><linearGradient id="pCielo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${dia?'#6FA8DC':'#050f16'}"/><stop offset="1" stop-color="${dia?'#F0B441':'#10324a'}"/></linearGradient>
+  <linearGradient id="pPared" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f3b4b"/><stop offset="1" stop-color="#15303e"/></linearGradient>
+  <linearGradient id="pMetal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9fb0b8"/><stop offset=".5" stop-color="#dfe6e9"/><stop offset="1" stop-color="#9fb0b8"/></linearGradient></defs>`;
+  // exterior / muelle
+  s+=`<rect x="0" y="0" width="150" height="450" fill="url(#pCielo)"/>`;
+  s+= dia?`<circle cx="112" cy="70" r="20" fill="#F0B441"/>`:`<circle cx="112" cy="70" r="15" fill="#EFE6D2"/><circle cx="118" cy="65" r="13" fill="#08192a"/>`;
+  s+=`<rect x="0" y="450" width="150" height="90" fill="#0E2C3D"/><g stroke="#1d4a63" stroke-width="2"><line x1="10" y1="480" x2="60" y2="480"/><line x1="70" y1="505" x2="130" y2="505"/></g>`;
+  s+=`<rect x="0" y="430" width="150" height="20" fill="#5b4a3a"/><g stroke="#3f3226"><line x1="30" y1="430" x2="30" y2="450"/><line x1="75" y1="430" x2="75" y2="450"/><line x1="120" y1="430" x2="120" y2="450"/></g>`;
+  const llega=fr?[...fr.lleg,...(fPrev?fPrev.lleg:[])]:[];
+  if(llega.length){ s+=`<g><path d="M8 455 H142 L130 490 H20 Z" fill="#1c3b4f"/><path d="M12 468 H138 L134 476 H16 Z" fill="#E8623A"/><rect x="40" y="428" width="44" height="27" fill="#d9d2c0"/><rect x="46" y="434" width="9" height="8" fill="#F0B441"/><rect x="61" y="434" width="9" height="8" fill="#F0B441"/><line x1="100" y1="385" x2="100" y2="455" stroke="#8fa3ad" stroke-width="2"/></g>`; }
+  // pared interior
+  s+=`<rect x="150" y="0" width="850" height="430" fill="url(#pPared)"/><rect x="150" y="430" width="850" height="110" fill="#26343b"/><line x1="150" y1="430" x2="1000" y2="430" stroke="#3a4a52" stroke-width="2"/>`;
+  s+=`<rect x="146" y="0" width="8" height="430" fill="#0d2230"/>`;
+  // lámparas
+  [260,560,860].forEach(x=>{ s+=`<line x1="${x}" y1="0" x2="${x}" y2="30" stroke="#0a1f2c" stroke-width="2"/><path d="M${x-22} 30 H${x+22} L${x+14} 42 H${x-14} Z" fill="#0a1f2c"/>`+(trab?`<path d="M${x-14} 42 L${x-90} 430 H${x+90} L${x+14} 42 Z" fill="#F0B441" opacity=".07"/>`:''); });
+  // resaltado de saturación
+  const zonas={rec:[158,142],cam:[302,146],fil:[452,212],iqf:[672,140],emp:[816,92]};
+  Object.entries(zonas).forEach(([k,[x,w]])=>{ if(sat[k]) s+=`<rect x="${x}" y="150" width="${w}" height="285" rx="10" fill="#E8623A" opacity=".16" stroke="#E8623A" stroke-width="2" stroke-dasharray="6 4"/><text x="${x+w/2}" y="168" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#E8623A">AL 100 %</text>`; });
+  // cajones en el muelle
+  const nm=fr?Math.min(15,Math.ceil(fr.mue/150)):0;
+  for(let i=0;i<nm;i++){ const c=i%3, r=Math.floor(i/3); s+=cajon(14+c*42,410-r*18,fr.mueCal?'#b3261e':'#E8623A',fr.mueCal?'#5c0f0b':'#7a2e18'); }
+  if(fr && fr.mue>0) s+=`<rect x="6" y="${404-Math.ceil(nm/3)*18-22}" width="138" height="20" rx="4" fill="${fr.mueCal?'#b3261e':'#07161F'}" opacity=".9"/><text x="75" y="${404-Math.ceil(nm/3)*18-8}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#EFE6D2">${fr.mueCal?'☀ ':''}${fmt(fr.mue)} kg sin frío</text>`;
+  // recepción
+  s+=`<rect x="168" y="380" width="120" height="14" rx="3" fill="url(#pMetal)"/><rect x="176" y="394" width="6" height="36" fill="#7d8a90"/><rect x="274" y="394" width="6" height="36" fill="#7d8a90"/><rect x="232" y="372" width="36" height="10" rx="3" fill="#6FA8DC" opacity=".7"/>`;
+  for(let i=0;i<dis.rec;i++) s+=persona(186+i*28,376,1,trab);
+  // cámara
+  const cx=306,cw=138, ocup=fr?Math.min(1,fr.cam/dis.cam):0, slots=24, llenos=Math.round(slots*ocup);
+  s+=`<rect x="${cx}" y="190" width="${cw}" height="240" rx="6" fill="#d6e7ee" stroke="#8fa3ad" stroke-width="3"/><rect x="${cx+8}" y="200" width="${cw-16}" height="222" fill="#bcd6e0"/>`;
+  for(let i=0;i<llenos;i++){ const c=i%4, r=Math.floor(i/4); s+=cajon(cx+10+c*30,402-r*18,'#E8623A','#7a2e18'); }
+  s+=`<text x="${cx+cw/2}" y="184" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#EFE6D2">❄ ${fmt(fr?fr.cam:0)} / ${fmt(dis.cam)} kg</text>`;
+  s+=`<rect x="${cx+10}" y="206" width="${(cw-20)*ocup}" height="6" fill="${ocup>=.95?'#E8623A':'#48B39C'}"/>`;
+  // fileteado
+  s+=`<rect x="458" y="380" width="200" height="14" rx="3" fill="url(#pMetal)"/><rect x="466" y="394" width="6" height="36" fill="#7d8a90"/><rect x="644" y="394" width="6" height="36" fill="#7d8a90"/>`;
+  const f2=Math.max(0,dis.fil-6), f1=Math.min(6,dis.fil);
+  for(let i=0;i<f2;i++) s+=persona(478+i*32,340,1,trab);
+  for(let i=0;i<f1;i++) s+=persona(470+i*32,378,1,trab);
+  if(trab && fr && fr.cam>0 && !(fr.paro&&dis.frena)) for(let i=0;i<f1;i++) s+=`<path d="M${462+i*32} 378 q8 -6 16 0 q-8 5 -16 0 z" fill="#c9d6dc"/>`;
+  const nt=fr?Math.min(6,Math.ceil(fr.fil/40)):0;
+  for(let i=0;i<nt;i++) s+=`<rect x="640" y="${372-i*7}" width="26" height="6" rx="1" fill="${fr.filViejo?'#F0B441':'#f4f1ea'}" stroke="#7d8a90"/>`;
+  if(fr && fr.filViejo) s+=`<text x="664" y="${362-nt*7}" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="10" fill="#F0B441">filet sin congelar ↓</text>`;
+  // túnel IQF
+  const ix=676, parado=fr&&fr.paro;
+  s+=`<rect x="${ix}" y="230" width="132" height="200" rx="8" fill="url(#pMetal)" stroke="#7d8a90" stroke-width="3"/><rect x="${ix+16}" y="290" width="100" height="70" rx="4" fill="${parado?'#3a1512':'#0E2C3D'}"/>`;
+  s+=`<text x="${ix+66}" y="258" text-anchor="middle" font-family="Archivo Black,sans-serif" font-size="15" fill="#164055">TÚNEL IQF</text><text x="${ix+66}" y="276" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#3f5a68">${dis.tunel} kg/h</text>`;
+  s+= parado?`<circle cx="${ix+66}" cy="222" r="9" fill="#E8623A"/><text x="${ix+66}" y="332" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#E8623A">⚠ PARADO</text>`
+     :`<circle cx="${ix+66}" cy="222" r="7" fill="${trab?'#48B39C':'#3a4a52'}"/>`+(trab?`<g fill="#EFE6D2" opacity=".85"><circle cx="${ix+36}" cy="310" r="2"/><circle cx="${ix+70}" cy="330" r="2.4"/><circle cx="${ix+96}" cy="304" r="1.8"/><circle cx="${ix+52}" cy="345" r="1.6"/></g><text x="${ix+66}" y="336" text-anchor="middle" font-size="22" fill="#EFE6D2">❄</text>`:'');
+  s+=`<rect x="${ix-12}" y="384" width="156" height="8" fill="#5d6a70"/>`;
+  // empaque
+  s+=`<rect x="822" y="380" width="80" height="14" rx="3" fill="url(#pMetal)"/><rect x="828" y="394" width="6" height="36" fill="#7d8a90"/><rect x="890" y="394" width="6" height="36" fill="#7d8a90"/>`;
+  for(let i=0;i<dis.emp;i++) s+=persona(836+i*20,376,1,trab);
+  // pallets de producto terminado
+  const cajasA=fr?Math.min(24,Math.floor(fr.A/150)):0, cajasB=fr?Math.min(12,Math.floor(fr.B/150)):0;
+  s+=`<rect x="910" y="424" width="84" height="8" fill="#8a6a45"/>`;
+  for(let i=0;i<cajasA;i++){ const c=i%2, r=Math.floor(i/2); s+=`<rect x="${912+c*20}" y="${412-r*12}" width="18" height="11" fill="#48B39C" stroke="#1f7a63"/>`; }
+  for(let i=0;i<cajasB;i++){ const r=i; s+=`<rect x="${956}" y="${412-r*12}" width="18" height="11" fill="#F0B441" stroke="#b7791f"/>`; }
+  if(fr && fr.R>0) s+=`<path d="M972 400 H996 L992 430 H976 Z" fill="#b3261e"/><text x="984" y="394" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#E8623A">rechazo</text>`;
+  // rótulos de estaciones
+  const rot=[[75,'Muelle'],[229,'Recepción'],[375,'Cámara'],[558,'Fileteado'],[742,'Túnel IQF'],[862,'Empaque'],[952,'Producto']];
+  rot.forEach(([x,t])=>{ s+=`<text x="${x}" y="${x<150?528:470}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#B9AE96">${t}</text>`; });
+  // flechas de flujo
+  [[292,302],[446,456],[660,672],[812,820],[904,910]].forEach(([a,b])=>{ s+=`<path d="M${a} 498 H${b}" stroke="#48B39C" stroke-width="2"/>`; });
+  // noche
+  if(fr && !trab) s+=`<rect x="154" y="0" width="846" height="430" fill="#02080d" opacity=".55"/><text x="575" y="120" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="#B9AE96">planta cerrada · fuera de turno</text>`;
+  // reloj
+  if(fr){ const ini=new Date(ESCENARIOS[etapa].inicio+'T12:00:00'), d=Math.floor(fr.h/24), f=new Date(ini); f.setDate(f.getDate()+d);
+    const hh=String(fr.h%24).padStart(2,'0');
+    s+=`<rect x="780" y="16" width="208" height="46" rx="8" fill="#07161F" stroke="${fr.extra?'#F0B441':'rgba(239,230,210,.3)'}"/><text x="884" y="36" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="#B9AE96">${DIAS_SEM[f.getDay()]} ${String(f.getDate()).padStart(2,'0')}/${String(f.getMonth()+1).padStart(2,'0')}${fr.extra?' · horas extra':''}</text><text x="884" y="56" text-anchor="middle" font-family="Archivo Black,sans-serif" font-size="18" fill="${fr.extra?'#F0B441':'#EFE6D2'}">${hh}:00</text>`;
+    s+=`<rect x="164" y="16" width="300" height="46" rx="8" fill="#07161F" stroke="rgba(239,230,210,.3)"/><text x="176" y="36" font-family="IBM Plex Mono,monospace" font-size="11" fill="#48B39C">A ${fmt(fr.A)} kg</text><text x="286" y="36" font-family="IBM Plex Mono,monospace" font-size="11" fill="#F0B441">B ${fmt(fr.B)} kg</text><text x="176" y="54" font-family="IBM Plex Mono,monospace" font-size="11" fill="${fr.fuera>0?'#E8623A':'#B9AE96'}">fuera de control ${fmt(fr.fuera)} kg</text>`; }
+  return s+'</svg>';
+}
+let anim={frames:null,i:0,timer:null,vel:14};
+function mostrarFrame(i){
+  const F=anim.frames; if(!F) return; anim.i=Math.max(0,Math.min(F.length-1,i));
+  const fr=F[anim.i]; $('#planta').innerHTML=planta(fr,F[anim.i-1]); $('#scrub').value=anim.i;
+  let t=[];
+  if(fr.lleg.length) t.push('🚢 Llega '+fr.lleg.join(' y '));
+  if(fr.paro) t.push('⚠ Túnel IQF parado'+(dis.frena?' · el fileteado espera':' · el filet se acumula sin congelar'));
+  if(fr.mueCal) t.push('☀ Pescado en el muelle sin frío hace más de 2 h');
+  const al=Object.entries(fr.s).filter(([,v])=>v).map(([k])=>NOMBRE[k]);
+  if(al.length) t.push('Al 100 %: <b>'+al.join(', ')+'</b>');
+  if(!fr.trab) t.push('Fuera de turno');
+  $('#ticker').innerHTML=t.join(' · ')||'La línea trabaja sin atascos.';
+}
+function play(){ stop(); $('#play').textContent='⏸'; anim.timer=setInterval(()=>{ if(anim.i>=anim.frames.length-1){stop();return;} mostrarFrame(anim.i+1); },1000/anim.vel); }
+function stop(){ if(anim.timer) clearInterval(anim.timer); anim.timer=null; $('#play').textContent='▶'; }
+$('#play').addEventListener('click',()=>{ if(anim.timer) stop(); else { if(anim.i>=anim.frames.length-1) anim.i=0; play(); } });
+$('#scrub').addEventListener('input',e=>{ stop(); mostrarFrame(+e.target.value); });
+document.querySelectorAll('[data-vel]').forEach(b=>b.addEventListener('click',()=>{ anim.vel=+b.dataset.vel; document.querySelectorAll('[data-vel]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); if(anim.timer) play(); }));
+
 /* ---------- Serie horaria ---------- */
 function serie(r){
   const n=r.serieCam.length, W=940,H=230,L=50,Rr=10,T=14,B=34, iw=W-L-Rr, ih=H-T-B;
@@ -407,10 +527,12 @@ $('#correr').addEventListener('click',()=>{
     ['Producto','A '+fmt(r.A)+' · B '+fmt(r.B),'', 'kg de filet'],['Horas extra',r.hExtra+' h','','en la semana']];
   $('#kpis').innerHTML=kp.map(([k,v,c,d])=>`<div class="kpi"><div class="k">${k}</div><div class="v ${c}">${v}</div><div class="d">${d}</div></div>`).join('');
   $('#diag').innerHTML=diagrama(r);
+  anim.frames=r.frames; $('#repro').hidden=false; $('#scrub').max=r.frames.length-1;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) mostrarFrame(r.frames.length-1); else { mostrarFrame(0); play(); }
   $('#serie').innerHTML=serie(r);
   $('#lectura').innerHTML=lecturaDe(r);
   pintarEtapas(); pintarDefensa();
-  $('#resPanel').scrollIntoView({behavior:'smooth',block:'start'});
+  $('#planta').scrollIntoView({behavior:'smooth',block:'center'});
 });
 
 /* ---------- Defensa ---------- */
@@ -465,7 +587,7 @@ $('#entregar').addEventListener('click',()=>{
 $('#reiniciar').addEventListener('click',()=>{dis={...DIS0}; etapa='normal'; mejores={}; corridas={normal:0,pico:0,imprevisto:0}; primeraPico=null; resp={};
   $('#final').classList.remove('show'); $('#resPanel').hidden=true; render(); window.scrollTo({top:0,behavior:'smooth'});});
 
-function render(){ pintarEtapas(); pintarEscenario(); pintarControles(); $('#diag').innerHTML=diagrama(null); if(!$('#resPanel').hidden){ $('#resPanel').style.opacity=.45; $('#resVer').innerHTML='<span class="med">Cambiaste el diseño: estos resultados son del intento anterior. Volvé a correr la semana.</span>'; } pintarDefensa(); }
+function render(){ pintarEtapas(); pintarEscenario(); pintarControles(); stop(); anim.frames=null; $('#repro').hidden=true; $('#planta').innerHTML=planta(null); $('#ticker').innerHTML='Así está armada tu planta. Sumá gente o cambiá equipos y vas a ver el cambio. Después corré la semana y mirá cómo trabaja, hora por hora.'; if(!$('#resPanel').hidden){ $('#resPanel').style.opacity=.45; $('#resVer').innerHTML='<span class="med">Cambiaste el diseño: estos resultados son del intento anterior. Volvé a correr la semana.</span>'; } pintarDefensa(); }
 render();
 </script>
 </body>
