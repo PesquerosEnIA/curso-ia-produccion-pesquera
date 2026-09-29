@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clase 4 · Datos y sensores del dominio pesquero</title>
+<meta name="description" content="Presentación de la Clase 4 del curso IA Aplicada a la Producción Pesquera (UTN FRCh · PesquerosEnIA): repaso de las clases 1 a 3 y datos y sensores del dominio pesquero.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --abismo:#07161F; --sonda:#0E2C3D; --plataforma:#164055; --carta:#EFE6D2; --tenue:#B9AE96;
+  --langostino:#E8623A; --marea:#48B39C; --boya:#F0B441; --transito:#6FA8DC; --frio:#2b5fa8;
+  --linea:rgba(239,230,210,.14); --linea2:rgba(239,230,210,.28);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#03090d;overflow:hidden}
+body{font-family:'Archivo',system-ui,sans-serif;color:var(--carta)}
+.escenario{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.lienzo{width:1600px;height:900px;position:relative;transform-origin:center center;flex:none}
+.slide{position:absolute;inset:0;background:var(--abismo);padding:70px 90px 80px;display:none;overflow:hidden}
+.slide.activa{display:block;animation:entra .35s ease}
+@keyframes entra{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide.activa{animation:none}}
+.slide::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(900px 500px at 110% -10%,rgba(72,179,156,.10),transparent 60%),
+  radial-gradient(700px 500px at -10% 120%,rgba(232,98,58,.08),transparent 60%);pointer-events:none}
+.slide>*{position:relative}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:20px;letter-spacing:.2em;text-transform:uppercase;color:var(--tenue);margin-bottom:14px}
+.eyebrow b{color:var(--boya);font-weight:600}
+h1{font-family:'Archivo Black',sans-serif;font-size:92px;line-height:.98;letter-spacing:-.02em;text-transform:uppercase}
+h2{font-family:'Archivo Black',sans-serif;font-size:56px;line-height:1.02;letter-spacing:-.015em;margin-bottom:22px}
+h1 em,h2 em{font-style:normal;color:var(--langostino)}
+h2 .v{color:var(--marea)} h2 .a{color:var(--boya)}
+p.lead{font-size:30px;line-height:1.35;color:var(--carta);max-width:1250px}
+p.lead b{color:var(--boya)}
+.sub{font-size:24px;color:var(--tenue);line-height:1.4}
+.mono{font-family:'IBM Plex Mono',monospace}
+.cols{display:flex;gap:34px}
+.col{flex:1;min-width:0}
+.card{background:var(--sonda);border:1px solid var(--linea);border-radius:18px;padding:24px 26px}
+.card h3{font-size:28px;margin-bottom:8px}
+.card p,.card li{font-size:22px;line-height:1.4;color:var(--carta)}
+.card .k{font-family:'IBM Plex Mono',monospace;font-size:16px;letter-spacing:.14em;text-transform:uppercase;color:var(--tenue);margin-bottom:6px}
+ul.lista{list-style:none}
+ul.lista li{padding-left:30px;position:relative;margin:10px 0;font-size:25px;line-height:1.35}
+ul.lista li::before{content:"";position:absolute;left:4px;top:13px;width:12px;height:12px;border-radius:3px;background:var(--marea)}
+.frase{font-family:'Archivo Black',sans-serif;font-size:44px;line-height:1.12}
+.cita{border-left:6px solid var(--boya);padding:10px 0 10px 26px;font-size:30px;line-height:1.35;font-style:italic}
+.cita span{display:block;font-style:normal;font-size:20px;color:var(--tenue);margin-top:8px;font-family:'IBM Plex Mono',monospace}
+.tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:17px;padding:5px 12px;border-radius:99px;border:1px solid var(--linea2);color:var(--carta);margin:0 8px 8px 0}
+.tag.v{border-color:var(--marea);color:var(--marea)} .tag.a{border-color:var(--boya);color:var(--boya)} .tag.r{border-color:var(--langostino);color:var(--langostino)}
+.pie{position:absolute;left:90px;right:90px;bottom:26px;display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:15px;color:#6b7c84;letter-spacing:.08em}
+svg text{font-family:'IBM Plex Mono',monospace}
+.fuente{position:absolute;right:90px;bottom:52px;font-family:'IBM Plex Mono',monospace;font-size:15px;color:#6b7c84;text-align:right;max-width:900px}
+.seccion{background:linear-gradient(135deg,#0E2C3D,#07161F 60%)}
+.seccion .num{font-family:'Archivo Black',sans-serif;font-size:260px;line-height:.8;color:rgba(240,180,65,.14);position:absolute;right:80px;bottom:40px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.regla{background:var(--sonda);border:1px solid var(--linea);border-top:6px solid var(--boya);border-radius:14px;padding:20px 20px}
+.regla .n{font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--tenue);letter-spacing:.12em}
+.regla .t{font-family:'Archivo Black',sans-serif;font-size:30px;line-height:1.1;margin:10px 0 14px}
+.regla .e{font-size:21px;line-height:1.4;color:var(--tenue)}
+.regla{min-height:380px}
+.regla .e b{color:var(--carta)}
+
+/* barra, notas, ayuda */
+.hud{position:fixed;left:0;right:0;bottom:0;height:5px;background:rgba(239,230,210,.08);z-index:5}
+.hud i{display:block;height:100%;background:var(--boya);width:0;transition:width .3s}
+.contador{position:fixed;right:14px;bottom:12px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6b7c84;z-index:5}
+.nav{position:fixed;left:14px;bottom:10px;display:flex;gap:6px;z-index:5;opacity:.25;transition:opacity .2s}
+.nav:hover{opacity:1}
+.nav button{font-family:'IBM Plex Mono',monospace;background:#0E2C3D;color:#EFE6D2;border:1px solid rgba(239,230,210,.25);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:13px}
+.notas{position:fixed;left:0;right:0;bottom:0;max-height:42vh;overflow:auto;background:rgba(3,9,13,.96);border-top:2px solid var(--boya);padding:16px 22px 34px;z-index:6;display:none;font-size:16px;line-height:1.5}
+.notas.show{display:block}
+.notas h4{font-family:'IBM Plex Mono',monospace;color:var(--boya);font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.notas b{color:var(--boya)}
+.notas ul{margin:6px 0 0 18px}
+aside.nota{display:none}
+.marca{position:absolute;top:16px;right:22px;display:flex;gap:8px;z-index:3}
+.marca span{background:#fff;border-radius:8px;height:40px;padding:4px 8px;display:flex;align-items:center}
+.marca img{height:30px;display:block}
+.logos{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.logo{background:#fff;border-radius:14px;height:96px;padding:12px 20px;display:flex;align-items:center;justify-content:center}
+.logo img{display:block;max-width:230px}
+.foto{padding:0}
+.foto figure{position:absolute;inset:0;margin:0;background:#0E2C3D}
+.foto figure img{width:100%;height:100%;object-fit:cover;display:block}
+.foto .falta-box{display:none}
+.foto figure.falta img{display:none}
+.foto figure.falta .falta-box{display:flex;flex-direction:column;justify-content:center;align-items:center;position:absolute;top:60px;bottom:60px;right:60px;left:52%;border:3px dashed rgba(239,230,210,.3);border-radius:24px;color:#B9AE96;font-family:'IBM Plex Mono',monospace;font-size:22px;text-align:center;gap:10px;padding:40px}
+.foto .velo{position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,22,31,.92) 0%,rgba(7,22,31,.55) 42%,rgba(7,22,31,0) 70%)}
+.foto .texto{position:absolute;left:90px;top:0;bottom:0;width:640px;display:flex;flex-direction:column;justify-content:center}
+.foto.contain figure{left:48%;background:#07161F}
+.foto.contain figure img{object-fit:contain}
+.foto.contain .velo{display:none}
+.foto.contain .texto{width:620px}
+.foto .credito{position:absolute;right:24px;bottom:18px;font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(239,230,210,.7);background:rgba(7,22,31,.6);padding:4px 10px;border-radius:6px}
+.dato{background:var(--sonda);border:1px solid var(--linea);border-radius:18px;padding:22px 24px}
+.dato .n{font-family:'Archivo Black',sans-serif;font-size:74px;line-height:1;color:var(--boya)}
+.dato .t{font-size:23px;line-height:1.35;margin-top:8px}
+.dato .c{font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--tenue);margin-top:10px}
+.biblio li{font-size:19px;line-height:1.45;margin:0 0 12px 0;list-style:none;padding-left:26px;position:relative;color:var(--carta)}
+.biblio li::before{content:"›";position:absolute;left:4px;color:var(--boya)}
+.biblio i{color:var(--tenue)}
+</style>
+</head>
+<body>
+<div class="escenario"><div class="lienzo" id="lienzo">
+
+<!-- ============ 1 · PORTADA ============ -->
+<section class="slide" data-sec="Inicio">
+  <div class="eyebrow">IA aplicada a la producción pesquera · <b>Clase 4</b> · UTN FRCh · PesquerosEnIA</div>
+  <h1 style="margin-top:40px">Datos y sensores<br>del dominio <em>pesquero</em></h1>
+  <p class="lead" style="margin-top:34px">De la señal del sensor al dato que decide.</p>
+  <svg width="1420" height="240" viewBox="0 0 1420 240" style="position:absolute;left:90px;bottom:90px" aria-hidden="true">
+    <path d="M0 150 C120 120 240 180 360 150 S600 120 720 150 960 180 1080 150 1320 120 1420 150" fill="none" stroke="#164055" stroke-width="3"/>
+    <path d="M0 185 C140 160 260 210 400 185 S660 160 800 185 1080 210 1220 185 1380 160 1420 185" fill="none" stroke="#0E2C3D" stroke-width="3"/>
+    <g transform="translate(980,58)"><path d="M0 60 H210 L190 96 H20 Z" fill="#1c3b4f"/><path d="M6 74 H204 L198 84 H12 Z" fill="#E8623A"/><rect x="60" y="28" width="60" height="32" fill="#d9d2c0"/><rect x="68" y="36" width="12" height="10" fill="#F0B441"/><rect x="88" y="36" width="12" height="10" fill="#F0B441"/><line x1="140" y1="0" x2="140" y2="60" stroke="#8fa3ad" stroke-width="3"/>
+      <g stroke="#48B39C" stroke-width="2.5" fill="none" opacity=".9"><path d="M140 0 q20 -18 40 0"/><path d="M140 0 q30 -32 60 0"/><path d="M140 0 q40 -46 80 0"/></g></g>
+    <g fill="#48B39C"><circle cx="160" cy="150" r="5"/><circle cx="330" cy="152" r="5"/><circle cx="520" cy="134" r="5"/><circle cx="700" cy="150" r="5"/></g>
+    <line x1="700" y1="150" x2="980" y2="130" stroke="#F0B441" stroke-dasharray="6 6" stroke-width="2"/>
+  </svg>
+  <div class="pie"><span>Ariel Giamportone · Soraya Corvalán</span><span>martes 29/09/2026 · 18:00</span></div>
+  <aside class="nota"><h4>0:00 · Apertura (2 min)</h4>Bienvenida. Contá cómo va a ser la clase: <b>10 min de repaso</b> de lo que ya vimos, el <b>cierre del desafío del lote</b>, y después lo nuevo: de dónde salen los datos del mar y de la flota, y cómo se cruzan. Hoy es la <b>primera clase con notebook</b>.<br>Teclas: <b>→</b> avanzar · <b>F</b> pantalla completa · <b>N</b> notas.</aside>
+</section>
+
+<!-- ============ 1b · INSTITUCIONES ============ -->
+<section class="slide" data-sec="Inicio" data-sin-marca>
+  <div class="eyebrow">Instituciones participantes</div>
+  <h2>Un curso sostenido por <em>el sector</em></h2>
+  <div class="logos" style="margin-top:30px"><div class="logo"><img src="../../branding/utn_frch.png" alt="UTN Facultad Regional Chubut" style="max-height:56px"></div><div class="logo"><img src="../../branding/ing_pesquera.png" alt="Ingeniería Pesquera UTN FRCh" style="max-height:88px"></div><div class="logo"><img src="../../branding/cidapal.png" alt="CIDAPAL UTN" style="max-height:72px"></div><div class="logo"><img src="../../branding/cfp.png" alt="Consejo Federal Pesquero" style="max-height:56px"></div><div class="logo"><img src="../../branding/capip.png" alt="CAPIP" style="max-height:56px"></div><div class="logo"><img src="../../branding/senasa.png" alt="SENASA" style="max-height:56px"></div><div class="logo"><img src="../../branding/pesquerosenia.png" alt="PesquerosEnIA" style="max-height:88px"></div></div>
+  <div class="cols" style="margin-top:44px">
+    <div class="card col"><div class="k">Dirección</div><p style="font-size:26px">Ing. Cristina Fernández · <b>Co-dirección:</b> Ing. Soraya Corvalán</p></div>
+    <div class="card col"><div class="k">Articulación</div><p style="font-size:26px"><b>SENASA</b> (convenio 2024) · <b>CAPIP</b> (convenio marco 2023) · <b>INIDEP</b></p></div>
+  </div>
+  <p class="sub" style="margin-top:26px">Departamento de Ingeniería Pesquera · UTN Facultad Regional Chubut · comunidad PesquerosEnIA</p>
+  <aside class="nota"><h4>0:01 · Instituciones (30 s)</h4>Agradecimiento breve a la red de instituciones. Mismo contenido que la bienvenida del aula.</aside>
+</section>
+<!-- ============ 2 · MAPA DEL CURSO ============ -->
+<section class="slide" data-sec="Inicio">
+  <div class="eyebrow">El recorrido</div>
+  <h2>Estamos en la <em>estación 4</em></h2>
+  <svg width="1420" height="470" viewBox="0 0 1420 470" aria-label="Recorrido de las 10 clases">
+    <line x1="60" y1="170" x2="1360" y2="170" stroke="#164055" stroke-width="6"/>
+    <line x1="60" y1="170" x2="485" y2="170" stroke="#F0B441" stroke-width="6"/>
+    <g font-size="17">
+    <g><circle cx="60" cy="170" r="20" fill="#F0B441"/><text x="60" y="176" text-anchor="middle" fill="#07161F" font-weight="600">1</text><text x="60" y="226" text-anchor="middle" fill="#EFE6D2">Estrategia y</text><text x="60" y="248" text-anchor="middle" fill="#EFE6D2">transformación</text></g>
+    <g><circle cx="204" cy="170" r="20" fill="#F0B441"/><text x="204" y="176" text-anchor="middle" fill="#07161F" font-weight="600">2</text><text x="204" y="226" text-anchor="middle" fill="#EFE6D2">Fundamentos</text><text x="204" y="248" text-anchor="middle" fill="#EFE6D2">de IA y LLM</text></g>
+    <g><circle cx="348" cy="170" r="20" fill="#F0B441"/><text x="348" y="176" text-anchor="middle" fill="#07161F" font-weight="600">3</text><text x="348" y="226" text-anchor="middle" fill="#EFE6D2">Prompting y</text><text x="348" y="248" text-anchor="middle" fill="#EFE6D2">asistentes</text></g>
+    <g><circle cx="492" cy="170" r="32" fill="#E8623A"/><text x="492" y="178" text-anchor="middle" fill="#fff" font-weight="600" font-size="22">4</text><text x="492" y="236" text-anchor="middle" fill="#F0B441" font-weight="600">Datos y</text><text x="492" y="258" text-anchor="middle" fill="#F0B441" font-weight="600">sensores</text><text x="492" y="112" text-anchor="middle" fill="#F0B441">HOY</text></g>
+    <g><circle cx="636" cy="170" r="20" fill="#164055"/><text x="636" y="176" text-anchor="middle" fill="#EFE6D2">5</text><text x="636" y="226" text-anchor="middle" fill="#B9AE96">Arquitectura</text><text x="636" y="248" text-anchor="middle" fill="#B9AE96">y Big Data</text></g>
+    <g><circle cx="780" cy="170" r="20" fill="#164055"/><text x="780" y="176" text-anchor="middle" fill="#EFE6D2">6</text><text x="780" y="226" text-anchor="middle" fill="#B9AE96">ML y modelos</text><text x="780" y="248" text-anchor="middle" fill="#B9AE96">predictivos</text></g>
+    <g><circle cx="924" cy="170" r="20" fill="#164055"/><text x="924" y="176" text-anchor="middle" fill="#EFE6D2">7</text><text x="924" y="226" text-anchor="middle" fill="#B9AE96">Visión</text><text x="924" y="248" text-anchor="middle" fill="#B9AE96">artificial</text></g>
+    <g><circle cx="1068" cy="170" r="20" fill="#164055"/><text x="1068" y="176" text-anchor="middle" fill="#EFE6D2">8</text><text x="1068" y="226" text-anchor="middle" fill="#B9AE96">Optimización</text><text x="1068" y="248" text-anchor="middle" fill="#B9AE96">y agentes</text></g>
+    <g><circle cx="1212" cy="170" r="20" fill="#164055"/><text x="1212" y="176" text-anchor="middle" fill="#EFE6D2">9</text><text x="1212" y="226" text-anchor="middle" fill="#B9AE96">Tableros y</text><text x="1212" y="248" text-anchor="middle" fill="#B9AE96">visualización</text></g>
+    <g><circle cx="1356" cy="170" r="20" fill="#164055"/><text x="1356" y="176" text-anchor="middle" fill="#EFE6D2">10</text><text x="1356" y="226" text-anchor="middle" fill="#B9AE96">Cierre</text></g>
+    </g>
+    <rect x="60" y="310" width="1300" height="140" rx="16" fill="#0E2C3D" stroke="rgba(239,230,210,.14)"/>
+    <text x="90" y="352" fill="#B9AE96" font-size="18">POR QUÉ ESTA CLASE ES UNA BISAGRA</text>
+    <text x="90" y="392" fill="#EFE6D2" font-size="27" font-family="Archivo,sans-serif">Hasta acá: qué es la IA y cómo pedirle cosas.</text>
+    <text x="90" y="428" fill="#F0B441" font-size="27" font-family="Archivo,sans-serif">Desde hoy: los datos que la alimentan → la 5 los organiza → la 6 predice.</text>
+  </svg>
+  <aside class="nota"><h4>0:02 · Mapa (1 min)</h4>Ubicá al grupo: tres clases de "IA y cómo hablarle"; hoy empieza la parte de <b>datos</b>, que es la materia prima de todo lo que sigue: la arquitectura y el Big Data en la 5 (Damián), ML en la 6, visión en la 7, agentes en la 8, tableros en la 9.</aside>
+</section>
+
+<!-- ============ 3 · REPASO C1 ============ -->
+<section class="slide" data-sec="Repaso">
+  <div class="eyebrow">Repaso · <b>Clase 1</b> · Estrategia y transformación digital</div>
+  <h2>La <em>paradoja</em> del dato pesquero</h2>
+  <div class="cols">
+    <div class="col">
+      <p class="lead">El sector genera datos todo el tiempo… y los subutiliza. La transformación no es comprar tecnología: es <b>decidir mejor</b> con lo que ya tenemos.</p>
+      <ul class="lista" style="margin-top:24px">
+        <li>Smart Fisheries: barco, planta y cadena conectados.</li>
+        <li>Cinco casos de uso de IA en la pesca, de la zona de pesca a la planta.</li>
+        <li>La brecha argentina es también la oportunidad.</li>
+      </ul>
+    </div>
+    <div class="col" style="flex:.9">
+      <div class="card" style="margin-bottom:18px"><div class="k">Doctrina del Grupo · Nicolás</div><div class="frase" style="font-size:40px">Se demuestra.<br>No se impone.</div></div>
+      <div class="card"><div class="k">Doctrina del Grupo · Claudio</div><div class="frase" style="font-size:34px;color:var(--boya)">Sin línea de base no hay nada que demostrar.</div></div>
+    </div>
+  </div>
+  <aside class="nota"><h4>0:03 · Repaso C1 (3 min)</h4>Una sola idea: <b>la paradoja</b> (tenemos datos, no los usamos). Usá las dos leyes de la Doctrina como gancho: son de ellos. Preguntá rápido: <i>"¿alguien empezó a medir algo desde la clase 1?"</i></aside>
+</section>
+
+<!-- ============ 3b · CONTEXTO GLOBAL (FAO 2024) ============ -->
+<section class="slide" data-sec="Repaso">
+  <div class="eyebrow">Datos · <b>el contexto global</b> · FAO, SOFIA 2024</div>
+  <h2>Por qué decidir con datos <em>ya no es opcional</em></h2>
+  <div class="cols" style="align-items:flex-start">
+    <div class="col">
+      <div class="k mono" style="font-size:17px;color:var(--tenue);letter-spacing:.14em;margin-bottom:8px">PRODUCCIÓN MUNDIAL DE ANIMALES ACUÁTICOS · 2022 (millones de t)</div>
+      <svg width="700" height="380" viewBox="0 0 700 380" aria-label="Captura 91,0 millones de toneladas contra acuicultura 94,4 millones de toneladas en 2022">
+        <line x1="60" y1="330" x2="680" y2="330" stroke="#B9AE96"/>
+        <rect x="120" y="45" width="190" height="285" rx="8" fill="#2b5fa8"/><text x="215" y="30" text-anchor="middle" font-size="30" fill="#EFE6D2" font-weight="600">91,0</text><text x="215" y="362" text-anchor="middle" font-size="22" fill="#EFE6D2">Pesca de captura</text>
+        <rect x="400" y="34" width="190" height="296" rx="8" fill="#48B39C"/><text x="495" y="20" text-anchor="middle" font-size="30" fill="#48B39C" font-weight="600">94,4</text><text x="495" y="362" text-anchor="middle" font-size="22" fill="#EFE6D2">Acuicultura</text>
+        <text x="495" y="190" text-anchor="middle" font-size="26" fill="#07161F" font-weight="600">51 %</text>
+      </svg>
+      <p class="sub">Por primera vez, la acuicultura supera a la captura en producción de animales acuáticos.</p>
+    </div>
+    <div class="col" style="flex:.8">
+      <div class="k mono" style="font-size:17px;color:var(--tenue);letter-spacing:.14em;margin-bottom:8px">ESTADO DE LAS POBLACIONES EVALUADAS · 2021</div>
+      <svg width="560" height="380" viewBox="0 0 560 380" aria-label="62,3 por ciento de poblaciones en niveles sostenibles y 37,7 por ciento sobreexplotadas">
+        <circle cx="190" cy="190" r="140" fill="none" stroke="#48B39C" stroke-width="56"/>
+        <circle cx="190" cy="190" r="140" fill="none" stroke="#E8623A" stroke-width="56" stroke-dasharray="331.6 879.6" transform="rotate(-90 190 190)"/>
+        <text x="190" y="184" text-anchor="middle" font-size="46" fill="#E8623A" font-family="Archivo Black,sans-serif">37,7 %</text><text x="190" y="218" text-anchor="middle" font-size="19" fill="#EFE6D2">sobreexplotadas</text>
+        <rect x="376" y="130" width="20" height="20" fill="#48B39C"/><text x="404" y="147" font-size="19" fill="#EFE6D2">62,3 %</text><text x="404" y="170" font-size="17" fill="#B9AE96">sostenibles</text>
+        <rect x="376" y="196" width="20" height="20" fill="#E8623A"/><text x="404" y="213" font-size="19" fill="#EFE6D2">37,7 %</text><text x="404" y="236" font-size="17" fill="#B9AE96">sobreexplotadas</text>
+      </svg>
+      <p class="sub">Casi 4 de cada 10 poblaciones pesqueras evaluadas están sobreexplotadas.</p>
+    </div>
+  </div>
+  <div class="fuente">FAO (2024). <i>El estado mundial de la pesca y la acuicultura 2024 (SOFIA). La transformación azul en acción.</i> Roma.</div>
+  <aside class="nota"><h4>0:05 · Contexto global (1 min)</h4>Refuerza la paradoja de la Clase 1 con cifras oficiales: la presión sobre el recurso es real, y decidir con datos es una cuestión de sostenibilidad, no solo de eficiencia. Dos cifras, no más.</aside>
+</section>
+<!-- ============ 4 · REPASO C2 ============ -->
+<section class="slide" data-sec="Repaso">
+  <div class="eyebrow">Repaso · <b>Clase 2</b> · Fundamentos de IA y LLM (Damián)</div>
+  <h2>Cinco capas que ya <em>conviven</em></h2>
+  <div class="cols">
+    <svg width="760" height="520" viewBox="0 0 760 520" aria-label="Escalera de cinco capas: reglas, ML, LLM, RAG y agentes">
+      <g font-family="Archivo,sans-serif">
+      <rect x="0" y="410" width="300" height="80" rx="10" fill="#164055"/><text x="20" y="446" font-size="26" font-weight="700" fill="#EFE6D2">Reglas</text><text x="20" y="474" font-size="16" fill="#B9AE96" font-family="IBM Plex Mono,monospace">si 90 °C → cortar</text>
+      <rect x="110" y="320" width="300" height="80" rx="10" fill="#1d5a6e"/><text x="130" y="356" font-size="26" font-weight="700" fill="#EFE6D2">Machine learning</text><text x="130" y="384" font-size="16" fill="#B9AE96" font-family="IBM Plex Mono,monospace">aprende patrones</text>
+      <rect x="220" y="230" width="300" height="80" rx="10" fill="#2f7f7a"/><text x="240" y="266" font-size="26" font-weight="700" fill="#EFE6D2">LLM</text><text x="240" y="294" font-size="16" fill="#e6f0ec" font-family="IBM Plex Mono,monospace">entiende texto libre</text>
+      <rect x="330" y="140" width="300" height="80" rx="10" fill="#48B39C"/><text x="350" y="176" font-size="26" font-weight="700" fill="#07161F">+ RAG</text><text x="350" y="204" font-size="16" fill="#07161F" font-family="IBM Plex Mono,monospace">responde con TU manual</text>
+      <rect x="440" y="50" width="300" height="80" rx="10" fill="#F0B441"/><text x="460" y="86" font-size="26" font-weight="700" fill="#07161F">+ Agentes</text><text x="460" y="114" font-size="16" fill="#07161F" font-family="IBM Plex Mono,monospace">encadena pasos solo</text>
+      </g>
+    </svg>
+    <div class="col">
+      <div class="k mono" style="font-size:17px;color:var(--tenue);letter-spacing:.14em;margin-bottom:10px">LAS CUATRO ZONAS DE RIESGO</div>
+      <div class="grid2">
+        <div class="card"><h3 style="color:var(--langostino)">1 · Alucina</h3><p>Inventa cifras y normas con total seguridad.</p></div>
+        <div class="card"><h3 style="color:var(--langostino)">2 · Verificá</h3><p>Lo regulatorio lo confirma una persona.</p></div>
+        <div class="card"><h3 style="color:var(--langostino)">3 · Privacidad</h3><p>Datos comerciales, fuera de IA pública.</p></div>
+        <div class="card"><h3 style="color:var(--langostino)">4 · Espejismos</h3><p>Un VLM describe; no mide.</p></div>
+      </div>
+    </div>
+  </div>
+  <aside class="nota"><h4>0:06 · Repaso C2 (3 min)</h4>Recorré la escalera de abajo hacia arriba en una frase por escalón. Remarcá <b>RAG</b>: fue la clave del desafío del lote (el manual estaba en Fishy). Los 4 riesgos vuelven hoy: el dato mal integrado es la puerta del riesgo 1.</aside>
+</section>
+
+<!-- ============ 5 · REPASO C3 ============ -->
+<section class="slide" data-sec="Repaso">
+  <div class="eyebrow">Repaso · <b>Clase 3</b> · Prompting y diseño de asistentes (Damián)</div>
+  <h2>El prompt es la <em>interfaz</em></h2>
+  <div class="cols">
+    <div class="col">
+      <div class="k mono" style="font-size:17px;color:var(--tenue);letter-spacing:.14em;margin-bottom:12px">SEIS TÉCNICAS, UNA PROGRESIÓN</div>
+      <svg width="680" height="330" viewBox="0 0 680 330" aria-label="Progresión de técnicas de prompting">
+        <g font-family="Archivo,sans-serif" font-size="21" font-weight="700">
+        <rect x="0" y="270" width="200" height="50" rx="8" fill="#164055"/><text x="16" y="302" fill="#EFE6D2">Directo</text>
+        <rect x="95" y="215" width="220" height="50" rx="8" fill="#1d5a6e"/><text x="111" y="247" fill="#EFE6D2">Con contexto</text>
+        <rect x="190" y="160" width="210" height="50" rx="8" fill="#2f7f7a"/><text x="206" y="192" fill="#EFE6D2">Iterativo</text>
+        <rect x="285" y="105" width="200" height="50" rx="8" fill="#3d9a8a"/><text x="301" y="137" fill="#EFE6D2">CAR</text>
+        <rect x="380" y="50" width="250" height="50" rx="8" fill="#48B39C"/><text x="396" y="82" fill="#07161F">Chain of Thought</text>
+        <rect x="475" y="0" width="200" height="45" rx="8" fill="#F0B441"/><text x="491" y="30" fill="#07161F">Few-Shot</text>
+        </g>
+      </svg>
+      <p class="sub" style="margin-top:14px">Todo practicado sobre <b style="color:var(--marea)">Fishy</b>, el asistente conectado a la base del curso (MCP).</p>
+    </div>
+    <div class="col" style="flex:.85">
+      <div class="card" style="margin-bottom:18px;border-left:6px solid var(--boya)"><div class="k">Guardrail blando</div><p>Una instrucción en el texto: funciona <b>mientras el modelo la respete</b>.</p></div>
+      <div class="card" style="border-left:6px solid var(--langostino)"><div class="k">Guardrail duro</div><p>La restricción vive <b>afuera</b>: el permiso no existe, la herramienta no está, o hace falta un click humano.</p></div>
+    </div>
+  </div>
+  <aside class="nota"><h4>0:09 · Repaso C3 (3 min)</h4>La escalera de técnicas y el par blando/duro, que es el puente directo al desafío. Si alguien todavía no conectó Fishy, recordá que hay una guía en la sección de la Clase 3 (y ofrecé ayuda por WhatsApp).</aside>
+</section>
+
+<!-- ============ 6 · DESAFÍO ============ -->
+<section class="slide" data-sec="Repaso">
+  <div class="eyebrow">Cierre del desafío · <b>«El asistente que liberó el lote»</b> · 8 autopsias</div>
+  <h2>La IA <em>recomienda</em>. La regla <span class="a">bloquea</span>.<br>La persona <span class="v">firma</span>.</h2>
+  <div class="cols" style="margin-top:10px">
+    <div class="col">
+      <svg width="760" height="330" viewBox="0 0 760 330" aria-label="Capas de defensa del caso del lote">
+        <g font-family="IBM Plex Mono,monospace" font-size="17">
+        <text x="0" y="24" fill="#B9AE96">LO QUE FALLÓ, CAPA POR CAPA</text>
+        <g transform="translate(0,48)"><rect width="740" height="46" rx="8" fill="#0E2C3D" stroke="#E8623A"/><text x="16" y="30" fill="#EFE6D2">1 · Inventó «7 °C según SENASA»</text><text x="724" y="30" text-anchor="end" fill="#E8623A">alucinación</text></g>
+        <g transform="translate(0,102)"><rect width="740" height="46" rx="8" fill="#0E2C3D" stroke="#E8623A"/><text x="16" y="30" fill="#EFE6D2">2 · El manual HACCP estaba y no lo leyó</text><text x="724" y="30" text-anchor="end" fill="#E8623A">RAG sin usar</text></g>
+        <g transform="translate(0,156)"><rect width="740" height="46" rx="8" fill="#0E2C3D" stroke="#E8623A"/><text x="16" y="30" fill="#EFE6D2">3 · «Respondé rápido y resolvé»</text><text x="724" y="30" text-anchor="end" fill="#E8623A">prompt que empuja</text></g>
+        <g transform="translate(0,210)"><rect width="740" height="46" rx="8" fill="#0E2C3D" stroke="#E8623A"/><text x="16" y="30" fill="#EFE6D2">4 · Podía liberar lotes por su cuenta</text><text x="724" y="30" text-anchor="end" fill="#E8623A">permiso = blando</text></g>
+        <g transform="translate(0,264)"><rect width="740" height="46" rx="8" fill="#0E2C3D" stroke="#F0B441"/><text x="16" y="30" fill="#EFE6D2">5 · «6 °C &gt; 4 °C» no se opina: se bloquea</text><text x="724" y="30" text-anchor="end" fill="#F0B441">regla fija</text></g>
+        </g>
+      </svg>
+    </div>
+    <div class="col" style="flex:.8">
+      <div class="card" style="border-top:6px solid var(--boya)"><div class="k">Nueva ley en la Doctrina · Estación 12</div><div class="frase" style="font-size:34px">🏆 Pablo Di Filippo</div><p style="margin-top:10px">«El error de la IA fue solamente el primer fallo; el diseño del sistema permitió que ese error llegara hasta el cliente.»</p></div>
+      <p class="sub" style="margin-top:16px">Menciones: Nicolás Córdoba · Carla Campos · Agustín Fermín · Ana Clara Arcuri</p>
+    </div>
+  </div>
+  <aside class="nota"><h4>0:12 · Desafío (10 min)</h4>Seguí el guion <b>guia_docente/cierre_desafio_d02_lote.md</b>: capas en orden, nombrando quién vio cada una; menciones de menos a más; ganador con su cita; mostrá la Doctrina en otra pestaña. Cerrá con el puente de la próxima diapositiva.</aside>
+</section>
+
+<!-- ============ 7 · PUENTE ============ -->
+<section class="slide seccion" data-sec="Puente">
+  <div class="eyebrow">El puente a hoy</div>
+  <p class="frase" style="font-size:70px;margin-top:80px;max-width:1300px">En el caso del lote, <span style="color:var(--marea)">el dato estaba</span>.<br>Lo que faltó fue <span style="color:var(--langostino)">integrarlo</span>.</p>
+  <p class="lead" style="margin-top:40px">Hoy: <b>de dónde salen</b> los datos del mar, de la flota y de la planta — y <b>cómo se cruzan</b> sin engañarnos.</p>
+  <div class="cita" style="margin-top:50px;max-width:1100px">Un dato que no se integra no es un dato. Es un archivo.<span>Marcelo Yanguela · desafío del lote</span></div>
+  <aside class="nota"><h4>0:22 · Puente (1 min)</h4>Frase de Marcelo como bisagra: todo lo de hoy es sobre integrar. Pasá directo al barco.</aside>
+</section>
+
+<!-- ============ 8 · SECCIÓN 1: ECOSISTEMA ============ -->
+<section class="slide" data-sec="1 · Ecosistema">
+  <div class="eyebrow">Parte 1 · <b>El ecosistema de datos</b></div>
+  <h2>Un barco genera datos <em>24/7</em></h2>
+  <svg width="1420" height="560" viewBox="0 0 1420 560" aria-label="Barco pesquero con sus sensores y la frecuencia de cada dato">
+    <defs><marker id="pt" markerWidth="8" markerHeight="8" refX="4" refY="4"><circle cx="4" cy="4" r="3" fill="#F0B441"/></marker></defs>
+    <rect x="0" y="350" width="1420" height="210" fill="#0a2233"/>
+    <path d="M0 350 C120 336 240 364 360 350 S600 336 720 350 960 364 1080 350 1320 336 1420 350" fill="none" stroke="#1d4a63" stroke-width="3"/>
+    <!-- barco -->
+    <g transform="translate(470,170)">
+      <path d="M0 180 H480 L440 260 H40 Z" fill="#1c3b4f"/><path d="M10 204 H470 L462 218 H18 Z" fill="#E8623A"/>
+      <rect x="250" y="90" width="150" height="90" fill="#d9d2c0"/><g fill="#164055"><rect x="262" y="104" width="30" height="24"/><rect x="302" y="104" width="30" height="24"/><rect x="342" y="104" width="30" height="24"/></g>
+      <line x1="320" y1="0" x2="320" y2="90" stroke="#8fa3ad" stroke-width="4"/><line x1="60" y1="40" x2="60" y2="180" stroke="#8fa3ad" stroke-width="5"/><line x1="60" y1="40" x2="250" y2="100" stroke="#8fa3ad" stroke-width="2"/>
+      <rect x="90" y="150" width="120" height="30" fill="#2b5fa8"/>
+    </g>
+    <!-- ecosonda -->
+    <g stroke="#48B39C" stroke-width="2" fill="none" opacity=".8"><path d="M760 430 L700 540"/><path d="M760 430 L820 540"/></g>
+    <g fill="#EFE6D2" opacity=".7"><ellipse cx="740" cy="510" rx="14" ry="5"/><ellipse cx="770" cy="520" rx="12" ry="4"/><ellipse cx="790" cy="505" rx="10" ry="4"/></g>
+    <g font-size="19">
+      <!-- etiquetas -->
+      <g><line x1="790" y1="170" x2="960" y2="60" stroke="#F0B441" marker-start="url(#pt)"/><text x="966" y="58" fill="#EFE6D2" font-weight="600">GPS · AIS</text><text x="966" y="82" fill="#B9AE96">posición y velocidad · segundos</text></g>
+      <g><line x1="830" y1="300" x2="1060" y2="200" stroke="#F0B441" marker-start="url(#pt)"/><text x="1066" y="198" fill="#EFE6D2" font-weight="600">VMS</text><text x="1066" y="222" fill="#B9AE96">posición satelital regulatoria · periódica</text></g>
+      <g><line x1="760" y1="440" x2="1040" y2="470" stroke="#F0B441" marker-start="url(#pt)"/><text x="1046" y="468" fill="#EFE6D2" font-weight="600">Ecosonda</text><text x="1046" y="492" fill="#B9AE96">fondo y cardúmenes · continua</text></g>
+      <g><line x1="620" y1="330" x2="380" y2="120" stroke="#F0B441" marker-start="url(#pt)"/><text x="40" y="104" fill="#EFE6D2" font-weight="600">Sensor de bodega</text><text x="40" y="128" fill="#B9AE96">temperatura de la carga · continua</text></g>
+      <g><line x1="500" y1="400" x2="330" y2="250" stroke="#F0B441" marker-start="url(#pt)"/><text x="40" y="234" fill="#EFE6D2" font-weight="600">Sensor SST</text><text x="40" y="258" fill="#B9AE96">temperatura del agua · cada pocos minutos</text></g>
+      <g><line x1="540" y1="310" x2="330" y2="380" stroke="#F0B441" marker-start="url(#pt)"/><text x="40" y="376" fill="#EFE6D2" font-weight="600">Balanza · parte de pesca</text><text x="40" y="400" fill="#B9AE96">especie, kg, zona, hora · por lance</text></g>
+    </g>
+  </svg>
+  <aside class="nota"><h4>0:23 · Ecosistema (4 min)</h4>💬 Abrí con: <b>"¿Qué datos generó su barco o su planta ayer?"</b> Dejá que respondan 2 o 3. Recorré los sensores. Remarcá la diferencia de frecuencias: segundos (AIS), minutos (SST), por lance (parte). Esa diferencia es un problema de integración, y vuelve en los Crímenes.</aside>
+</section>
+
+<section class="slide foto" data-sec="1 · Ecosistema">
+  <figure><img src="img/c4_marea_datos.jpg" alt="Barco pesquero de altura navegando al amanecer con capas de datos superpuestas" onerror="this.parentElement.classList.add('falta')"><div class="falta-box">🖼️ Imagen pendiente<br><b style="color:#EFE6D2">img/c4_marea_datos.jpg</b><span style="font-size:17px">Ver el prompt en img/PROMPTS_imagenes.md</span></div></figure>
+  <div class="velo"></div>
+  <div class="texto"><div class="eyebrow">Parte 1 · <b>El ecosistema de datos</b></div><h2>Cada marea es una <em>fábrica</em> de datos</h2><p class="lead" style="font-size:27px">Posición, velocidad, fondo, temperatura, kilos por lance. El barco ya mide todo: el desafío es <b>no tirar lo que mide</b>.</p></div>
+  <div class="credito">Imagen ilustrativa generada con IA</div>
+  <aside class="nota"><h4>0:26 · Imagen (30 s)</h4>Diapositiva de respiro visual: dejá la imagen y repetí la frase «el desafío es no tirar lo que mide».</aside>
+</section>
+<!-- ============ 9 · SMALL vs BIG ============ -->
+<section class="slide" data-sec="1 · Ecosistema">
+  <div class="eyebrow">Parte 1 · <b>El ecosistema de datos</b></div>
+  <h2>Dos mundos de datos, <em>un mismo mar</em></h2>
+  <div class="cols" style="align-items:stretch">
+    <div class="card col"><div class="k" style="color:var(--transito)">A bordo · lo genera tu operación</div><h3 style="font-size:40px">Small Data operativo</h3>
+      <ul class="lista"><li>GPS, ecosonda, sensores</li><li>Balanza y partes de pesca</li><li>Descargas, producción, calidad</li><li>Lotes, despachos, clientes</li></ul></div>
+    <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;flex:none;width:170px">
+      <svg width="170" height="200" viewBox="0 0 170 200" aria-hidden="true"><circle cx="60" cy="100" r="55" fill="#6FA8DC" opacity=".35"/><circle cx="110" cy="100" r="55" fill="#48B39C" opacity=".35"/><text x="85" y="108" text-anchor="middle" font-size="22" fill="#F0B441" font-weight="600">VALOR</text></svg>
+      <div class="mono" style="font-size:17px;color:var(--boya);text-align:center">el valor está<br>en el cruce</div>
+    </div>
+    <div class="card col"><div class="k" style="color:var(--marea)">Externo · lo genera el sector</div><h3 style="font-size:40px">Big Data sectorial</h3>
+      <ul class="lista"><li>Satélite: SST, clorofila</li><li>Modelos de corrientes</li><li>AIS de toda la flota</li><li>INIDEP, cuotas y vedas</li></ul></div>
+  </div>
+  <aside class="nota"><h4>0:27 · Small vs. Big (3 min)</h4>Frase ancla: <b>"el valor está en el cruce, no en el dato aislado"</b>. Ejemplo: la SST sola no dice nada; SST + captura histórica + posición = dónde conviene salir.</aside>
+</section>
+
+<!-- ============ 10 · SECCIÓN 2: SST ============ -->
+<section class="slide" data-sec="2 · Variables">
+  <div class="eyebrow">Parte 2 · <b>Las variables que mandan</b></div>
+  <h2>La temperatura del mar <em>ordena</em> la pesca</h2>
+  <div class="cols">
+    <svg width="640" height="600" viewBox="0 0 640 600" aria-label="Esquema de corrientes de Malvinas y Brasil sobre la plataforma argentina">
+      <defs><linearGradient id="gSST" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E8623A"/><stop offset=".35" stop-color="#F0B441"/><stop offset=".6" stop-color="#48B39C"/><stop offset="1" stop-color="#2b5fa8"/></linearGradient></defs>
+      <rect x="0" y="0" width="640" height="600" rx="16" fill="url(#gSST)" opacity=".85"/>
+      <path d="M0 0 H150 C170 80 140 140 190 200 C230 250 200 310 220 360 C240 420 180 470 200 520 C210 560 180 590 190 600 H0 Z" fill="#1d3a2e"/>
+      <text x="30" y="300" font-size="20" fill="#B9AE96" transform="rotate(-80 30 300)">ARGENTINA</text>
+      <path d="M430 590 C400 480 360 380 330 250" fill="none" stroke="#dff1ff" stroke-width="10" stroke-linecap="round" opacity=".9"/><path d="M322 262 L330 226 L346 258 Z" fill="#dff1ff"/>
+      <text x="420" y="520" font-size="20" fill="#07161F" font-weight="600">Malvinas</text><text x="420" y="544" font-size="16" fill="#07161F">fría, sube</text>
+      <path d="M600 20 C560 90 480 150 380 190" fill="none" stroke="#b3261e" stroke-width="10" stroke-linecap="round"/><path d="M392 178 L356 196 L388 204 Z" fill="#b3261e"/>
+      <text x="460" y="60" font-size="20" fill="#07161F" font-weight="600">Brasil</text><text x="460" y="84" font-size="16" fill="#07161F">cálida, baja</text>
+      <circle cx="350" cy="210" r="46" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="6 5"/>
+      <text x="410" y="260" font-size="16" fill="#07161F" font-weight="600">Confluencia ≈ 38° S</text><text x="410" y="280" font-size="15" fill="#07161F">frente muy productivo</text>
+      <text x="16" y="590" font-size="13" fill="#EFE6D2">Esquema didáctico, sin escala</text>
+    </svg>
+    <div class="col">
+      <div class="k mono" style="font-size:17px;color:var(--tenue);letter-spacing:.14em;margin-bottom:14px">CADA ESPECIE, SU RANGO TÉRMICO (°C)</div>
+      <svg width="760" height="300" viewBox="0 0 760 300" aria-label="Rangos térmicos por especie">
+        <g font-size="18">
+        <line x1="180" y1="250" x2="740" y2="250" stroke="#B9AE96"/>
+        <g fill="#B9AE96"><text x="180" y="276" text-anchor="middle">2</text><text x="320" y="276" text-anchor="middle">6</text><text x="460" y="276" text-anchor="middle">10</text><text x="600" y="276" text-anchor="middle">14</text><text x="740" y="276" text-anchor="middle">18</text></g>
+        <text x="0" y="62" fill="#EFE6D2">Merluza</text><rect x="250" y="40" width="280" height="34" rx="6" fill="#2b5fa8"/><text x="390" y="64" text-anchor="middle" fill="#fff" font-weight="600">4–12</text>
+        <text x="0" y="132" fill="#EFE6D2">Langostino</text><rect x="320" y="110" width="280" height="34" rx="6" fill="#48B39C"/><text x="460" y="134" text-anchor="middle" fill="#07161F" font-weight="600">6–14</text>
+        <text x="0" y="202" fill="#EFE6D2">Calamar</text><rect x="390" y="180" width="280" height="34" rx="6" fill="#E8623A"/><text x="530" y="204" text-anchor="middle" fill="#fff" font-weight="600">8–16</text>
+        </g>
+      </svg>
+      <ul class="lista"><li>Se mide por <b>satélite</b>, gratis y a diario.</li><li>Los <b>frentes</b> (agua fría + cálida) concentran alimento y peces.</li></ul>
+    </div>
+  </div>
+  <div class="fuente">Rangos: guía de la Clase 4 del curso · Fuentes de SST: Copernicus Marine, NOAA CoastWatch, NASA MODIS</div>
+  <aside class="nota"><h4>0:30 · SST (6 min) — sugerido: Soraya</h4>Contexto oceanográfico: Malvinas sube fría por el talud, Brasil baja cálida; se encuentran cerca de los 38° S. 💬 <b>"¿Dónde buscarían merluza según este esquema?"</b> (agua fresca, cerca de frentes). Aclarar que el mapa es un esquema: el real lo vemos en el notebook.</aside>
+</section>
+
+<!-- ============ 11 · CLOROFILA ============ -->
+<section class="slide" data-sec="2 · Variables">
+  <div class="eyebrow">Parte 2 · <b>Las variables que mandan</b></div>
+  <h2>Verde en el mar = <em>alimento</em></h2>
+  <p class="lead">La clorofila-a mide el fitoplancton: el <b>primer eslabón</b> de la cadena que termina en la merluza y el calamar.</p>
+  <svg width="1420" height="330" viewBox="0 0 1420 330" style="margin-top:30px" aria-label="Cadena trófica desde el fitoplancton hasta merluza y calamar">
+    <g font-family="Archivo,sans-serif">
+      <g transform="translate(0,40)"><circle cx="110" cy="110" r="100" fill="#48B39C" opacity=".25"/><g fill="#48B39C"><circle cx="80" cy="90" r="9"/><circle cx="120" cy="80" r="7"/><circle cx="140" cy="120" r="10"/><circle cx="95" cy="135" r="8"/><circle cx="60" cy="120" r="6"/></g><text x="110" y="250" text-anchor="middle" font-size="26" font-weight="700" fill="#EFE6D2">Fitoplancton</text><text x="110" y="278" text-anchor="middle" font-size="17" fill="#B9AE96" font-family="IBM Plex Mono,monospace">lo ve el satélite</text></g>
+      <path d="M240 150 H330" stroke="#F0B441" stroke-width="5"/><path d="M330 138 L352 150 L330 162 Z" fill="#F0B441"/>
+      <g transform="translate(360,40)"><circle cx="110" cy="110" r="100" fill="#6FA8DC" opacity=".22"/><g stroke="#6FA8DC" stroke-width="3" fill="none"><path d="M80 100 q10 -20 20 0 q10 20 20 0"/><path d="M100 130 q10 -20 20 0 q10 20 20 0"/></g><text x="110" y="250" text-anchor="middle" font-size="26" font-weight="700" fill="#EFE6D2">Zooplancton</text></g>
+      <path d="M600 150 H690" stroke="#F0B441" stroke-width="5"/><path d="M690 138 L712 150 L690 162 Z" fill="#F0B441"/>
+      <g transform="translate(720,40)"><circle cx="110" cy="110" r="100" fill="#B9AE96" opacity=".18"/><g fill="#B9AE96"><path d="M60 100 q30 -18 60 0 q-30 18 -60 0 z"/><path d="M90 130 q30 -18 60 0 q-30 18 -60 0 z"/></g><text x="110" y="250" text-anchor="middle" font-size="26" font-weight="700" fill="#EFE6D2">Anchoíta</text></g>
+      <path d="M960 150 H1050" stroke="#F0B441" stroke-width="5"/><path d="M1050 138 L1072 150 L1050 162 Z" fill="#F0B441"/>
+      <g transform="translate(1080,20)"><circle cx="150" cy="130" r="125" fill="#E8623A" opacity=".2"/><path d="M60 120 q70 -45 150 0 q-80 45 -150 0 z M210 120 l30 -24 v48 z" fill="#E8623A"/><text x="150" y="290" text-anchor="middle" font-size="26" font-weight="700" fill="#EFE6D2">Merluza · calamar</text></g>
+    </g>
+  </svg>
+  <div class="card" style="margin-top:10px;border-left:6px solid var(--marea)"><p style="font-size:24px">🌱 <b>Floración de primavera (septiembre–noviembre):</b> estamos justo en esa ventana. Lo que hoy muestra el satélite anticipa dónde se va a concentrar el recurso.</p></div>
+  <div class="fuente">Fuentes: Copernicus Marine (color del océano) · NASA MODIS-Aqua</div>
+  <aside class="nota"><h4>0:36 · Clorofila (4 min) — sugerido: Soraya</h4>Recorré la cadena. Remarcá el <b>desfase</b>: la clorofila de hoy es un indicador adelantado. Estamos en plena floración: invitá a mirar el satélite de esta semana en el notebook.</aside>
+</section>
+
+<!-- ============ 11b · EVIDENCIA OCEANOGRÁFICA ============ -->
+<section class="slide foto contain" data-sec="2 · Variables">
+  <figure><img src="img/c4_satelite_clorofila_patagonia.jpg" alt="Imagen satelital real de clorofila o floración de fitoplancton sobre la plataforma patagónica" onerror="this.parentElement.classList.add('falta')"><div class="falta-box">🛰️ Imagen satelital REAL pendiente<br><b style="color:#EFE6D2">img/c4_satelite_clorofila_patagonia.jpg</b><span style="font-size:17px">Bajarla de NASA Worldview o Earth Observatory (ver img/PROMPTS_imagenes.md). No usar imagen generada: sería un dato inventado.</span></div></figure>
+  <div class="velo"></div>
+  <div class="texto">
+    <div class="eyebrow">Parte 2 · <b>Lo que dice la ciencia</b></div>
+    <h2>El satélite <em>ve</em> los frentes</h2>
+    <ul class="lista">
+      <li>La <b>confluencia Brasil–Malvinas</b> se ubica en torno a los <b>38° S</b> y se desplaza en el tiempo <span class="mono" style="font-size:17px;color:var(--tenue)">(Olson et al., 1988)</span>.</li>
+      <li>Los <b>frentes</b> de la plataforma austral concentran productividad y recursos pesqueros <span class="mono" style="font-size:17px;color:var(--tenue)">(Acha et al., 2004)</span>.</li>
+      <li>El <b>frente del talud</b> patagónico muestra altas concentraciones de clorofila, con máximos en primavera <span class="mono" style="font-size:17px;color:var(--tenue)">(Romero et al., 2006)</span>.</li>
+    </ul>
+  </div>
+  <div class="credito">Imagen satelital: NASA · clorofila-a sobre color verdadero (dominio público)</div>
+  <aside class="nota"><h4>0:40 · Evidencia (2 min) — sugerido: Soraya</h4>Esta diapositiva le da respaldo científico a las dos anteriores. Si la imagen real está cargada, señalá el verde del frente del talud: es la clorofila que vimos en la cadena trófica.</aside>
+</section>
+<!-- ============ 12 · CRUCE DE CAPAS ============ -->
+<section class="slide" data-sec="2 · Variables">
+  <div class="eyebrow">Parte 2 · <b>Las variables que mandan</b></div>
+  <h2>El cruce de capas <em>dice dónde</em> buscar</h2>
+  <div class="cols">
+    <svg width="760" height="560" viewBox="0 0 760 560" aria-label="Capas superpuestas: temperatura, clorofila y profundidad">
+      <g transform="translate(90,40) skewX(-20)">
+        <rect x="80" y="0" width="480" height="120" rx="10" fill="#E8623A" opacity=".55"/><text x="100" y="40" font-size="22" fill="#fff" font-weight="600">SST en rango</text>
+        <rect x="80" y="150" width="480" height="120" rx="10" fill="#48B39C" opacity=".55"/><text x="100" y="190" font-size="22" fill="#07161F" font-weight="600">Clorofila alta</text>
+        <rect x="80" y="300" width="480" height="120" rx="10" fill="#2b5fa8" opacity=".6"/><text x="100" y="340" font-size="22" fill="#fff" font-weight="600">Profundidad adecuada</text>
+        <rect x="360" y="0" width="90" height="420" fill="#F0B441" opacity=".35"/>
+      </g>
+      <text x="470" y="520" font-size="22" fill="#F0B441" font-weight="600">← zona probable</text>
+    </svg>
+    <div class="col">
+      <p class="lead">Ninguna variable sola decide. <b>Juntas</b> arman un mapa de probabilidad.</p>
+      <ul class="lista" style="margin-top:22px"><li>Ambiente + historial de capturas = <b>modelo predictivo</b>.</li><li>Eso es exactamente lo que entrenamos en la <b>Clase 6</b>.</li><li>Hoy, en el notebook: <b>captura según rango de SST</b>.</li></ul>
+      <div class="card" style="margin-top:22px"><div class="k">Probalo</div><p>Simulador «¿A qué zona voy?» (Clase 6) y «¿Dónde pongo la jaula?» (acuicultura, en esta sección).</p></div>
+    </div>
+  </div>
+  <aside class="nota"><h4>0:40 · Cruce (3 min)</h4>La idea de "capas" ordena todo lo que sigue: también en acuicultura (sitio de cultivo) y en fiscalización (AIS + VMS). Anticipá la Clase 6 sin entrar en ML.</aside>
+</section>
+
+<!-- ============ 13 · SECCIÓN 3: AIS vs VMS ============ -->
+<section class="slide" data-sec="3 · Rastro digital">
+  <div class="eyebrow">Parte 3 · <b>El rastro digital de la flota</b></div>
+  <h2>AIS y VMS: el mar se volvió <em>transparente</em></h2>
+  <div class="cols">
+    <div class="card col" style="border-top:6px solid var(--transito)"><div class="k">Público · anticolisión</div><h3 style="font-size:46px;color:var(--transito)">AIS</h3>
+      <ul class="lista"><li>Posición, rumbo, velocidad e identidad</li><li>Alta frecuencia: cada pocos segundos</li><li>Cualquiera accede: base de Global Fishing Watch</li><li>Se puede <b>apagar</b></li></ul></div>
+    <div class="card col" style="border-top:6px solid var(--marea)"><div class="k">Regulatorio · no público</div><h3 style="font-size:46px;color:var(--marea)">VMS</h3>
+      <ul class="lista"><li>Posición satelital periódica</li><li>Obligatorio según la normativa</li><li>Lo administra la autoridad</li><li>Controla vedas y zonas</li></ul></div>
+  </div>
+  <div class="cita" style="margin-top:30px">El AIS y Global Fishing Watch hacen que el mar sea, por primera vez en la historia, genuinamente transparente.<span>David Kroodsma · Science, 2018</span></div>
+  <aside class="nota"><h4>0:43 · AIS y VMS (4 min)</h4>Diferencia clave: <b>público vs. regulatorio</b> y <b>se puede apagar vs. no</b>. Esa diferencia es el corazón del Expediente 01 de los Crímenes.</aside>
+</section>
+
+<!-- ============ 13b · ¿QUÉ TAN TRANSPARENTE? ============ -->
+<section class="slide" data-sec="3 · Rastro digital">
+  <div class="eyebrow">Datos · <b>el rastro digital, en cifras</b></div>
+  <h2>Transparente… pero <em>no del todo</em></h2>
+  <div class="grid3" style="margin-top:10px">
+    <div class="dato"><div class="n">&gt; 55 %</div>
+      <svg width="100%" height="34" viewBox="0 0 400 34" aria-hidden="true"><rect width="400" height="22" rx="11" fill="#164055"/><rect width="220" height="22" rx="11" fill="#F0B441"/></svg>
+      <div class="t">de la superficie del océano tuvo actividad pesquera industrial, según el AIS de más de 70.000 barcos.</div><div class="c">Kroodsma et al., 2018 · Science</div></div>
+    <div class="dato"><div class="n" style="color:var(--langostino)">≈ 75 %</div>
+      <svg width="100%" height="34" viewBox="0 0 400 34" aria-hidden="true"><rect width="400" height="22" rx="11" fill="#164055"/><rect width="300" height="22" rx="11" fill="#E8623A"/></svg>
+      <div class="t">de los pesqueros industriales del mundo <b>no son rastreados públicamente</b> (detectados por imágenes satelitales).</div><div class="c">Paolo et al., 2024 · Nature</div></div>
+    <div class="dato"><div class="n" style="color:var(--marea)"><span style="font-size:32px">hasta</span> ~6 %</div>
+      <svg width="100%" height="34" viewBox="0 0 400 34" aria-hidden="true"><rect width="400" height="22" rx="11" fill="#164055"/><rect width="24" height="22" rx="11" fill="#48B39C"/></svg>
+      <div class="t">de la actividad de los pesqueros ocurre con el AIS <b>apagado a propósito</b>. Uno de los focos: el borde de la ZEE argentina.</div><div class="c">Welch et al., 2022 · Science Advances</div></div>
+  </div>
+  <p class="lead" style="margin-top:30px">Por eso un solo dato no alcanza: el AIS <b>se cruza</b> con VMS, radar e imágenes satelitales.</p>
+  <aside class="nota"><h4>0:47 · Cifras del rastro (2 min)</h4>Tres cifras de tres papers: el AIS cambió la fiscalización (Kroodsma), pero la mayoría de la flota industrial no es visible públicamente (Paolo) y apagar el AIS es una práctica real, con un foco junto a nuestra ZEE (Welch). Anticipa la regla 2: cruzar fuentes.</aside>
+</section>
+<section class="slide foto" data-sec="3 · Rastro digital">
+  <figure><img src="img/c4_centro_monitoreo.jpg" alt="Centro de monitoreo pesquero con un gran mapa del Mar Argentino y trayectorias de barcos" onerror="this.parentElement.classList.add('falta')"><div class="falta-box">🖼️ Imagen pendiente<br><b style="color:#EFE6D2">img/c4_centro_monitoreo.jpg</b><span style="font-size:17px">Ver el prompt en img/PROMPTS_imagenes.md</span></div></figure>
+  <div class="velo"></div>
+  <div class="texto"><div class="eyebrow">Parte 3 · <b>El rastro digital de la flota</b></div><h2>Del punto en el mapa a la <em>decisión</em></h2><p class="lead" style="font-size:27px">Un centro de monitoreo no mira barcos: mira <b>patrones</b>. Velocidad, huecos de señal, cruces con zonas de veda.</p></div>
+  <div class="credito">Imagen ilustrativa generada con IA</div>
+  <aside class="nota"><h4>0:49 · Imagen (30 s)</h4>Puente a la regla de velocidad: «un centro de monitoreo mira patrones, no barcos».</aside>
+</section>
+<!-- ============ 14 · REGLA DE VELOCIDAD ============ -->
+<section class="slide" data-sec="3 · Rastro digital">
+  <div class="eyebrow">Parte 3 · <b>El rastro digital de la flota</b></div>
+  <h2>La velocidad delata <em>qué hace</em> el barco</h2>
+  <div class="cols">
+    <svg width="820" height="560" viewBox="0 0 820 560" aria-label="Trayectoria de un barco coloreada por velocidad, con un hueco de señal">
+      <rect width="820" height="560" rx="16" fill="#0a2233"/>
+      <path d="M0 0 H110 C130 120 90 260 120 400 C130 470 100 520 110 560 H0 Z" fill="#1d3a2e"/>
+      <circle cx="90" cy="480" r="10" fill="#F0B441"/><text x="110" y="486" font-size="18" fill="#F0B441">Puerto</text>
+      <g fill="#6FA8DC"><circle cx="150" cy="450" r="7"/><circle cx="210" cy="400" r="7"/><circle cx="270" cy="350" r="7"/><circle cx="330" cy="300" r="7"/><circle cx="560" cy="330" r="7"/><circle cx="480" cy="400" r="7"/><circle cx="380" cy="450" r="7"/><circle cx="260" cy="480" r="7"/></g>
+      <g fill="#E8623A"><circle cx="370" cy="270" r="8"/><circle cx="395" cy="255" r="8"/><circle cx="420" cy="245" r="8"/><circle cx="445" cy="240" r="8"/></g>
+      <line x1="445" y1="240" x2="560" y2="330" stroke="#F0B441" stroke-width="3" stroke-dasharray="8 7"/>
+      <text x="520" y="250" font-size="20" fill="#F0B441" font-weight="600">⚠ 6 h sin señal</text>
+      <text x="520" y="276" font-size="17" fill="#EFE6D2">9 km en 6 h = 0,8 nudos:</text><text x="520" y="298" font-size="17" fill="#EFE6D2">se quedó ahí</text>
+    </svg>
+    <div class="col">
+      <div class="k mono" style="font-size:17px;color:var(--tenue);letter-spacing:.14em;margin-bottom:12px">REGLA TIPO GLOBAL FISHING WATCH</div>
+      <div class="card" style="margin-bottom:12px;border-left:8px solid var(--marea)"><h3>&lt; 1 nudo · en puerto</h3></div>
+      <div class="card" style="margin-bottom:12px;border-left:8px solid var(--langostino)"><h3>1 a 5 nudos · pescando</h3><p>velocidad de arrastre</p></div>
+      <div class="card" style="margin-bottom:22px;border-left:8px solid var(--transito)"><h3>&gt; 5 nudos · navegando</h3></div>
+      <p class="frase" style="font-size:34px">La ausencia de un dato <span style="color:var(--boya)">también es dato</span>.</p>
+    </div>
+  </div>
+  <aside class="nota"><h4>0:47 · Regla de velocidad (6 min, con demo)</h4>Si hay tiempo, abrí el simulador <b>DT-011 · Rastro AIS</b> (interactivos/dt11_ais_esfuerzo.html) y apagá el transpondedor en vivo. La cuenta 9 km / 6 h = 0,8 nudos es la del Expediente 01: no la resuelvas del todo, dejala como anzuelo.</aside>
+</section>
+
+<!-- ============ 15 · SECCIÓN 4: DATOS ABIERTOS ============ -->
+<section class="slide" data-sec="4 · Datos abiertos">
+  <div class="eyebrow">Parte 4 · <b>Datos abiertos y formatos</b></div>
+  <h2>Datos del mar, <em>gratis</em> y a un click</h2>
+  <div class="grid4" style="margin-top:10px">
+    <div class="card" style="border-top:6px solid var(--transito)"><div class="k">Europa</div><h3>Copernicus Marine</h3><p>SST diaria, clorofila, corrientes y reanálisis (GLORYS).</p></div>
+    <div class="card" style="border-top:6px solid var(--marea)"><div class="k">EE. UU.</div><h3>NOAA · ERDDAP</h3><p>SST de alta resolución y servidor de datos con descarga directa.</p></div>
+    <div class="card" style="border-top:6px solid var(--boya)"><div class="k">Argentina</div><h3>INIDEP</h3><p>Evaluación de recursos, campañas e índices de abundancia.</p></div>
+    <div class="card" style="border-top:6px solid var(--langostino)"><div class="k">Global</div><h3>Global Fishing Watch</h3><p>Esfuerzo pesquero a partir del AIS, con mapa y API.</p></div>
+  </div>
+  <div class="card" style="margin-top:28px;display:flex;gap:30px;align-items:center"><div class="frase" style="font-size:40px;flex:none;color:var(--boya)">Con datos gratuitos</div><p style="font-size:26px">podés elegir zona <b>antes de salir</b>. La barrera ya no es el dato: es saber leerlo.</p></div>
+  <aside class="nota"><h4>0:53 · Datos abiertos (4 min) — sugerido: Soraya (INIDEP)</h4>Una línea por plataforma. Si hay conexión, mostrá el mapa de Global Fishing Watch sobre el Mar Argentino 1 minuto.</aside>
+</section>
+
+<!-- ============ 16 · FORMATOS ============ -->
+<section class="slide" data-sec="4 · Datos abiertos">
+  <div class="eyebrow">Parte 4 · <b>Datos abiertos y formatos</b></div>
+  <h2>Cada dato viene en su <em>formato</em></h2>
+  <div class="grid3">
+    <div class="card"><svg width="100%" height="190" viewBox="0 0 360 190" aria-label="Tabla CSV"><g font-size="16">
+      <rect x="20" y="20" width="320" height="150" rx="8" fill="#07161F" stroke="#6FA8DC"/>
+      <text x="36" y="52" fill="#6FA8DC">fecha,especie,kg,zona</text><text x="36" y="84" fill="#EFE6D2">07/09,Merluza,558,CH:118</text><text x="36" y="114" fill="#EFE6D2">07/09,Langost.,835,CH:108</text><text x="36" y="144" fill="#EFE6D2">07/09,Calamar,595,CH:114</text></g></svg>
+      <h3 style="color:var(--transito)">CSV · tablas</h3><p>Partes, lances, descargas. Se abre hasta en una planilla.</p></div>
+    <div class="card"><svg width="100%" height="190" viewBox="0 0 360 190" aria-label="Cubo NetCDF latitud por longitud por tiempo">
+      <g transform="translate(90,20)"><path d="M0 40 L60 0 H200 L140 40 Z" fill="#48B39C" opacity=".6"/><path d="M140 40 L200 0 V110 L140 150 Z" fill="#2f7f7a"/><rect x="0" y="40" width="140" height="110" fill="#48B39C" opacity=".85"/>
+      <g stroke="#07161F" stroke-opacity=".35"><line x1="46" y1="40" x2="46" y2="150"/><line x1="93" y1="40" x2="93" y2="150"/><line x1="0" y1="77" x2="140" y2="77"/><line x1="0" y1="114" x2="140" y2="114"/></g></g>
+      <g font-size="15" fill="#EFE6D2"><text x="150" y="186">latitud × longitud</text><text x="300" y="80">tiempo</text></g></svg>
+      <h3 style="color:var(--marea)">NetCDF · cubos</h3><p>SST y clorofila: una grilla por día. Se lee con <span class="mono">xarray</span>.</p></div>
+    <div class="card"><svg width="100%" height="190" viewBox="0 0 360 190" aria-label="Polígono de un área de veda"><rect x="20" y="20" width="320" height="150" rx="8" fill="#0a2233"/>
+      <path d="M90 50 L230 40 L290 110 L200 150 L110 130 Z" fill="#E8623A" fill-opacity=".3" stroke="#E8623A" stroke-width="3" stroke-dasharray="8 6"/><text x="150" y="104" font-size="18" fill="#E8623A" font-weight="600">VEDA</text></svg>
+      <h3 style="color:var(--langostino)">Shapefile · áreas</h3><p>Vedas, ZEE, zonas de cultivo: polígonos con coordenadas.</p></div>
+  </div>
+  <aside class="nota"><h4>0:57 · Formatos (3 min)</h4>No es una clase de informática: la idea es que reconozcan el formato cuando lo descarguen. El notebook trae el código para abrir NetCDF reales de Copernicus (comentado).</aside>
+</section>
+
+<!-- ============ 17 · SECCIÓN 5: DATO OPERATIVO ============ -->
+<section class="slide" data-sec="5 · Dato operativo">
+  <div class="eyebrow">Parte 5 · <b>El dato operativo</b> · Fishy</div>
+  <h2>De la red al cliente: la <em>cadena</em> de datos</h2>
+  <svg width="1420" height="330" viewBox="0 0 1420 330" aria-label="Cadena de datos: lance, descarga, producción, lote, despacho">
+    <g font-family="Archivo,sans-serif">
+    <g transform="translate(0,60)"><rect width="230" height="150" rx="14" fill="#164055"/><text x="115" y="60" text-anchor="middle" font-size="30" font-weight="700" fill="#EFE6D2">Lance</text><text x="115" y="96" text-anchor="middle" font-size="17" fill="#B9AE96" font-family="IBM Plex Mono,monospace">parte: especie,</text><text x="115" y="120" text-anchor="middle" font-size="17" fill="#B9AE96" font-family="IBM Plex Mono,monospace">kg declarados, zona</text></g>
+    <g transform="translate(297,60)"><rect width="230" height="150" rx="14" fill="#1d5a6e"/><text x="115" y="60" text-anchor="middle" font-size="30" font-weight="700" fill="#EFE6D2">Descarga</text><text x="115" y="96" text-anchor="middle" font-size="17" fill="#e6f0ec" font-family="IBM Plex Mono,monospace">kg pesados</text><text x="115" y="120" text-anchor="middle" font-size="17" fill="#e6f0ec" font-family="IBM Plex Mono,monospace">en el muelle</text></g>
+    <g transform="translate(594,60)"><rect width="230" height="150" rx="14" fill="#2f7f7a"/><text x="115" y="60" text-anchor="middle" font-size="30" font-weight="700" fill="#EFE6D2">Producción</text><text x="115" y="96" text-anchor="middle" font-size="17" fill="#e6f0ec" font-family="IBM Plex Mono,monospace">rendimiento,</text><text x="115" y="120" text-anchor="middle" font-size="17" fill="#e6f0ec" font-family="IBM Plex Mono,monospace">sensores, calidad</text></g>
+    <g transform="translate(891,60)"><rect width="230" height="150" rx="14" fill="#48B39C"/><text x="115" y="60" text-anchor="middle" font-size="30" font-weight="700" fill="#07161F">Lote</text><text x="115" y="96" text-anchor="middle" font-size="17" fill="#07161F" font-family="IBM Plex Mono,monospace">grado, vencimiento</text><text x="115" y="120" text-anchor="middle" font-size="17" fill="#07161F" font-family="IBM Plex Mono,monospace">estado</text></g>
+    <g transform="translate(1188,60)"><rect width="230" height="150" rx="14" fill="#F0B441"/><text x="115" y="60" text-anchor="middle" font-size="30" font-weight="700" fill="#07161F">Despacho</text><text x="115" y="96" text-anchor="middle" font-size="17" fill="#07161F" font-family="IBM Plex Mono,monospace">cliente,</text><text x="115" y="120" text-anchor="middle" font-size="17" fill="#07161F" font-family="IBM Plex Mono,monospace">transporte</text></g>
+    <g fill="#F0B441"><path d="M236 128 L286 135 L236 142 Z"/><path d="M533 128 L583 135 L533 142 Z"/><path d="M830 128 L880 135 L830 142 Z"/><path d="M1127 128 L1177 135 L1127 142 Z"/></g>
+    <path d="M115 230 Q412 310 412 230" fill="none" stroke="#E8623A" stroke-width="3" stroke-dasharray="7 6"/>
+    <text x="150" y="300" font-size="20" fill="#E8623A" font-family="IBM Plex Mono,monospace">reconciliación: ¿declarado = pesado?</text>
+    </g>
+  </svg>
+  <div class="cols" style="margin-top:6px">
+    <div class="card col"><div class="k">Trazabilidad</div><p>Tomás cualquier producto vendido y reconstruís la cadena <b>hasta el lance de origen</b>.</p></div>
+    <div class="card col"><div class="k">Fishy · la base del curso</div><p>22 tablas de una operación simulada, de la captura al cliente. Se consulta en lenguaje natural con Claude (MCP).</p></div>
+  </div>
+  <aside class="nota"><h4>1:00 · Dato operativo (6 min, con demo)</h4>Mostrá el explorador <b>c4_datos_operativos</b> (pestaña Reconciliación) o, mejor, una consulta en vivo a Fishy desde Claude: <i>"Mostrame los lances del Don Alberto del 07/09 y su descarga"</i>. Es el mismo dato que usa el Expediente 01.</aside>
+</section>
+
+<section class="slide foto" data-sec="5 · Dato operativo">
+  <figure><img src="img/c4_trazabilidad_planta.jpg" alt="Planta de procesamiento pesquero con cajas etiquetadas y una línea de trazabilidad digital hasta el barco" onerror="this.parentElement.classList.add('falta')"><div class="falta-box">🖼️ Imagen pendiente<br><b style="color:#EFE6D2">img/c4_trazabilidad_planta.jpg</b><span style="font-size:17px">Ver el prompt en img/PROMPTS_imagenes.md</span></div></figure>
+  <div class="velo"></div>
+  <div class="texto"><div class="eyebrow">Parte 5 · <b>El dato operativo</b></div><h2>Cada caja cuenta <em>su historia</em></h2><p class="lead" style="font-size:27px">Del lance al cliente: si el dato viaja con el producto, cualquier caja se reconstruye hasta el barco y la zona de origen.</p></div>
+  <div class="credito">Imagen ilustrativa generada con IA</div>
+  <aside class="nota"><h4>1:05 · Imagen (30 s)</h4>Cerrá la parte operativa con la idea de trazabilidad; en la próxima diapositiva, las reglas para no engañarse con esos datos.</aside>
+</section>
+<!-- ============ 18 · CALIDAD DEL DATO ============ -->
+<section class="slide" data-sec="5 · Dato operativo">
+  <div class="eyebrow">Parte 5 · <b>Leer datos sin engañarse</b> · aprendido en los Crímenes del Golfo</div>
+  <h2>Cinco reglas para <em>no equivocarse</em> con datos</h2>
+  <div class="grid5" style="margin-top:8px">
+    <div class="regla"><div class="n">REGLA 1</div><div class="t">La ausencia de un dato también es dato.</div><div class="e">Un AIS apagado 6 h y solo 9 km recorridos: <b>se quedó pescando</b>.</div></div>
+    <div class="regla" style="border-top-color:var(--marea)"><div class="n">REGLA 2</div><div class="t">Un dato solo sospecha. Dos independientes prueban.</div><div class="e">AIS + VMS + telemetría del motor: <b>tres fuentes</b> contra una coartada.</div></div>
+    <div class="regla" style="border-top-color:var(--langostino)"><div class="n">REGLA 3</div><div class="t">Un dato sin origen no prueba nada.</div><div class="e">SST en Fishy: <b>«reconstruido, sin lectura original»</b>.</div></div>
+    <div class="regla" style="border-top-color:var(--transito)"><div class="n">REGLA 4</div><div class="t">Contá en proporción.</div><div class="e">31 excepciones de 49 descargas (63 %) &lt; 21 de 29 (72 %).</div></div>
+    <div class="regla" style="border-top-color:#b3261e"><div class="n">REGLA 5</div><div class="t">Un dato sin huso horario no se cruza.</div><div class="e">01/09 01:08 UTC = <b>31/08 22:08</b> en la planta.</div></div>
+  </div>
+  <p class="lead" style="margin-top:34px">Todas salen de <b>datos reales de Fishy</b>. Las vas a encontrar vos mismo en los tres expedientes de esta semana.</p>
+  <aside class="nota"><h4>1:06 · Calidad del dato (6 min)</h4>Esta es la diapositiva conceptual más importante de la clase. Leé cada regla con su ejemplo en una frase. No resuelvas los casos: son el desafío de la semana. Si surge la duda de los husos: Argentina es UTC−3 todo el año y la base guarda en UTC.</aside>
+</section>
+
+<!-- ============ 19 · MANOS A LA OBRA ============ -->
+<section class="slide seccion" data-sec="Práctica">
+  <div class="eyebrow">Manos a la obra · <b>Notebook en Colab</b></div>
+  <h2>Del dato al <em>insight</em>, sin instalar nada</h2>
+  <div class="grid3" style="margin-top:14px">
+    <div class="card" style="border-top:6px solid var(--marea)"><div class="k">🟢 Novato</div><h3>Solo ▶ y observar</h3><p>SST, clorofila y a qué temperatura se pesca más.</p></div>
+    <div class="card" style="border-top:6px solid var(--boya)"><div class="k">🟡 Intermedio</div><h3>Flujo completo + 2 ejercicios</h3><p>Mover el frente de clorofila; estacionalidad del óptimo de SST.</p></div>
+    <div class="card" style="border-top:6px solid var(--langostino)"><div class="k">🔴 Avanzado</div><h3>Pipeline real</h3><p>Ingesta Copernicus con xarray, frentes por gradiente, sesgos.</p></div>
+  </div>
+  <div class="card" style="margin-top:26px"><p style="font-size:24px">📍 En el aula: sección Clase 4 → <b>Recursos del repo</b> → notebook de tu nivel → «Abrir en Colab». Si te trabás: cambiá un número y volvé a correr la celda. <b>No se rompe nada.</b></p></div>
+  <div class="num">▶</div>
+  <aside class="nota"><h4>1:12 · Notebook (25 min)</h4>Ariel conduce el notebook intermedio en pantalla; Soraya acompaña el chat y las dudas de nivel. Corré la celda de setup <b>antes</b> de llegar acá. Momento "ajá": el gráfico <b>captura por rango de SST</b> (óptimo 8–12 °C). Pedí a cada uno que anote un hallazgo para la Tarea.</aside>
+</section>
+
+<!-- ============ 20 · RECURSOS INTERACTIVOS ============ -->
+<section class="slide" data-sec="Práctica">
+  <div class="eyebrow">En el aula esta semana · <b>casos aplicados</b></div>
+  <h2>Para <em>jugar</em> con los datos</h2>
+  <div class="grid3">
+    <div class="card"><div class="k">Fiscalización</div><h3>🎛️ Rastro AIS · DT-011</h3><p>Clasificá la actividad por velocidad y apagá el transpondedor.</p></div>
+    <div class="card"><div class="k">Operación</div><h3>🗄️ El dato operativo</h3><p>El modelo de datos de la cadena y la reconciliación, con datos de Fishy.</p></div>
+    <div class="card"><div class="k">Acuicultura</div><h3>🐟 La jaula y el sitio</h3><p>La corriente como dato de sensor; cruzar capas para ubicar un cultivo.</p></div>
+  </div>
+  <div class="card" style="margin-top:22px;background:#0b1d27;border:2px solid var(--langostino)">
+    <div class="cols" style="align-items:center">
+      <div class="col"><div class="k" style="color:var(--langostino)">🔎 Desafío de la semana · Crímenes del Golfo</div><div class="frase" style="font-size:40px">Sos el inspector.<br>Los datos son las pistas.</div></div>
+      <div class="col"><ul class="lista"><li><b>01 ·</b> El apagón del Don Alberto</li><li><b>02 ·</b> El sospechoso de siempre</li><li><b>03 ·</b> La noche del túnel</li></ul></div>
+    </div>
+  </div>
+  <aside class="nota"><h4>1:37 · Casos y desafío (7 min)</h4>Si queda tiempo, jugá en vivo los primeros 3 minutos del <b>Expediente 01</b> (tocar el monitor AIS y el reporte VMS) y cortá antes de la acusación. Presentalos como el desafío de la semana: se juegan en orden, a pantalla completa.</aside>
+</section>
+
+<!-- ============ 21 · CIERRE ============ -->
+<section class="slide" data-sec="Cierre">
+  <div class="eyebrow">Cierre</div>
+  <h2>Lo que nos llevamos <em>hoy</em></h2>
+  <svg width="1420" height="250" viewBox="0 0 1420 250" aria-label="Síntesis: fuentes, variables, cruce, calidad y modelo">
+    <g font-family="Archivo,sans-serif" font-weight="700" font-size="26">
+    <g transform="translate(0,40)"><rect width="250" height="110" rx="14" fill="#164055"/><text x="125" y="64" text-anchor="middle" fill="#EFE6D2">Fuentes</text></g>
+    <g transform="translate(290,40)"><rect width="250" height="110" rx="14" fill="#1d5a6e"/><text x="125" y="64" text-anchor="middle" fill="#EFE6D2">Variables</text></g>
+    <g transform="translate(580,40)"><rect width="250" height="110" rx="14" fill="#2f7f7a"/><text x="125" y="64" text-anchor="middle" fill="#EFE6D2">Cruce</text></g>
+    <g transform="translate(870,40)"><rect width="250" height="110" rx="14" fill="#48B39C"/><text x="125" y="64" text-anchor="middle" fill="#07161F">Calidad</text></g>
+    <g transform="translate(1160,40)"><rect width="250" height="110" rx="14" fill="#F0B441"/><text x="125" y="54" text-anchor="middle" fill="#07161F">Arquitectura</text><text x="125" y="86" text-anchor="middle" fill="#07161F" font-size="18" font-family="IBM Plex Mono,monospace">Clases 5 y 6</text></g>
+    <g fill="#F0B441"><path d="M255 88 L284 95 L255 102 Z"/><path d="M545 88 L574 95 L545 102 Z"/><path d="M835 88 L864 95 L835 102 Z"/><path d="M1125 88 L1154 95 L1125 102 Z"/></g>
+    </g>
+  </svg>
+  <div class="cols">
+    <div class="card col"><div class="k">Esta semana</div><ul class="lista"><li>Tarea: explorá un dato ambiental de tu zona</li><li>Cuestionario de 5 preguntas</li><li>Crímenes del Golfo 01 → 03</li></ul></div>
+    <div class="card col" style="border-left:6px solid var(--boya)"><div class="k">Próximas estaciones</div><p style="font-size:24px"><b>Clase 5 · Arquitectura de datos y Big Data</b> (Damián): cómo se integran sensores, nube y procesamiento masivo.</p><p style="font-size:24px;margin-top:10px"><b>Clase 6:</b> con estos datos entrenamos un modelo que <b>recomienda la zona de pesca</b>.</p></div>
+  </div>
+  <aside class="nota"><h4>1:44 · Cierre (6 min)</h4>Síntesis en una línea: <b>fuentes → variables → cruce → calidad</b>, y lo que sigue: la Clase 5 (Damián) organiza estos datos en una arquitectura; la 6 los usa para predecir. Actividades de la semana. Abrí 5 minutos de preguntas. Si sobra tiempo, retomá el Expediente 01 en vivo.</aside>
+</section>
+
+<!-- ============ 21b · BIBLIOGRAFÍA ============ -->
+<section class="slide" data-sec="Cierre">
+  <div class="eyebrow">Fuentes de esta presentación</div>
+  <h2>Bibliografía</h2>
+  <ul class="biblio" style="margin-top:6px">
+    <li>Acha, E. M., Mianzan, H. W., Guerrero, R. A., Favero, M. y Bava, J. (2004). Marine fronts at the continental shelves of austral South America: physical and ecological processes. <i>Journal of Marine Systems</i>, 44, 83–105.</li>
+    <li>FAO (2024). <i>El estado mundial de la pesca y la acuicultura 2024. La transformación azul en acción.</i> Roma: FAO.</li>
+    <li>Kroodsma, D. A. et al. (2018). Tracking the global footprint of fisheries. <i>Science</i>, 359(6378), 904–908.</li>
+    <li>Olson, D. B., Podestá, G. P., Evans, R. H. y Brown, O. B. (1988). Temporal variations in the separation of Brazil and Malvinas Currents. <i>Deep-Sea Research</i>, 35(12), 1971–1990.</li>
+    <li>Paolo, F. S. et al. (2024). Satellite mapping reveals extensive industrial activity at sea. <i>Nature</i>, 625, 85–91.</li>
+    <li>Romero, S. I., Piola, A. R., Charo, M. y Garcia, C. A. E. (2006). Chlorophyll-a variability off Patagonia based on SeaWiFS data. <i>Journal of Geophysical Research</i>, 111, C05021.</li>
+    <li>Welch, H. et al. (2022). Hot spots of unseen fishing vessels. <i>Science Advances</i>, 8(44).</li>
+    <li>Datos operativos: <b>Fishy</b>, base sintética del curso (MCP). Rangos térmicos por especie y productos satelitales: guía de la Clase 4.</li>
+  </ul>
+  <aside class="nota"><h4>Bibliografía</h4>No se proyecta en clase salvo que pregunten; queda para quien descargue la presentación del aula.</aside>
+</section>
+<!-- ============ 22 · GRACIAS ============ -->
+<section class="slide seccion" data-sec="Cierre" data-sin-marca>
+  <div class="eyebrow">IA aplicada a la producción pesquera · Clase 4</div>
+  <p class="frase" style="font-size:78px;margin-top:120px">El dato estaba.<br><span style="color:var(--boya)">Ahora sabemos leerlo.</span></p>
+  <p class="lead" style="margin-top:50px">Nos vemos en el aula y en la comunidad PesquerosEnIA.</p>
+  <div class="logos" style="margin-top:46px;transform:scale(.72);transform-origin:left top"><div class="logo"><img src="../../branding/utn_frch.png" alt="UTN Facultad Regional Chubut" style="max-height:56px"></div><div class="logo"><img src="../../branding/ing_pesquera.png" alt="Ingeniería Pesquera UTN FRCh" style="max-height:88px"></div><div class="logo"><img src="../../branding/cidapal.png" alt="CIDAPAL UTN" style="max-height:72px"></div><div class="logo"><img src="../../branding/cfp.png" alt="Consejo Federal Pesquero" style="max-height:56px"></div><div class="logo"><img src="../../branding/capip.png" alt="CAPIP" style="max-height:56px"></div><div class="logo"><img src="../../branding/senasa.png" alt="SENASA" style="max-height:56px"></div><div class="logo"><img src="../../branding/pesquerosenia.png" alt="PesquerosEnIA" style="max-height:88px"></div></div>
+  <div class="pie"><span>Ariel Giamportone · Soraya Corvalán · UTN FRCh</span><span>github.com/PesquerosEnIA</span></div>
+  <aside class="nota"><h4>1:50 · Fin</h4>Dejala proyectada durante las preguntas finales.</aside>
+</section>
+
+</div></div>
+
+<div class="hud"><i id="barra"></i></div>
+<div class="contador" id="contador"></div>
+<div class="nav"><button type="button" id="bAnt" aria-label="Anterior">←</button><button type="button" id="bSig" aria-label="Siguiente">→</button><button type="button" id="bFull">F · pantalla completa</button><button type="button" id="bNotas">N · notas</button></div>
+<div class="notas" id="notas" aria-live="polite"></div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')], lienzo=document.getElementById('lienzo');
+slides.forEach(sl=>{ if(sl.dataset.sinMarca!==undefined) return; const m=document.createElement('div'); m.className='marca'; m.setAttribute('aria-hidden','true');
+  m.innerHTML='<span><img src="../../branding/utn_frch.png" alt=""></span><span><img src="../../branding/pesquerosenia.png" alt=""></span>'; sl.appendChild(m); });
+let i=0;
+function escalar(){ const s=Math.min(innerWidth/1600, innerHeight/900); lienzo.style.transform=`scale(${s})`; }
+function ir(n){
+  i=Math.max(0,Math.min(slides.length-1,n));
+  slides.forEach((s,k)=>s.classList.toggle('activa',k===i));
+  document.getElementById('barra').style.width=(100*(i+1)/slides.length)+'%';
+  document.getElementById('contador').textContent=`${slides[i].dataset.sec||''} · ${i+1} / ${slides.length}`;
+  const nota=slides[i].querySelector('aside.nota'); document.getElementById('notas').innerHTML=nota?nota.innerHTML:'';
+  if(location.hash!=='#'+(i+1)) history.replaceState(null,'','#'+(i+1));
+}
+function full(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); }
+function notas(){ document.getElementById('notas').classList.toggle('show'); }
+addEventListener('keydown',e=>{
+  if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();ir(i+1);}
+  else if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){e.preventDefault();ir(i-1);}
+  else if(e.key==='Home') ir(0); else if(e.key==='End') ir(slides.length-1);
+  else if(e.key==='f'||e.key==='F') full(); else if(e.key==='n'||e.key==='N') notas();
+});
+let x0=null; addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
+addEventListener('touchend',e=>{ if(x0===null) return; const d=e.changedTouches[0].clientX-x0; if(Math.abs(d)>50) ir(i+(d<0?1:-1)); x0=null; });
+document.getElementById('bAnt').onclick=()=>ir(i-1); document.getElementById('bSig').onclick=()=>ir(i+1);
+document.getElementById('bFull').onclick=full; document.getElementById('bNotas').onclick=notas;
+addEventListener('resize',escalar); escalar();
+ir((parseInt(location.hash.slice(1))||1)-1);
+</script>
+</body>
+</html>
