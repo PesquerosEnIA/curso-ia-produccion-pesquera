@@ -87,7 +87,7 @@ button.primario:hover:not(:disabled){filter:brightness(1.08);color:#fff}
 .reproductor[hidden]{display:none!important}
 .reproductor{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
 .reproductor input[type=range]{flex:1 1 200px;accent-color:var(--boya);height:26px}
-.reproductor #play{width:44px;font-size:1rem}
+.reproductor #play,.reproductor #atras,.reproductor #adelante{width:44px;font-size:.95rem;padding:0}
 .ticker{font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:var(--carta);background:rgba(7,22,31,.5);border:1px solid var(--linea);border-radius:8px;padding:8px 10px;margin-top:8px;min-height:2.6em}
 .ticker b{color:var(--boya)}
 .diag svg,.serie svg{min-width:620px}
@@ -155,9 +155,11 @@ footer a{color:var(--carta)}
     <h2>Tu diseño de la línea</h2>
     <div class="planta" id="planta"></div>
     <div class="reproductor" id="repro" hidden>
+      <button type="button" id="atras" aria-label="Una hora atrás">◀</button>
       <button type="button" id="play" aria-label="Reproducir o pausar">⏸</button>
+      <button type="button" id="adelante" aria-label="Una hora adelante">▶|</button>
       <input type="range" id="scrub" min="0" max="0" value="0" aria-label="Hora de la semana">
-      <div class="seg"><button type="button" data-vel="6" aria-pressed="false">lento</button><button type="button" data-vel="14" aria-pressed="true">normal</button><button type="button" data-vel="40" aria-pressed="false">rápido</button></div>
+      <div class="seg"><button type="button" data-vel="1" aria-pressed="false">lento · 1 h/s</button><button type="button" data-vel="3" aria-pressed="true">normal · 3 h/s</button><button type="button" data-vel="8" aria-pressed="false">rápido · 8 h/s</button></div>
     </div>
     <div class="ticker" id="ticker">Así está armada tu planta. Sumá gente o cambiá equipos y vas a ver el cambio. Después corré la semana y mirá cómo trabaja, hora por hora.</div>
     <div class="ctrls" id="ctrls" style="margin-top:12px"></div>
@@ -465,11 +467,16 @@ function planta(fr, fPrev){
     s+=`<rect x="164" y="16" width="300" height="46" rx="8" fill="#07161F" stroke="rgba(239,230,210,.3)"/><text x="176" y="36" font-family="IBM Plex Mono,monospace" font-size="11" fill="#48B39C">A ${fmt(fr.A)} kg</text><text x="286" y="36" font-family="IBM Plex Mono,monospace" font-size="11" fill="#F0B441">B ${fmt(fr.B)} kg</text><text x="176" y="54" font-family="IBM Plex Mono,monospace" font-size="11" fill="${fr.fuera>0?'#E8623A':'#B9AE96'}">fuera de control ${fmt(fr.fuera)} kg</text>`; }
   return s+'</svg>';
 }
-let anim={frames:null,i:0,timer:null,vel:14};
+let anim={frames:null,i:0,timer:null,vel:3};
 function mostrarFrame(i){
   const F=anim.frames; if(!F) return; anim.i=Math.max(0,Math.min(F.length-1,i));
   const fr=F[anim.i]; $('#planta').innerHTML=planta(fr,F[anim.i-1]); $('#scrub').value=anim.i;
   let t=[];
+  const hd=fr.h%24, fin=PARAM.turno_inicio+PARAM.horas_turno*dis.turnos, prev=anim.frames[anim.i-1];
+  if(hd===PARAM.turno_inicio) t.push('🔔 <b>'+String(hd).padStart(2,'0')+':00 · entra el turno</b>');
+  if(dis.turnos===2 && hd===PARAM.turno_inicio+PARAM.horas_turno) t.push('🔔 <b>14:00 · cambio de turno</b>');
+  if(fr.extra && !(prev&&prev.extra)) t.push('⏱ <b>empiezan las horas extra</b>');
+  if(prev && prev.trab && !fr.trab) t.push('🔕 <b>'+String(hd).padStart(2,'0')+':00 · termina la jornada</b>'+(fr.mue>0?' con '+fmt(fr.mue)+' kg todavía en el muelle':(fr.cam>0?' · quedan '+fmt(fr.cam)+' kg en la cámara':'')));
   if(fr.lleg.length) t.push('🚢 Llega '+fr.lleg.join(' y '));
   if(fr.paro) t.push('⚠ Túnel IQF parado'+(dis.frena?' · el fileteado espera':' · el filet se acumula sin congelar'));
   if(fr.mueCal) t.push('☀ Pescado en el muelle sin frío hace más de 2 h');
@@ -478,8 +485,13 @@ function mostrarFrame(i){
   if(!fr.trab) t.push('Fuera de turno');
   $('#ticker').innerHTML=t.join(' · ')||'La línea trabaja sin atascos.';
 }
-function play(){ stop(); $('#play').textContent='⏸'; anim.timer=setInterval(()=>{ if(anim.i>=anim.frames.length-1){stop();return;} mostrarFrame(anim.i+1); },1000/anim.vel); }
-function stop(){ if(anim.timer) clearInterval(anim.timer); anim.timer=null; $('#play').textContent='▶'; }
+function tranquila(fr){ return fr && !fr.trab && !fr.lleg.length && fr.mue<1; } // noche sin novedades: pasa más rápido
+function tic(){ if(anim.i>=anim.frames.length-1){stop();return;} mostrarFrame(anim.i+1);
+  const f=anim.frames[anim.i]; anim.timer=setTimeout(tic, 1000/anim.vel/(tranquila(f)?4:1)); }
+function play(){ stop(); $('#play').textContent='⏸'; anim.timer=setTimeout(tic, 1000/anim.vel); }
+function stop(){ if(anim.timer) clearTimeout(anim.timer); anim.timer=null; $('#play').textContent='▶'; }
+$('#atras').addEventListener('click',()=>{ if(!anim.frames) return; stop(); mostrarFrame(anim.i-1); });
+$('#adelante').addEventListener('click',()=>{ if(!anim.frames) return; stop(); mostrarFrame(anim.i+1); });
 $('#play').addEventListener('click',()=>{ if(!anim.frames){ $('#correr').click(); return; } if(anim.timer) stop(); else { if(anim.i>=anim.frames.length-1) anim.i=0; play(); } });
 $('#scrub').addEventListener('input',e=>{ if(!anim.frames) return; stop(); mostrarFrame(+e.target.value); });
 document.querySelectorAll('[data-vel]').forEach(b=>b.addEventListener('click',()=>{ anim.vel=+b.dataset.vel; document.querySelectorAll('[data-vel]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); if(anim.timer) play(); }));
