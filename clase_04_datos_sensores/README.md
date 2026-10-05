@@ -44,6 +44,13 @@ clase_04_datos_sensores/
 
 ---
 
+## Casos y desafíos de la clase
+
+- [`caso_dt11_ais_psma/`](caso_dt11_ais_psma/): AIS/VMS y score de riesgo PSMA antes del arribo (datos sintéticos)
+- [`desafio_12mn/`](desafio_12mn/): **¿dentro o fuera de las 12 millas?** Peritaje VMS sobre un expediente de sumario **simulado**, inspirado en un caso real que trajo una alumna. Usa la línea oficial del SHN
+
+---
+
 ## Recursos a reutilizar
 
 - [`Hydrodinamic_model_Aquaculture_nets`](https://github.com/arielgiamportone/Hydrodinamic_model_Aquaculture_nets) — variables ambientales reales, modelo hídrodinámico
