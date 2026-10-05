@@ -1,0 +1,13 @@
+punto,nombre,carta,lat_gm,lon_gm,tipo_tramo_siguiente
+29,Punta al E punta Morro Nuevo,H-215,42°53'.1 S,64°06'.0 W,Recta
+30,Punta Ninfas,H-215,42°58'.8 S,64°17'.8 W,Normal
+31,Proximidades baliza Escollera,H-215,43°20'.5 S,65°03'.0 W,Recta
+32,Proximidades baliza Restinga,H-215,43°20'.8 S,65°03'.2 W,Normal
+33,230 punta Delfin 4.2',H-215,43°35'.2 S,65°15'.7 W,Recta
+34,Isla Escondida,H-215,43°43'.4 S,65°16'.7 W,Recta
+35,092 faro punta Lobos 1.2',H-215,43°47'.7 S,65°18'.2 W,Normal
+36,Punta Clara,H-215,43°58'.5 S,65°13'.5 W,Recta
+37,Punta Tombo,H-215,44°02'.2 S,65°11'.1 W,Normal
+38,Extremo E punta Atlas,H-215,44°08'.2 S,65°13'.1 W,Recta
+39,N isla al E de punta Loberia,H-215,44°16'.7 S,65°13'.6 W,Recta
+40,Cabo Raso,H-215,44°20'.2 S,65°13'.6 W,Normal
