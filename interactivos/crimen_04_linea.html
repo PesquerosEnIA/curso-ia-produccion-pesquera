@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La línea invisible · Crímenes del Golfo</title>
+<meta name="description" content="Expediente 04 (datos simulados): un sumario por pescar en veda. El capitán jura que nunca cruzó las 12 millas. Cruzá el VMS, el parte y la línea oficial del SHN y decidí qué le aconsejás a la armadora.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --abismo:#07161F;
+  --sonda:#0E2C3D;
+  --plataforma:#164055;
+  --carta:#EFE6D2;
+  --carta-tenue:#B9AE96;
+  --langostino:#E8623A;
+  --marea:#48B39C;
+  --boya:#F0B441;
+  --transito:#6FA8DC;
+  --linea:rgba(239,230,210,.14);
+  --linea-fuerte:rgba(239,230,210,.28);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+body{background:var(--abismo);color:var(--carta);font-family:'Archivo',system-ui,sans-serif;line-height:1.5;padding:22px 16px 70px}
+:focus-visible{outline:2px solid var(--boya);outline-offset:3px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.mono{font-family:'IBM Plex Mono',monospace}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--carta-tenue)}
+h1{font-family:'Archivo Black',sans-serif;font-size:clamp(1.7rem,5vw,2.5rem);line-height:1.02;letter-spacing:-.02em;text-transform:uppercase;margin:.45rem 0 .6rem}
+h1 em{font-style:normal;color:var(--langostino)}
+.bajada{font-size:.98rem;color:var(--carta);max-width:70ch}
+.bajada b{color:var(--boya);font-weight:600}
+.instr{font-size:.86rem;color:var(--carta-tenue);margin-top:.5rem;max-width:70ch}
+h2{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--boya);font-weight:600;margin-bottom:10px}
+.panel{background:var(--sonda);border:1px solid var(--linea);border-radius:14px;padding:16px}
+
+/* ---------- Escena ---------- */
+.escena-marco{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--linea-fuerte);background:#0b2433}
+.escena-marco svg{display:block;width:100%;height:auto}
+.obj{cursor:zoom-in}
+.obj .hit{fill:transparent}
+.obj:hover .dib,.obj:focus-visible .dib{filter:drop-shadow(0 0 6px rgba(240,180,65,.95)) brightness(1.12)}
+.obj:focus{outline:none}
+.obj.pulso .dib{animation:pulso 1.4s ease-in-out 2}
+@keyframes pulso{50%{filter:drop-shadow(0 0 14px rgba(240,180,65,1)) brightness(1.3)}}
+.badge{display:none}
+.obj.hallada .badge{display:inline}
+.barra{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+.contador{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--carta-tenue)}
+.contador b{color:var(--boya);font-size:1rem}
+.pistas{display:flex;gap:4px;margin-top:6px}
+.pistas span{width:22px;height:5px;border-radius:1px;background:var(--plataforma)}
+.pistas span.on{background:var(--boya)}
+button{font-family:'IBM Plex Mono',monospace;font-size:.78rem;letter-spacing:.04em;cursor:pointer;border-radius:8px;border:1px solid var(--linea-fuerte);background:transparent;color:var(--carta);padding:9px 13px;min-height:40px}
+button:hover{border-color:var(--boya);color:var(--boya)}
+button.primario{background:var(--langostino);border-color:var(--langostino);color:#fff;font-weight:600}
+button.primario:hover{filter:brightness(1.08);color:#fff}
+button:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+/* ---------- Libreta ---------- */
+.libreta{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.nota{border:1px dashed var(--linea-fuerte);border-radius:10px;padding:9px 11px;font-size:.82rem;color:var(--carta-tenue);min-height:54px}
+.nota.on{border-style:solid;border-color:var(--linea-fuerte);color:var(--carta);cursor:pointer;background:rgba(239,230,210,.03)}
+.nota.on:hover{border-color:var(--boya)}
+.nota .n{font-family:'IBM Plex Mono',monospace;font-size:.66rem;color:var(--boya);letter-spacing:.1em}
+.nota .t{display:block;font-weight:600;margin-top:2px}
+
+/* ---------- Mesa de cruce ---------- */
+.mesa{display:flex;flex-wrap:wrap;gap:16px}
+.mesa .mapa{flex:1 1 420px;min-width:0}
+.mesa .capas{flex:1 1 220px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.mapa svg{width:100%;height:auto;display:block;border-radius:10px;background:#0a2233}
+.capa{display:flex;align-items:flex-start;gap:10px;font-size:.86rem;padding:8px 10px;border:1px solid var(--linea);border-radius:10px;cursor:pointer}
+.capa input{margin-top:3px;accent-color:var(--boya);width:18px;height:18px;flex:none}
+.capa.bloq{opacity:.45;cursor:not-allowed}
+.capa small{display:block;color:var(--carta-tenue);font-size:.74rem}
+.nota-mesa{font-size:.8rem;color:var(--carta-tenue);margin-top:4px}
+
+/* ---------- Acusación ---------- */
+.paso{margin-top:6px}
+.paso p.q{font-weight:600;margin-bottom:8px}
+.opciones{display:flex;flex-direction:column;gap:8px}
+.op{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--linea);border-radius:10px;cursor:pointer;font-size:.9rem}
+.op:hover{border-color:var(--linea-fuerte)}
+.op input{margin-top:3px;accent-color:var(--langostino);width:18px;height:18px;flex:none}
+.op.bloq{opacity:.4;cursor:not-allowed}
+.op small{display:block;color:var(--carta-tenue);font-size:.74rem}
+.aviso-sel{font-size:.78rem;color:var(--carta-tenue);margin-top:6px}
+
+/* ---------- Veredicto ---------- */
+.veredicto{display:none}
+.veredicto.show{display:block}
+.sello{font-family:'Archivo Black',sans-serif;text-transform:uppercase;font-size:1.5rem;line-height:1.05;margin:4px 0 6px}
+.puntaje{font-family:'IBM Plex Mono',monospace;font-size:.85rem;color:var(--carta-tenue)}
+.puntaje b{color:var(--boya);font-size:1.3rem}
+.vtexto{margin:10px 0 14px;font-size:.93rem;max-width:72ch}
+.sol{display:flex;flex-direction:column;gap:8px}
+.sol .it{border-left:3px solid var(--linea-fuerte);padding:6px 0 6px 12px;font-size:.86rem}
+.sol .it .r{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600}
+.r-solida{color:var(--marea)} .it.solida{border-color:var(--marea)}
+.r-contexto{color:var(--transito)} .it.contexto{border-color:var(--transito)}
+.r-indicio{color:var(--boya)} .it.indicio{border-color:var(--boya)}
+.r-trampa,.r-coartada{color:var(--langostino)} .it.trampa,.it.coartada{border-color:var(--langostino)}
+.leyes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:14px}
+.ley{background:var(--abismo);border:1px solid var(--linea);border-radius:10px;padding:12px;font-weight:600;font-size:.92rem}
+.ley span{display:block;font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:.66rem;color:var(--carta-tenue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.fishy{margin-top:14px;font-size:.86rem;border:1px solid var(--marea);border-radius:10px;padding:12px;background:rgba(72,179,156,.07)}
+.fishy code{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--marea)}
+
+/* ---------- Modal ficha ---------- */
+.modal{position:fixed;inset:0;background:rgba(3,10,15,.78);display:none;align-items:flex-start;justify-content:center;padding:24px 12px;overflow-y:auto;z-index:10}
+.modal.show{display:flex}
+.ficha{background:var(--carta);color:#1b1a16;border-radius:12px;max-width:560px;width:100%;padding:20px 18px 18px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.ficha .cerrar{position:absolute;top:10px;right:10px;background:transparent;color:#1b1a16;border:1px solid rgba(0,0,0,.2);min-height:36px;padding:4px 10px}
+.ficha .cerrar:hover{color:var(--langostino);border-color:var(--langostino)}
+.ficha .exp{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#6d6452}
+.ficha h3{font-family:'Archivo Black',sans-serif;font-size:1.25rem;line-height:1.1;margin:4px 40px 10px 0;text-transform:uppercase}
+.ficha p{font-size:.92rem;margin:8px 0}
+.ficha table{width:100%;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:.76rem;margin:8px 0}
+.ficha th,.ficha td{text-align:left;padding:5px 6px;border-bottom:1px solid rgba(0,0,0,.12)}
+.ficha th{font-weight:600;color:#6d6452}
+.ficha .alerta{color:#b3261e;font-weight:600}
+.ficha .ok{color:#1f7a63;font-weight:600}
+.chip{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.06em;padding:3px 8px;border-radius:99px;margin-top:6px}
+.chip.fishy{background:#d6efe8;color:#135b4b;border:0;margin:6px 0 0;padding:3px 8px}
+.chip.didac{background:#f7e4b8;color:#6b4a07}
+.ficha .pregunta{border-left:3px solid var(--langostino);padding:4px 0 4px 10px;font-style:italic;color:#4a4436}
+.ficha svg{width:100%;height:auto;display:block;border-radius:8px;background:#0a2233;margin:8px 0}
+.ficha .mini svg{background:#fff;border:1px solid rgba(0,0,0,.1)}
+
+footer{font-size:.76rem;color:var(--carta-tenue);border-top:1px solid var(--linea);padding-top:12px;line-height:1.6}
+footer a{color:var(--carta)}
+</style>
+<style>
+.graf{border:1px solid var(--linea);border-radius:10px;padding:12px;background:rgba(7,22,31,.35)}
+.graf h3{font-size:.9rem;margin-bottom:2px}
+.graf .sub{font-size:.76rem;color:var(--carta-tenue);margin-bottom:8px}
+.graf svg{width:100%;height:auto;display:block}
+.graf .candado{font-size:.82rem;color:var(--carta-tenue);padding:34px 8px;text-align:center;border:1px dashed var(--linea-fuerte);border-radius:8px}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 8px}
+.seg button{min-height:36px;padding:5px 12px;font-size:.74rem}
+.seg button[aria-pressed="true"]{background:var(--boya);border-color:var(--boya);color:#07161F;font-weight:600}
+.lectura{font-family:'IBM Plex Mono',monospace;font-size:.8rem;margin-top:8px;color:var(--carta)}
+.lectura b{color:var(--boya)}
+.ficha pre{font-family:'IBM Plex Mono',monospace;font-size:.72rem;background:#111a20;color:#EFE6D2;padding:10px;border-radius:6px;overflow-x:auto;line-height:1.6}
+.ficha pre .f{color:#E8623A;font-weight:600}
+.ficha .mini svg{background:#0a2233}
+</style>
+<style>
+.kit{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.kit .card{background:var(--abismo);border:1px solid var(--linea);border-radius:10px;padding:12px;font-size:.88rem}
+.kit .card h3{font-size:.95rem;margin-bottom:6px}
+.kit .card span.tag{font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--boya)}
+.flujo{display:flex;flex-direction:column;gap:8px;counter-reset:f}
+.flujo .f{display:flex;gap:10px;align-items:flex-start;font-size:.88rem;border:1px solid var(--linea);border-radius:10px;padding:10px 12px}
+.flujo .f::before{counter-increment:f;content:counter(f);font-family:'Archivo Black',sans-serif;color:var(--abismo);background:var(--boya);border-radius:50%;min-width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+.flujo .f b{color:var(--boya);font-weight:600}
+.flujo .f.ia::before{background:var(--marea)}
+.flujo .f.cod::before{background:var(--transito)}
+.flujo .f.hum::before{background:var(--langostino);color:#fff}
+.prompt{font-family:'IBM Plex Mono',monospace;font-size:.74rem;background:#0b1318;border:1px solid var(--linea);border-radius:8px;padding:10px;white-space:pre-wrap;color:var(--carta);margin-top:8px;max-height:260px;overflow:auto}
+.tabla-c4{width:100%;border-collapse:collapse;font-size:.84rem}
+.tabla-c4 th,.tabla-c4 td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--linea);vertical-align:top}
+.tabla-c4 th{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--carta-tenue);font-weight:500}
+.tabla-c4 td:first-child{color:var(--boya);font-weight:600;white-space:nowrap}
+.enlaces{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.enlaces a{font-family:'IBM Plex Mono',monospace;font-size:.76rem;color:var(--carta);border:1px solid var(--linea-fuerte);border-radius:8px;padding:8px 12px;text-decoration:none}
+.enlaces a:hover{border-color:var(--boya);color:var(--boya)}
+.sim{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:#a50f15;border-radius:4px;padding:3px 8px;margin-bottom:6px}
+footer{font-size:.76rem;color:var(--carta-tenue);line-height:1.6}
+footer a{color:var(--carta)}
+.leyenda{display:flex;flex-wrap:wrap;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--carta-tenue);margin-top:6px}
+.leyenda i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="sim">Datos simulados · caso didáctico</span>
+    <div class="eyebrow">Crímenes del Golfo · Expediente 04 · Clase 4 — Datos y sensores</div>
+    <h1>La línea <em>invisible</em></h1>
+    <p class="bajada">Martes, 21:40. Gestoría pesquera, Rawson. Sobre el escritorio, un sumario recién notificado: el <b>B/P DON FICTICIO</b> habría pescado <b>a menos de 6 nudos dentro de la Zona de Veda Permanente</b>. Multa: <b>5.000 Unidades Pesca</b>. El capitán jura que nunca cruzó las 12 millas. La armadora quiere saber la verdad antes de firmar el descargo. <b>Le convenga o no.</b></p>
+    <p class="instr">Tocá los objetos de la oficina: cada uno es un dato. Algunos prueban, otros engañan. Cruzá las fuentes en la mesa de análisis y decidí qué le aconsejás a la armadora. <b style="color:var(--carta)">Solo podés usar lo que encontraste.</b></p>
+  </header>
+
+  <!-- ================= ESCENA ================= -->
+  <section>
+    <div class="escena-marco">
+      <svg id="escena" viewBox="0 0 1000 640" role="img" aria-label="Oficina de una gestoría pesquera de noche, con objetos que son pistas">
+        <defs>
+          <linearGradient id="gPared" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d3a4a"/><stop offset="1" stop-color="#14303e"/></linearGradient>
+          <linearGradient id="gPiso" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2d22"/><stop offset="1" stop-color="#241b14"/></linearGradient>
+          <linearGradient id="gNoche" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#06121a"/><stop offset="1" stop-color="#0f2a3a"/></linearGradient>
+          <radialGradient id="gLampara" cx=".5" cy=".2" r=".7"><stop offset="0" stop-color="#F0B441" stop-opacity=".28"/><stop offset="1" stop-color="#F0B441" stop-opacity="0"/></radialGradient>
+        </defs>
+
+        <rect width="1000" height="430" fill="url(#gPared)"/>
+        <rect y="430" width="1000" height="210" fill="url(#gPiso)"/>
+        <g stroke="#2c2118" stroke-width="2" opacity=".6"><line x1="0" y1="500" x2="1000" y2="500"/><line x1="0" y1="575" x2="1000" y2="575"/></g>
+
+        <!-- Ventana al puerto (ambiente) -->
+        <g aria-hidden="true">
+          <rect x="40" y="40" width="250" height="190" rx="4" fill="url(#gNoche)" stroke="#0a1a24" stroke-width="8"/>
+          <line x1="165" y1="40" x2="165" y2="230" stroke="#0a1a24" stroke-width="6"/>
+          <g fill="#EFE6D2"><circle cx="70" cy="70" r="1.2"/><circle cx="120" cy="58" r="1"/><circle cx="210" cy="75" r="1.3"/><circle cx="260" cy="60" r="1"/><circle cx="235" cy="100" r=".9"/></g>
+          <circle cx="250" cy="80" r="14" fill="#EFE6D2" opacity=".85"/>
+          <rect x="44" y="185" width="242" height="41" fill="#0b2433"/>
+          <path d="M60 185 l18 -14 h40 l10 14 z" fill="#164055"/><rect x="80" y="160" width="4" height="14" fill="#164055"/>
+          <path d="M190 185 l14 -10 h34 l8 10 z" fill="#164055"/>
+          <rect x="268" y="150" width="8" height="35" fill="#B9AE96"/><circle cx="272" cy="148" r="5" fill="#F0B441"/>
+          <path d="M272 148 L330 130 L330 166 Z" fill="#F0B441" opacity=".12"/>
+          <text x="165" y="250" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#B9AE96">Puerto Rawson</text>
+        </g>
+
+        <!-- Lámpara -->
+        <g aria-hidden="true"><path d="M560 0 V60" stroke="#0a1a24" stroke-width="3"/><path d="M530 60 h60 l-12 26 h-36 z" fill="#2b2b2b"/><ellipse cx="560" cy="250" rx="300" ry="230" fill="url(#gLampara)"/></g>
+
+        <!-- 9 · Biblioteca con normativa (CONTEXTO) -->
+        <g class="obj" data-id="ley" tabindex="0" role="button" aria-label="Estante con libros de normativa pesquera">
+          <rect class="hit" x="320" y="50" width="170" height="130"/>
+          <g class="dib">
+            <rect x="326" y="160" width="158" height="10" fill="#3a2a1e"/>
+            <rect x="334" y="86" width="22" height="74" fill="#6b2a1e"/><rect x="358" y="78" width="18" height="82" fill="#164055"/>
+            <rect x="378" y="92" width="26" height="68" fill="#2b5fa8"/><rect x="406" y="82" width="20" height="78" fill="#48B39C"/>
+            <rect x="428" y="96" width="24" height="64" fill="#8a6d3b"/><rect x="454" y="88" width="22" height="72" fill="#5b3a6b"/>
+            <text transform="translate(347 150) rotate(-90)" font-family="IBM Plex Mono,monospace" font-size="7" fill="#EFE6D2">LEY 24.922</text>
+            <text transform="translate(393 150) rotate(-90)" font-family="IBM Plex Mono,monospace" font-size="7" fill="#EFE6D2">LEY 23.968</text>
+            <text transform="translate(418 150) rotate(-90)" font-family="IBM Plex Mono,monospace" font-size="7" fill="#07161F">RES CFP</text>
+          </g>
+          <g class="badge"><circle cx="484" cy="62" r="12" fill="#F0B441"/><text x="484" y="66" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">9</text></g>
+        </g>
+
+        <!-- Corcho -->
+        <g aria-hidden="true"><rect x="640" y="40" width="330" height="230" rx="6" fill="#a9825a" stroke="#5a4028" stroke-width="6"/></g>
+
+        <!-- 5 · Parte de pesca en el corcho (SÓLIDA) -->
+        <g class="obj" data-id="parte" tabindex="0" role="button" aria-label="Parte de pesca clavado en el corcho">
+          <rect class="hit" x="652" y="52" width="130" height="150"/>
+          <g class="dib" transform="rotate(-3 717 127)">
+            <rect x="662" y="62" width="110" height="132" fill="#EFE6D2"/>
+            <circle cx="717" cy="66" r="4" fill="#E8623A"/>
+            <text x="717" y="82" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="7.5" font-weight="600" fill="#1b1a16">PARTE DE PESCA</text>
+            <g font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1b1a16">
+              <text x="670" y="100">ZARPADA  04:05</text><text x="670" y="113">DESEMB.  19:25</text>
+              <text x="670" y="126">LANCES   5</text><text x="670" y="139">ZONA     P</text>
+              <text x="670" y="152">LANGOSTINO 17.034 kg</text>
+            </g>
+            <text x="717" y="182" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6" fill="#6d6452">hora local · 21/03</text>
+          </g>
+          <g class="badge"><circle cx="776" cy="60" r="12" fill="#F0B441"/><text x="776" y="64" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">5</text></g>
+        </g>
+
+        <!-- 4 · Manual del proveedor (CONTEXTO clave) -->
+        <g class="obj" data-id="manual" tabindex="0" role="button" aria-label="Hoja del manual del proveedor de monitoreo satelital">
+          <rect class="hit" x="792" y="52" width="80" height="110"/>
+          <g class="dib" transform="rotate(4 832 107)">
+            <rect x="798" y="60" width="68" height="94" fill="#f7f3ea"/>
+            <circle cx="832" cy="64" r="4" fill="#48B39C"/>
+            <text x="832" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6" font-weight="600" fill="#1b1a16">MANUAL VMS</text>
+            <g stroke="#9a9384" stroke-width="1.2"><line x1="806" y1="90" x2="858" y2="90"/><line x1="806" y1="98" x2="852" y2="98"/><line x1="806" y1="106" x2="858" y2="106"/></g>
+            <text x="832" y="128" text-anchor="middle" font-family="Archivo Black,sans-serif" font-size="13" fill="#b3261e">UTC</text>
+            <g stroke="#9a9384" stroke-width="1.2"><line x1="806" y1="140" x2="850" y2="140"/></g>
+          </g>
+          <g class="badge"><circle cx="866" cy="60" r="12" fill="#F0B441"/><text x="866" y="64" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">4</text></g>
+        </g>
+
+        <!-- 7 · Foto del ploter del capitán (TRAMPA) -->
+        <g class="obj" data-id="croquis" tabindex="0" role="button" aria-label="Foto impresa de la pantalla del ploter del capitán">
+          <rect class="hit" x="872" y="120" width="96" height="140"/>
+          <g class="dib" transform="rotate(-5 918 190)">
+            <rect x="878" y="130" width="84" height="116" fill="#f2f2f2"/>
+            <rect x="884" y="136" width="72" height="80" fill="#0b1a2a"/>
+            <path d="M944 140 C930 170 916 190 896 212" stroke="#ffd23f" stroke-width="2" stroke-dasharray="4 3" fill="none"/>
+            <path d="M936 146 C924 172 912 188 892 206" stroke="#7cf3ff" stroke-width="1.6" fill="none"/>
+            <circle cx="918" cy="128" r="4" fill="#E8623A"/>
+            <text x="920" y="232" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#1b1a16">«siempre adentro»</text>
+          </g>
+          <g class="badge"><circle cx="962" cy="128" r="12" fill="#F0B441"/><text x="962" y="132" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">7</text></g>
+        </g>
+
+        <!-- Escritorio -->
+        <g aria-hidden="true">
+          <rect x="300" y="420" width="660" height="18" fill="#5a3f2a"/>
+          <rect x="320" y="438" width="14" height="150" fill="#3e2b1d"/><rect x="926" y="438" width="14" height="150" fill="#3e2b1d"/>
+          <rect x="700" y="438" width="200" height="100" fill="#4a3424"/><rect x="790" y="480" width="20" height="5" fill="#B9AE96"/>
+        </g>
+
+        <!-- 6 · Monitor con la capa oficial (SÓLIDA) -->
+        <g class="obj" data-id="carta" tabindex="0" role="button" aria-label="Monitor con un mapa de la costa y una línea oficial">
+          <rect class="hit" x="520" y="214" width="230" height="210"/>
+          <g class="dib">
+            <rect x="528" y="222" width="214" height="150" rx="6" fill="#111a20"/>
+            <rect x="536" y="230" width="198" height="126" fill="#0a2233"/>
+            <path d="M536 356 L536 300 C560 290 570 270 590 262 C600 258 606 246 614 230 L536 230 Z" fill="#3a4d3a"/>
+            <path d="M650 230 C640 262 620 296 588 356" stroke="#E8623A" stroke-width="2.2" fill="none"/>
+            <text x="676" y="246" font-family="IBM Plex Mono,monospace" font-size="7" fill="#E8623A">12 mn</text>
+            <text x="728" y="350" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#B9AE96">SHN · IGN</text>
+            <rect x="624" y="372" width="22" height="30" fill="#2a2a2a"/><rect x="596" y="400" width="78" height="10" rx="3" fill="#2a2a2a"/>
+          </g>
+          <g class="badge"><circle cx="742" cy="224" r="12" fill="#F0B441"/><text x="742" y="228" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">6</text></g>
+        </g>
+
+        <!-- 3 · Notebook con el export VMS (SÓLIDA) -->
+        <g class="obj" data-id="vms" tabindex="0" role="button" aria-label="Computadora portátil con una tabla de posiciones">
+          <rect class="hit" x="764" y="312" width="180" height="120"/>
+          <g class="dib">
+            <rect x="782" y="320" width="146" height="92" rx="5" fill="#111a20"/>
+            <rect x="788" y="326" width="134" height="80" fill="#0b1318"/>
+            <g font-family="IBM Plex Mono,monospace" font-size="5.4" fill="#8fa3ad">
+              <text x="792" y="338">Mar 21 2025  5:15PM 4329.9S 3.3</text>
+              <text x="792" y="350" fill="#E8623A">Mar 21 2025  6:00PM 4331.2S 3.2</text>
+              <text x="792" y="362">Mar 21 2025  6:15PM 4331.8S 3.4</text>
+              <text x="792" y="374">Mar 21 2025  6:30PM 4332.4S 3.0</text>
+              <text x="792" y="386">Mar 21 2025  7:00PM 4333.0S 0.3</text>
+            </g>
+            <path d="M770 412 H940 L950 426 H760 Z" fill="#9aa3a8"/>
+          </g>
+          <g class="badge"><circle cx="928" cy="318" r="12" fill="#F0B441"/><text x="928" y="322" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">3</text></g>
+        </g>
+
+        <!-- 1 · Notificación del sumario (CONTEXTO) -->
+        <g class="obj" data-id="notif" tabindex="0" role="button" aria-label="Notificación del sumario sobre el escritorio">
+          <rect class="hit" x="330" y="330" width="110" height="96"/>
+          <g class="dib" transform="rotate(-7 385 378)">
+            <rect x="342" y="340" width="86" height="76" fill="#ffffff"/>
+            <text x="385" y="354" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6.5" font-weight="600" fill="#1b1a16">NOTIFICACIÓN</text>
+            <text x="385" y="364" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="5.5" fill="#6d6452">SUMARIO · VEDA</text>
+            <g stroke="#c9c2b3" stroke-width="1.2"><line x1="350" y1="374" x2="420" y2="374"/><line x1="350" y1="382" x2="414" y2="382"/><line x1="350" y1="390" x2="420" y2="390"/></g>
+            <text x="385" y="408" text-anchor="middle" font-family="Archivo Black,sans-serif" font-size="9" fill="#b3261e">5.000 UP</text>
+          </g>
+          <g class="badge"><circle cx="432" cy="338" r="12" fill="#F0B441"/><text x="432" y="342" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">1</text></g>
+        </g>
+
+        <!-- 2 · Carpeta: informe de la autoridad (INDICIO) -->
+        <g class="obj" data-id="informe" tabindex="0" role="button" aria-label="Carpeta con el informe de monitoreo de la autoridad">
+          <rect class="hit" x="440" y="340" width="96" height="86"/>
+          <g class="dib" transform="rotate(5 488 384)">
+            <rect x="448" y="350" width="80" height="68" rx="3" fill="#b3261e"/>
+            <rect x="460" y="360" width="58" height="48" fill="#EFE6D2"/>
+            <text x="489" y="374" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="6" font-weight="600" fill="#1b1a16">ANEXO I</text>
+            <g font-family="IBM Plex Mono,monospace" font-size="5" fill="#1b1a16"><text x="464" y="386">22/03 15:30</text><text x="464" y="395">22/03 16:00</text><text x="464" y="404">22/03 17:45 …</text></g>
+          </g>
+          <g class="badge"><circle cx="530" cy="346" r="12" fill="#F0B441"/><text x="530" y="350" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">2</text></g>
+        </g>
+
+        <!-- 8 · Celular con audio del capitán (TRAMPA) -->
+        <g class="obj" data-id="audio" tabindex="0" role="button" aria-label="Celular con un mensaje de audio del capitán">
+          <rect class="hit" x="640" y="370" width="70" height="60"/>
+          <g class="dib" transform="rotate(12 674 400)">
+            <rect x="656" y="376" width="38" height="52" rx="5" fill="#1b1a16"/>
+            <rect x="660" y="382" width="30" height="38" fill="#0e3a2d"/>
+            <rect x="663" y="392" width="24" height="9" rx="4" fill="#48B39C"/>
+            <path d="M666 397 h2 m2 -3 v6 m3 -5 v4 m3 -6 v8 m3 -5 v3" stroke="#07161F" stroke-width="1.1"/>
+          </g>
+          <g class="badge"><circle cx="704" cy="376" r="12" fill="#F0B441"/><text x="704" y="380" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" fill="#07161F">8</text></g>
+        </g>
+
+        <!-- Taza y mate (ambiente) -->
+        <g aria-hidden="true"><path d="M594 396 h26 l-3 24 h-20 z" fill="#8a6d3b"/><path d="M604 396 c0 -12 8 -12 10 -22" stroke="#48B39C" stroke-width="2" fill="none"/></g>
+      </svg>
+    </div>
+
+    <div class="barra">
+      <div>
+        <div class="contador">Pistas encontradas: <b id="cuenta">0</b> / <span id="total"></span></div>
+        <div class="pistas" id="pistas" aria-hidden="true"></div>
+      </div>
+      <button id="linterna" type="button">🔦 Linterna (ver una pista)</button>
+    </div>
+  </section>
+
+  <!-- ================= LIBRETA ================= -->
+  <section class="panel">
+    <h2>Libreta de la gestora</h2>
+    <div class="libreta" id="libreta"></div>
+  </section>
+
+  <!-- ================= MESA ================= -->
+  <section class="panel">
+    <h2>Mesa de análisis · cruzá las fuentes</h2>
+    <div class="mesa">
+      <div class="mapa graf" id="gMapa"></div>
+      <div class="capas graf" id="gDist" style="flex:1 1 420px"></div>
+    </div>
+    <p class="nota-mesa" style="margin-top:10px">El mapa se habilita con las pistas 3 y 6; las posiciones de la autoridad, con la 2; la línea del ploter, con la 7. El gráfico de distancias necesita la 3 y la 6; para corregir la hora del informe hacen falta la 4 y la 5.</p>
+  </section>
+
+  <!-- ================= DECISIÓN ================= -->
+  <section class="panel">
+    <h2>Tu consejo a la armadora</h2>
+    <div class="paso">
+      <p class="q">1 · ¿Qué le aconsejás?</p>
+      <div class="opciones" id="opQue"></div>
+    </div>
+    <div class="paso" style="margin-top:16px">
+      <p class="q">2 · ¿Con qué datos lo sostenés? <span style="font-weight:400;color:var(--carta-tenue)">(elegí hasta 3)</span></p>
+      <div class="opciones" id="opPruebas"></div>
+      <p class="aviso-sel" id="avisoSel"></p>
+    </div>
+    <div class="barra">
+      <span class="contador" id="estadoAcus">Respondé las dos preguntas.</span>
+      <button class="primario" id="acusar" type="button" disabled>✍ Firmar el informe</button>
+    </div>
+  </section>
+
+  <!-- ================= VEREDICTO ================= -->
+  <section class="panel veredicto" id="veredicto" aria-live="polite">
+    <h2>Veredicto</h2>
+    <div class="sello" id="sello"></div>
+    <div class="puntaje">Puntaje: <b id="puntos"></b> / 100 · <span id="rango"></span></div>
+    <p class="vtexto" id="vtexto"></p>
+    <h2 style="margin-top:14px">La solución del expediente</h2>
+    <div class="sol" id="solucion"></div>
+    <div class="leyes">
+      <div class="ley"><span>Regla 1</span>Un dato sin huso horario no se puede cruzar.</div>
+      <div class="ley"><span>Regla 2</span>Una línea sin carta, datum ni precisión no prueba nada a 50 metros.</div>
+      <div class="ley"><span>Regla 3</span>El perito dice de qué lado está el barco, aunque no le convenga a quien paga.</div>
+      <div class="ley"><span>Regla 4</span>La IA lee el expediente. El cálculo se hace en código y lo firma una persona.</div>
+    </div>
+    <div class="barra"><span></span><button id="reiniciar" type="button">↺ Volver a empezar</button></div>
+  </section>
+
+  <!-- ================= KIT ================= -->
+  <section class="panel">
+    <h2>Kit de la gestora · lo que acabás de usar es la Clase 4</h2>
+    <p class="vtexto" style="margin-top:0">Este expediente está inspirado en un caso real que trajo una alumna del curso: una gestora pesquera con 50 años en el sector, que revisa sumarios y partes todos los días. No hace falta ser programadora para trabajar así: hace falta saber <b style="color:var(--boya)">qué preguntarle a cada dato</b>.</p>
+    <table class="tabla-c4">
+      <tr><th>Concepto de la Clase 4</th><th>Dónde apareció en el expediente</th></tr>
+      <tr><td>Fuentes AIS / VMS</td><td>El export del proveedor (pista 3) y el sistema de la autoridad (pista 2) son dos sensores del mismo barco. No coinciden al metro: hay que compararlos.</td></tr>
+      <tr><td>Metadatos</td><td>Huso horario (UTC vs. hora local), datum y precisión del GPS. Sin ellos, el dato no se puede usar como prueba.</td></tr>
+      <tr><td>Datos abiertos oficiales</td><td>La línea de 12 mn del Servicio de Hidrografía Naval, publicada por el IGN, y los puntos de la Ley 23.968. Son públicos y cualquiera puede descargarlos.</td></tr>
+      <tr><td>Small data operativo</td><td>El parte de pesca: pocos números, cargados a mano, pero con la hora local que destraba todo el caso.</td></tr>
+      <tr><td>Cruce de fuentes</td><td>Alinear en el tiempo y en el espacio el VMS, el informe, el parte y la línea oficial. Ninguna fuente sola resuelve el caso.</td></tr>
+      <tr><td>Calidad del dato</td><td>La línea del ploter, corrida unos 450 m, y el informe con la fecha mal. Un dato puede estar completo y aun así estar mal.</td></tr>
+    </table>
+
+    <h2 style="margin-top:18px">Cómo trabajaría una gestora con IA, paso a paso</h2>
+    <div class="flujo">
+      <div class="f ia"><div><b>Extraer con IA.</b> Pegarle al asistente (ChatGPT, Claude) el texto del sumario <i>sin datos personales</i> y pedirle una tabla: fecha, horas, huso, posiciones, norma, qué línea dice que usó. Usar el prompt de abajo.</div></div>
+      <div class="f hum"><div><b>Verificar contra el papel.</b> Cada dato de la tabla se controla contra el documento original. La IA a veces completa lo que no está.</div></div>
+      <div class="f cod"><div><b>Calcular en código.</b> Distancias a la línea oficial, husos horarios e incertidumbre se calculan en un notebook, de forma que cualquiera pueda repetirlo. El cuaderno del desafío ya trae las herramientas.</div></div>
+      <div class="f ia"><div><b>Redactar con IA.</b> A partir de la tabla de resultados, el asistente arma el borrador del descargo o del informe técnico.</div></div>
+      <div class="f hum"><div><b>Firmar una persona.</b> La gestora lee línea por línea, corrige y decide. La responsabilidad no se delega.</div></div>
+    </div>
+    <div class="prompt" id="prompt">Sos asistente de un perito naval. Del texto del sumario que sigue, extraé SOLO lo que figura literalmente. Devolvé una tabla con: fecha del evento, cada posición (fecha, hora, latitud, longitud, velocidad), huso horario declarado, sistema de posicionamiento, precisión informada, línea jurisdiccional usada (fuente, carta, edición, datum), normas citadas y sanción. Si un dato no figura, escribí "NO FIGURA". No inventes ni completes. Al final, listá inconsistencias internas (fechas, horas, unidades).
+
+TEXTO DEL SUMARIO:
+&lt;&lt;pegar acá, sin nombres, CUIT ni matrícula&gt;&gt;</div>
+    <div class="barra"><span class="contador">Probalo con el expediente simulado.</span><button id="copiar" type="button">⧉ Copiar prompt</button></div>
+
+    <h2 style="margin-top:14px">Para el desafío de la semana</h2>
+    <div class="enlaces">
+      <a href="https://colab.research.google.com/github/PesquerosEnIA/curso-ia-produccion-pesquera/blob/master/clase_04_datos_sensores/desafio_12mn/notebooks/desafio_12mn_inicio.ipynb" target="_blank" rel="noopener">▶ Abrir el notebook en Colab</a>
+      <a href="https://github.com/PesquerosEnIA/curso-ia-produccion-pesquera/tree/master/clase_04_datos_sensores/desafio_12mn/expediente" target="_blank" rel="noopener">📁 Expediente completo (PDF)</a>
+      <a href="https://github.com/PesquerosEnIA/curso-ia-produccion-pesquera/tree/master/clase_04_datos_sensores/desafio_12mn" target="_blank" rel="noopener">📄 Consigna y rúbrica</a>
+    </div>
+  </section>
+
+  <footer>
+    <b>Caso de ficción didáctica con datos simulados.</b> El buque <i>DON FICTICIO</i>, la armadora, el capitán, el expediente, las posiciones y las cifras son inventados. Son reales y públicas las normas citadas (Ley 24.922, Ley 23.968, Res. CFP 1/2002 y 26/2009) y la línea del límite exterior del Mar Territorial, del Servicio de Hidrografía Naval publicada por el IGN. Inspirado en un caso real que aportó una alumna del curso.<br>
+    Anteriores: <a href="crimen_01_apagon.html" target="_blank" rel="noopener">Exp. 01 · El apagón del Don Alberto</a> · <a href="crimen_02_sospechoso.html" target="_blank" rel="noopener">Exp. 02 · El sospechoso de siempre</a> · <a href="crimen_03_tunel.html" target="_blank" rel="noopener">Exp. 03 · La noche del túnel</a>.<br>
+    Inspirado en el formato de los <i>Crímenes ilustrados</i> de Modesto García. · Ariel Giamportone | PesquerosEnIA · UTN FRCh
+  </footer>
+</div>
+
+<!-- ================= FICHA (modal) ================= -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="fTitulo">
+  <div class="ficha">
+    <button class="cerrar" id="cerrar" type="button" aria-label="Cerrar">✕</button>
+    <div class="exp" id="fExp"></div>
+    <h3 id="fTitulo"></h3>
+    <div id="fCuerpo"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CRÍMENES DEL GOLFO · motor del expediente (Exp. 04)
+   DATOS SIMULADOS: B/P DON FICTICIO, 21/03/2025.
+   SERIE: [hora local, velocidad kn, metros a la línea de 12 mn (− dentro / + fuera)]
+   ============================================================ */
+const SERIE=[["04:15",10.7,-19394],["04:30",10.4,-14862],["04:45",10.2,-10546],["05:00",10.5,-6863],["05:15",10.5,-4057],["05:30",10.1,-1504],["05:45",0.3,-1490],["06:00",3.0,-1390],["06:15",3.3,-1280],["06:30",2.9,-1171],["06:45",3.6,-1061],["07:00",4.8,-958],["07:15",3.0,-851],["07:30",3.0,-723],["07:45",3.3,-636],["08:00",3.1,-519],["08:15",3.0,-415],["08:30",3.2,-299],["08:45",0.4,-340],["09:00",0.2,-299],["09:15",3.1,-286],["09:30",3.0,-261],["09:45",3.0,-230],["10:00",3.3,-219],["10:15",3.3,-209],["10:30",2.9,-184],["10:45",3.6,-164],["11:00",3.2,-148],["11:15",0.5,-197],["11:30",0.2,-118],["11:45",3.4,-79],["12:00",3.3,-68],["12:15",3.2,-65],["12:30",3.1,-53],["12:45",3.0,-44],["13:00",3.0,-72],["13:15",3.3,-91],["13:30",3.2,-106],["13:45",0.5,-146],["14:00",0.1,-73],["14:15",3.3,64],["14:30",3.4,206],["14:45",3.3,343],["15:00",3.2,384],["15:15",3.4,318],["15:30",3.0,180],["15:45",2.9,27],["16:00",0.3,2],["16:15",0.7,-235],["16:30",3.2,-279],["16:45",3.3,-296],["17:00",3.1,-328],["17:15",3.1,-366],["17:30",3.4,-412],["17:45",3.3,-414],["18:00",0.3,-462],["18:15",11.1,-5385],["18:30",11.3,-10209],["18:45",10.5,-14968],["19:00",10.9,-19443]];
+const TRACK=[[-64.9976,-43.3423],[-64.9388,-43.3434],[-64.8798,-43.3441],[-64.8208,-43.345],[-64.762,-43.346],[-64.7031,-43.3466],[-64.7032,-43.3468],[-64.7181,-43.3546],[-64.7329,-43.3624],[-64.7476,-43.37],[-64.7629,-43.3793],[-64.7808,-43.3947],[-64.7812,-43.4071],[-64.7822,-43.4194],[-64.7855,-43.4325],[-64.7899,-43.4455],[-64.7934,-43.4584],[-64.7979,-43.4713],[-64.7984,-43.4711],[-64.7979,-43.4712],[-64.7919,-43.4588],[-64.7868,-43.446],[-64.7806,-43.4334],[-64.7762,-43.4206],[-64.7733,-43.4078],[-64.7713,-43.3947],[-64.7563,-43.3857],[-64.7411,-43.3779],[-64.7415,-43.3776],[-64.7409,-43.3781],[-64.7556,-43.3863],[-64.7698,-43.3948],[-64.7716,-43.408],[-64.7742,-43.421],[-64.7785,-43.434],[-64.7846,-43.4466],[-64.7896,-43.4593],[-64.7957,-43.4719],[-64.7962,-43.4718],[-64.7953,-43.472],[-64.8004,-43.4848],[-64.8072,-43.4976],[-64.8151,-43.5096],[-64.8252,-43.5211],[-64.838,-43.5312],[-64.8516,-43.5404],[-64.8648,-43.5493],[-64.8652,-43.5493],[-64.8674,-43.5479],[-64.8556,-43.5374],[-64.8436,-43.5275],[-64.8323,-43.5173],[-64.8227,-43.5063],[-64.8137,-43.4946],[-64.8059,-43.4833],[-64.8064,-43.4831],[-64.8566,-43.4548],[-64.9068,-43.4264],[-64.9569,-43.3981],[-65.0066,-43.3697],[-65.0566,-43.3414]];
+const LIM=[[-64.6,-43.3231],[-64.6567,-43.3424],[-64.6729,-43.3503],[-64.685,-43.3555],[-64.6913,-43.3572],[-64.7411,-43.3794],[-64.769,-43.3939],[-64.769,-43.3984],[-64.7726,-43.4184],[-64.778,-43.4341],[-64.7807,-43.4387],[-64.7878,-43.458],[-64.7968,-43.477],[-64.8081,-43.495],[-64.8224,-43.5126],[-64.8485,-43.5358],[-64.8759,-43.5581],[-64.9168,-43.5871],[-64.9428,-43.6253],[-64.9623,-43.65]];
+const PLO=[[-64.6,-43.3275],[-64.6537,-43.3458],[-64.67,-43.3538],[-64.6826,-43.3592],[-64.6889,-43.3608],[-64.7382,-43.3829],[-64.7634,-43.396],[-64.7671,-43.4189],[-64.7727,-43.4354],[-64.7754,-43.4401],[-64.7826,-43.4593],[-64.7916,-43.4784],[-64.8031,-43.4968],[-64.818,-43.5151],[-64.8442,-43.5384],[-64.8719,-43.5609],[-64.9122,-43.5896],[-64.9379,-43.6272],[-64.9557,-43.65]];
+/* Informe de la autoridad: fecha y hora tal como figuran (22/03, "hora local") */
+const AUT=[['15:30','4325.270S','06446.401W',3.0,17],['16:00','4326.799S','06447.022W',2.9,-3],['17:45','4330.593S','06448.861W',3.2,415],['18:00','4331.291S','06449.497W',3.2,430],['18:15','4331.893S','06450.256W',3.4,370]]
+  .map(([h,la,lo,v,d])=>({h,la,lo,lat:-(parseInt(la.slice(0,2))+parseFloat(la.slice(2,-1))/60),lon:-(parseInt(lo.slice(0,3))+parseFloat(lo.slice(3,-1))/60),v,d}));
+const PUERTO=[-65.0566,-43.3414];
+const mins=s=>{const p=s.split(':');return +p[0]*60+ +p[1];};
+const hhmm=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+const fmt=n=>n.toLocaleString('es-AR');
+
+/* ---------- Mapa ---------- */
+function mapa(o){
+  const W=420,H=360,x0=-64.98,x1=-64.62,y0=-43.32,y1=-43.62,k=Math.cos(43.45*Math.PI/180);
+  const sx=(W-20)/((x1-x0)*k), sy=(H-20)/(y0-y1), s=Math.min(sx,sy);
+  const X=l=>10+(l-x0)*k*s, Y=t=>10+(y0-t)*s;
+  const path=pts=>pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join(' ');
+  let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Mapa del track del buque y la línea de 12 millas">`;
+  g+=`<rect width="${W}" height="${H}" fill="#0a2233"/>`;
+  g+=`<text x="16" y="${H*0.62}" font-family="IBM Plex Mono,monospace" font-size="9" fill="#48B39C">AGUAS PROVINCIALES</text><text x="${W-14}" y="${H*0.62}" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="9" fill="#E8623A">ZONA DE VEDA (nacional)</text>`;
+  if(o.ploter) g+=`<path d="${path(PLO)}" stroke="#ffd23f" stroke-width="1.6" stroke-dasharray="5 4" fill="none"/>`;
+  g+=`<path d="${path(LIM)}" stroke="#E8623A" stroke-width="2.4" fill="none"/>`;
+  g+=`<path d="${path(TRACK)}" stroke="#6FA8DC" stroke-width="1.1" fill="none" opacity=".8"/>`;
+  SERIE.forEach((r,i)=>{const p=TRACK[i]; if(!p) return; const lento=r[1]<6, fuera=r[2]>0&&lento;
+    g+=`<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="${fuera?3.6:2.2}" fill="${fuera?'#E8623A':(lento?'#EFE6D2':'#6FA8DC')}"><title>${r[0]} · ${r[1]} kn · ${r[2]>0?'+':''}${fmt(r[2])} m</title></circle>`;});
+  if(o.aut) AUT.forEach((a,i)=>{g+=`<g><path d="M${X(a.lon)-5} ${Y(a.lat)-5} l10 10 m0 -10 l-10 10" stroke="#F0B441" stroke-width="2"/><text x="${X(a.lon)+7}" y="${Y(a.lat)+3}" font-family="IBM Plex Mono,monospace" font-size="9" fill="#F0B441">${i+1}</text><title>Autoridad ${i+1}: ${a.h} (informe)</title></g>`;});
+  return g+'</svg>';
+}
+
+/* ---------- Distancia a la línea vs hora ---------- */
+function distancias(o){
+  const W=560,H=300,L=56,R=12,T=18,B=40,iw=W-L-R,ih=H-T-B, t0=mins('05:00'), t1=mins('19:00'), lo=-1600, hi=600;
+  const X=m=>L+(m-t0)/(t1-t0)*iw, Y=d=>T+(hi-Math.max(lo,Math.min(hi,d)))/(hi-lo)*ih;
+  let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Distancia a la línea de 12 millas a lo largo del día">`;
+  g+=`<rect x="${L}" y="${T}" width="${iw}" height="${Y(0)-T}" fill="#E8623A" opacity=".08"/>`;
+  [-1500,-1000,-500,0,500].forEach(d=>{g+=`<line x1="${L}" x2="${W-R}" y1="${Y(d)}" y2="${Y(d)}" stroke="#EFE6D2" stroke-opacity="${d?0.07:0}"/><text x="${L-6}" y="${Y(d)+3}" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="#B9AE96">${d>0?'+':''}${fmt(d)}</text>`;});
+  g+=`<line x1="${L}" x2="${W-R}" y1="${Y(0)}" y2="${Y(0)}" stroke="#E8623A" stroke-width="2"/><text x="${W-R}" y="${Y(0)-5}" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="#E8623A">línea 12 mn (SHN)</text>`;
+  if(o.ploter) g+=`<line x1="${L}" x2="${W-R}" y1="${Y(450)}" y2="${Y(450)}" stroke="#ffd23f" stroke-dasharray="5 4"/><text x="${W-R}" y="${Y(450)-5}" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="#ffd23f">línea del ploter (+450 m)</text>`;
+  for(let h=5;h<=19;h+=2){const x=X(h*60);g+=`<text x="${x}" y="${H-B+16}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#B9AE96">${String(h).padStart(2,'0')}:00</text>`;}
+  SERIE.forEach(r=>{const m=mins(r[0]); if(m<t0||m>t1||r[1]>=6) return; const f=r[2]>0;
+    g+=`<circle cx="${X(m).toFixed(1)}" cy="${Y(r[2]).toFixed(1)}" r="${f?4:2.6}" fill="${f?'#E8623A':'#EFE6D2'}" opacity="${f?1:.75}"><title>VMS ${r[0]} · ${r[1]} kn · ${r[2]>0?'+':''}${fmt(r[2])} m</title></circle>`;});
+  if(o.aut) AUT.forEach((a,i)=>{const m=mins(a.h)-(o.corr?180:0); const x=X(m), y=Y(a.d);
+    g+=`<g><path d="M${x-5} ${y-5} l10 10 m0 -10 l-10 10" stroke="#F0B441" stroke-width="2"/><text x="${x+7}" y="${y-6}" font-family="IBM Plex Mono,monospace" font-size="9" fill="#F0B441">${i+1}</text><title>Autoridad ${i+1}: ${hhmm(m)} · ${a.d>0?'+':''}${a.d} m</title></g>`;});
+  g+=`<text x="${L}" y="${H-6}" font-family="IBM Plex Mono,monospace" font-size="8" fill="${o.corr?'#F0B441':'#B9AE96'}">eje: hora local del 21/03 · ${o.aut?(o.corr?'informe corregido (−3 h y −1 día)':'informe tal cual (hora rotulada «local»)'):'solo VMS < 6 kn'}</text>`;
+  return g+'</svg>';
+}
+
+/* ---------- Evidencias ---------- */
+const EVIDENCIAS=[
+  {id:'notif',n:1,titulo:'Notificación del sumario',rol:'contexto',puntos:0,fuenteTxt:'Expediente 01 · simulado',
+   cuerpo:()=>`<p>Se abre sumario por el evento del <b>22/03/2025</b>: navegar a <b>menos de 6 nudos dentro de la Zona de Veda Permanente</b> (Ley 24.922 art. 21 inc. i; Res. CFP 26/2009 art. 8; Res. CFP 1/2002 art. 3). Multa: <b>5.000 UP</b>. Plazo: 10 días hábiles.</p>
+   <p class="pregunta">La veda es «al este del límite de las jurisdicciones nacional y provincial». ¿Dónde pasa esa línea y quién la dibuja?</p>`},
+  {id:'informe',n:2,titulo:'Informe de monitoreo de la autoridad',rol:'indicio',puntos:5,fuenteTxt:'Expediente 02 · simulado',
+   cuerpo:()=>`<p>Anexo I del sumario. Cinco posiciones «en veda»:</p>
+   <table><tr><th>N.º</th><th>Fecha</th><th>Hora (local)</th><th>Lat</th><th>Lon</th><th>kn</th></tr>
+   ${AUT.map((a,i)=>`<tr><td>${i+1}</td><td>22/03/2025</td><td>${a.h}</td><td>${a.la}</td><td>${a.lo}</td><td>${a.v.toFixed(1)}</td></tr>`).join('')}</table>
+   <p>Línea usada: «límite exterior del Mar Territorial». <span class="alerta">No informa carta, edición, datum ni precisión del posicionador.</span></p>
+   <p class="pregunta">El parte de pesca dice que el viaje fue el 21/03. ¿Qué pasó el 22/03?</p>`},
+  {id:'vms',n:3,titulo:'Export VMS del proveedor de la armadora',rol:'solida',puntos:20,fuenteTxt:'Expediente 03 · simulado',
+   cuerpo:()=>`<p>96 posiciones del <b>21/03/2025</b>, una cada 15 minutos, con rumbo y velocidad. Formato <span class="mono">GGMM.mmm</span>: <span class="mono">4331.291S</span> = 43° 31,291' Sur.</p>
+   <table><tr><th>Hora del sistema</th><th>Lat</th><th>kn</th></tr>
+   <tr><td>Mar 21 2025 7:15AM</td><td>4320.5S</td><td>10.7 · sale de puerto</td></tr>
+   <tr><td>Mar 21 2025 6:00PM</td><td>4331.2S</td><td class="alerta">3.2</td></tr>
+   <tr><td>Mar 21 2025 10:15PM</td><td>4320.5S</td><td>0.0 · en puerto</td></tr></table>
+   <p class="pregunta">El barco sale de puerto a las 07:15 «del sistema». ¿A qué hora dice el capitán que zarpó?</p>`},
+  {id:'manual',n:4,titulo:'Manual del proveedor: «hora del sistema = UTC»',rol:'contexto',puntos:10,fuenteTxt:'Elemento del caso',
+   cuerpo:()=>`<p>En la página 3 del manual del servicio de monitoreo, subrayado en rojo: <b>«Todas las fechas y horas del sistema se expresan en UTC.»</b></p>
+   <p>Argentina usa <b>UTC−3</b> todo el año. Las 18:00 UTC son las <b>15:00</b> en Rawson.</p>
+   <p class="pregunta">Si la autoridad copió la hora del sistema y la rotuló «hora local», ¿cuántas horas se corrió?</p>`},
+  {id:'parte',n:5,titulo:'Parte de pesca del 21/03',rol:'solida',puntos:15,fuenteTxt:'Expediente 04 · simulado',
+   cuerpo:()=>`<p>Declaración jurada del capitán, en hora local:</p>
+   <table><tr><th>Zarpada</th><th>Desembarque</th><th>Lances</th><th>Zona</th></tr>
+   <tr><td>21/03 04:05</td><td>21/03 19:25</td><td>5</td><td>P (provincial)</td></tr></table>
+   <p>El VMS muestra la salida a las 07:15 y la llegada a las 22:15 del sistema: <b>3 horas de diferencia</b> en las dos puntas. El viaje fue <b>uno solo, el 21/03</b>.</p>
+   <p class="pregunta">El parte declara zona P. ¿Alcanza una declaración para probar dónde estuvo el barco?</p>`},
+  {id:'carta',n:6,titulo:'Capa oficial: límite del Mar Territorial (SHN/IGN)',rol:'solida',puntos:20,fuenteTxt:'Dato real y público · SHN vía IGN',
+   cuerpo:()=>`<p>La línea de <b>12 millas marinas</b> medida desde las líneas de base de la <b>Ley 23.968</b>. Frente a Rawson la base es la costa de bajamar entre Punta Ninfas y la escollera, y tramos rectos hacia el sur.</p>
+   <p>La publica el <b>Instituto Geográfico Nacional</b> con datos del <b>Servicio de Hidrografía Naval</b>, como servicio web abierto. Es la misma que usa el notebook del desafío.</p>
+   <p class="pregunta">Si la autoridad usó otra carta o una edición vieja, ¿cuántos metros puede cambiar el resultado?</p>`},
+  {id:'croquis',n:7,titulo:'Foto del ploter del capitán',rol:'trampa',puntos:-15,fuenteTxt:'Expediente 05 · simulado',
+   cuerpo:()=>`<p>El capitán imprimió la pantalla de su ploter: la derrota del día va siempre <b>a la izquierda de la línea amarilla de 12 mn</b>. «¿Ven? Siempre adentro.»</p>
+   <p>La línea amarilla es la de <i>su</i> cartografía, cargada hace años. Nadie sabe de qué carta ni de qué datum.</p>
+   <p class="pregunta">¿La línea del ploter es la línea oficial?</p>`},
+  {id:'audio',n:8,titulo:'Audio del capitán por WhatsApp',rol:'trampa',puntos:-20,fuenteTxt:'Elemento del caso',
+   cuerpo:()=>`<p><i>«Te juro que nunca salimos de las doce. Treinta años en esta costa, la conozco de memoria. Eso es un error de ellos.»</i></p>
+   <p class="pregunta">¿Un testimonio sincero es un dato?</p>`},
+  {id:'ley',n:9,titulo:'Normativa en el estante',rol:'contexto',puntos:5,fuenteTxt:'Normas reales',
+   cuerpo:()=>`<p><b>Res. CFP 1/2002, art. 3:</b> se presume que pesca todo buque que navega a menos de 6 nudos.</p>
+   <p><b>Res. CFP 26/2009, art. 8:</b> veda permanente al arrastre entre 43° S y 47° S; el límite oeste es el límite entre jurisdicción nacional y provincial.</p>
+   <p><b>Ley 23.968:</b> fija las líneas de base; el Mar Territorial llega a 12 mn de ellas.</p>
+   <p class="pregunta">La presunción de los 6 nudos se aplica dentro de la veda. ¿Y si el barco iba lento del lado provincial?</p>`}
+];
+
+const OPCIONES_QUE=[
+  {id:'total',txt:'Descargo total: el barco nunca salió de aguas provinciales. Lo prueban la foto del ploter, el parte (zona P) y la palabra del capitán.'},
+  {id:'allanar',txt:'Allanarse a todo con el 50 % de descuento: la autoridad tiene el sistema oficial y discutir no sirve.'},
+  {id:'parcial',txt:'Impugnar la fecha y la hora del informe y las posiciones 1 y 2, que quedan a metros de la línea y el propio VMS ubica del lado provincial. Reconocer que las posiciones 3, 4 y 5 están entre 300 y 430 m fuera, y evaluar con la armadora un allanamiento o un descargo parcial. Actualizar la cartografía del ploter.',correcta:true},
+  {id:'nulidad',txt:'Pedir la nulidad por la fecha mal escrita y no analizar nada más: un error de fecha tira abajo todo el sumario.'}
+];
+const MAL={
+  total:'Con la línea oficial, el VMS de la propia armadora pone al barco entre 64 y 384 m fuera de las 12 mn durante unas dos horas a 3 nudos, de 14:15 a 16:00. El ploter usa una línea corrida unos 450 m mar afuera: por eso el capitán «siempre estuvo adentro». Si el descargo se apoya en eso, la autoridad lo desarma con el VMS que presentó la misma armadora.',
+  allanar:'Allanarse a todo es pagar también por las posiciones 1 y 2, que están a 17 m fuera y 3 m dentro según la autoridad, y que el VMS ubica del lado provincial. Además el informe tiene la fecha corrida un día y la hora en UTC rotulada como local. Hay margen para discutir.',
+  nulidad:'Un error de fecha es un buen argumento procesal, pero no cambia dónde estuvo el barco. Si la armadora no sabe que hay dos horas de pesca firmes fuera de la línea, decide a ciegas. Primero el análisis, después la estrategia.'
+};
+const EXP={
+  notif:'El marco: qué se imputa y qué hay que probar. No trae posiciones.',
+  informe:'Trae las posiciones imputadas, pero con la fecha corrida al 22/03 y la hora del sistema (UTC) rotulada como local. Tampoco informa qué línea ni qué precisión usó.',
+  vms:'La prueba central: posiciones cada 15 minutos con velocidad. Confirma que hubo pesca lenta fuera de la línea, y también que las posiciones 1 y 2 están del lado provincial.',
+  manual:'La clave para cruzar: el sistema registra en UTC. Restando 3 horas (y corrigiendo el día) las posiciones del informe caen exactamente sobre el track.',
+  parte:'Fija el viaje en el 21/03 y, comparado con el VMS, demuestra las 3 horas de diferencia. La zona P declarada no prueba nada por sí sola.',
+  carta:'La línea oficial contra la que se mide todo. Sin ella, cada uno trae su propia línea.',
+  croquis:'Trampa: la línea del ploter está corrida unos 450 m mar afuera. Explica por qué el capitán cree que nunca salió, pero no prueba dónde estaba.',
+  audio:'Trampa: un testimonio sincero no es un dato. Puede estar convencido y equivocado a la vez.',
+  ley:'Contexto: la presunción de pesca (< 6 kn) solo pesa dentro de la veda; del lado provincial no aplica.'
+};
+
+/* ---------- Estado ---------- */
+const $=s=>document.querySelector(s);
+const halladas=new Set();
+const byId=Object.fromEntries(EVIDENCIAS.map(e=>[e.id,e]));
+let corr=false, verPloter=true, ultimoFoco=null;
+$('#total').textContent=EVIDENCIAS.length;
+
+document.querySelectorAll('.obj').forEach(g=>{
+  const abrir=()=>abrirFicha(g.dataset.id);
+  g.addEventListener('click',abrir);
+  g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();abrir();}});
+});
+function abrirFicha(id){
+  const e=byId[id]; if(!e) return;
+  ultimoFoco=document.activeElement;
+  const nueva=!halladas.has(id); halladas.add(id);
+  $('#fExp').textContent=`Pista ${e.n} de ${EVIDENCIAS.length}${nueva?' · nueva':''}`;
+  $('#fTitulo').textContent=e.titulo;
+  const real=e.fuenteTxt.startsWith('Dato real')||e.fuenteTxt.startsWith('Normas');
+  $('#fCuerpo').innerHTML=e.cuerpo()+`<span class="chip ${real?'fishy':'didac'}">${real?'✓ ':'✎ '}${e.fuenteTxt}</span>`;
+  $('#modal').classList.add('show'); $('#cerrar').focus();
+  actualizar();
+}
+function cerrarFicha(){$('#modal').classList.remove('show'); if(ultimoFoco) ultimoFoco.focus();}
+$('#cerrar').addEventListener('click',cerrarFicha);
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')cerrarFicha();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#modal').classList.contains('show'))cerrarFicha();});
+$('#linterna').addEventListener('click',()=>{
+  const falta=EVIDENCIAS.filter(e=>!halladas.has(e.id)); if(!falta.length) return;
+  const g=document.querySelector(`.obj[data-id="${falta[Math.floor(Math.random()*falta.length)].id}"]`);
+  g.classList.remove('pulso'); void g.getBBox(); g.classList.add('pulso'); setTimeout(()=>g.classList.remove('pulso'),3000);
+});
+
+function actualizar(){
+  $('#cuenta').textContent=halladas.size;
+  $('#pistas').innerHTML=EVIDENCIAS.map(e=>`<span class="${halladas.has(e.id)?'on':''}"></span>`).join('');
+  document.querySelectorAll('.obj').forEach(g=>g.classList.toggle('hallada',halladas.has(g.dataset.id)));
+  $('#linterna').disabled=halladas.size===EVIDENCIAS.length;
+  $('#libreta').innerHTML=EVIDENCIAS.map(e=>halladas.has(e.id)
+    ?`<div class="nota on" role="button" tabindex="0" data-id="${e.id}"><span class="n">PISTA ${e.n}</span><span class="t">${e.titulo}</span></div>`
+    :`<div class="nota"><span class="n">PISTA ${e.n}</span><span class="t">? · sin encontrar</span></div>`).join('');
+  document.querySelectorAll('.nota.on').forEach(n=>{
+    n.addEventListener('click',()=>abrirFicha(n.dataset.id));
+    n.addEventListener('keydown',ev=>{if(ev.key==='Enter')abrirFicha(n.dataset.id);});
+  });
+  dibujarMesa(); pintarPruebas();
+}
+
+function dibujarMesa(){
+  const base=halladas.has('vms')&&halladas.has('carta'), aut=halladas.has('informe'), plo=halladas.has('croquis'), puedeCorr=halladas.has('manual')&&halladas.has('parte');
+  if(!puedeCorr) corr=false;
+  const gm=$('#gMapa'), gd=$('#gDist');
+  if(!base){
+    gm.innerHTML=`<h3>Mapa del día</h3><div class="candado">🔒 Encontrá las pistas 3 y 6</div>`;
+    gd.innerHTML=`<h3>Metros a la línea de 12 mn</h3><div class="candado">🔒 Encontrá las pistas 3 y 6</div>`;
+    return;
+  }
+  const fuera=SERIE.filter(r=>r[1]<6&&r[2]>0);
+  gm.innerHTML=`<h3>Mapa del día · 21/03</h3><div class="sub">Track VMS, línea oficial${aut?', posiciones de la autoridad':''}${plo&&verPloter?' y línea del ploter':''}</div>
+    ${plo?`<div class="seg"><button type="button" id="bPlo" aria-pressed="${verPloter}">Línea del ploter</button></div>`:''}
+    ${mapa({aut,ploter:plo&&verPloter})}
+    <div class="leyenda"><span><i style="background:#E8623A"></i>12 mn oficial</span>${plo&&verPloter?'<span><i style="background:#ffd23f"></i>ploter</span>':''}<span><i style="background:#EFE6D2"></i>&lt; 6 kn</span><span><i style="background:#6FA8DC"></i>tránsito</span>${aut?'<span style="color:#F0B441">✕ autoridad</span>':''}</div>`;
+  let lect=`El VMS tiene <b>${fuera.length} posiciones lentas fuera</b> de la línea oficial, de ${fuera[0][0]} a ${fuera[fuera.length-1][0]}, hasta <b>+${Math.max(...fuera.map(r=>r[2]))} m</b>.`;
+  if(aut&&!corr) lect+=' Las cruces de la autoridad <b>no caen sobre el track</b> a esa hora: a las 17:45 el barco estaba a 414 m <i>dentro</i>. '+(puedeCorr?'Probá corregir la hora del informe.':'¿En qué hora está el informe? (pistas 4 y 5)');
+  if(aut&&corr) lect+=' Corregido, el informe cae justo sobre el track: las cruces <b>3, 4 y 5</b> están firmes fuera (370 a 430 m); la <b>1 y la 2</b> quedan a +17 y −3 m, dentro del error de cualquier GPS o carta.';
+  if(plo&&verPloter) lect+=' La línea del ploter está unos <b>450 m mar afuera</b>: con ella, nada sale.';
+  gd.innerHTML=`<h3>Metros a la línea de 12 mn</h3><div class="sub">Posiciones a menos de 6 nudos · − dentro (provincial) / + fuera (veda)</div>
+    ${aut?`<div class="seg"><button type="button" data-c="0" aria-pressed="${!corr}">Informe tal cual</button><button type="button" data-c="1" aria-pressed="${corr}" ${puedeCorr?'':'disabled title="Encontrá las pistas 4 y 5"'}>Hora corregida</button></div>`:''}
+    ${distancias({aut,corr,ploter:plo&&verPloter})}<p class="lectura">${lect}</p>`;
+  gd.querySelectorAll('button[data-c]').forEach(b=>b.addEventListener('click',()=>{corr=b.dataset.c==='1';dibujarMesa();}));
+  const bp=$('#bPlo'); if(bp) bp.addEventListener('click',()=>{verPloter=!verPloter;dibujarMesa();});
+}
+
+/* ---------- Decisión ---------- */
+$('#opQue').innerHTML=OPCIONES_QUE.map(o=>`<label class="op"><input type="radio" name="que" value="${o.id}"><span>${o.txt}</span></label>`).join('');
+$('#opQue').addEventListener('change',validar);
+function pintarPruebas(){
+  const marcadas=new Set([...document.querySelectorAll('#opPruebas input:checked')].map(i=>i.value));
+  $('#opPruebas').innerHTML=EVIDENCIAS.map(e=>{const ok=halladas.has(e.id);
+    return `<label class="op ${ok?'':'bloq'}"><input type="checkbox" value="${e.id}" ${ok?'':'disabled'} ${marcadas.has(e.id)&&ok?'checked':''}><span>${ok?e.titulo:'Pista '+e.n+' · sin encontrar'}</span></label>`;}).join('');
+  document.querySelectorAll('#opPruebas input').forEach(i=>i.addEventListener('change',()=>{
+    if(document.querySelectorAll('#opPruebas input:checked').length>3){i.checked=false;$('#avisoSel').textContent='Máximo 3 datos: elegí los más fuertes.';}
+    else $('#avisoSel').textContent='';
+    validar();}));
+  validar();
+}
+function validar(){
+  const q=document.querySelector('input[name=que]:checked'), n=document.querySelectorAll('#opPruebas input:checked').length;
+  $('#acusar').disabled=!(q&&n>0);
+  $('#estadoAcus').textContent=!q?'Decidí qué le aconsejás a la armadora.':(n===0?'Elegí al menos un dato.':`${n} dato${n>1?'s':''} seleccionado${n>1?'s':''}.`);
+}
+$('#acusar').addEventListener('click',()=>{
+  const q=OPCIONES_QUE.find(o=>o.id===document.querySelector('input[name=que]:checked').value);
+  const sel=[...document.querySelectorAll('#opPruebas input:checked')].map(i=>byId[i.value]);
+  const solidas=sel.filter(e=>e.rol==='solida'), malas=sel.filter(e=>e.rol==='trampa');
+  const pts=Math.max(0,Math.min(100,(q.correcta?40:0)+sel.reduce((a,e)=>a+e.puntos,0)+(q.correcta&&solidas.length===3?5:0)));
+  let sello,texto,color;
+  if(!q.correcta){color='var(--langostino)';sello={total:'El descargo se cayó',allanar:'Pagaste de más',nulidad:'Decidiste a ciegas'}[q.id];texto=MAL[q.id];}
+  else if(malas.length){color='var(--boya)';sello='Consejo correcto, fundamento flojo';
+    texto=`El consejo es el correcto, pero te apoyaste en ${malas.map(e=>'«'+e.titulo.toLowerCase()+'»').join(' y ')}. La foto del ploter y la palabra del capitán son justamente lo que la línea oficial desmiente.`;}
+  else if(solidas.length>=2){color='var(--marea)';sello='Peritaje impecable';
+    texto='Cruzaste el VMS con la línea oficial y con la hora del parte. Encontraste lo que la armadora necesitaba saber: dónde tiene razón (fecha, hora, posiciones 1 y 2) y dónde no (dos horas de pesca firmes fuera). Ese informe sirve para decidir.';}
+  else {color='var(--boya)';sello='Bien, pero te falta sostenerlo';
+    texto='El consejo es correcto. Para que resista una impugnación, apoyalo en las fuentes que se pueden verificar: el VMS, la línea oficial y el parte de pesca.';}
+  $('#sello').textContent=sello; $('#sello').style.color=color;
+  $('#puntos').textContent=pts;
+  $('#rango').textContent=pts>=85?'Perito naval':pts>=60?'Gestora con olfato':pts>=35?'Aprendiz de inspector':'A repasar la Clase 4';
+  $('#vtexto').textContent=texto;
+  $('#solucion').innerHTML=EVIDENCIAS.map(e=>`<div class="it ${e.rol}"><span class="r r-${e.rol}">${{solida:'Prueba sólida',contexto:'Contexto',indicio:'Indicio',trampa:'Trampa'}[e.rol]} · Pista ${e.n}</span><br><b>${e.titulo}.</b> ${EXP[e.id]}</div>`).join('');
+  $('#veredicto').classList.add('show'); $('#veredicto').scrollIntoView({behavior:'smooth',block:'start'});
+});
+$('#reiniciar').addEventListener('click',()=>{
+  halladas.clear(); corr=false; verPloter=true;
+  document.querySelectorAll('input[name=que]').forEach(i=>i.checked=false);
+  $('#veredicto').classList.remove('show'); actualizar(); window.scrollTo({top:0,behavior:'smooth'});
+});
+$('#copiar').addEventListener('click',()=>{
+  const t=$('#prompt').textContent;
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{$('#copiar').textContent='✓ Copiado';setTimeout(()=>$('#copiar').textContent='⧉ Copiar prompt',2000);})
+  .catch(()=>{const r=document.createRange();r.selectNodeContents($('#prompt'));const s=getSelection();s.removeAllRanges();s.addRange(r);});
+});
+actualizar();
+</script>
+</body>
+</html>
