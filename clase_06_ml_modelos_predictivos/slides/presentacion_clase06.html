@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clase 6 · Machine learning y modelos predictivos</title>
+<meta name="description" content="Presentación de la Clase 6 del curso IA Aplicada a la Producción Pesquera (UTN FRCh · PesquerosEnIA): repaso de las clases 4 y 5, aprendizaje supervisado, evaluación honesta, umbral de decisión, regresión, límites y ética del modelo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --abismo:#07161F; --sonda:#0E2C3D; --plataforma:#164055; --carta:#EFE6D2; --tenue:#B9AE96;
+  --langostino:#E8623A; --marea:#48B39C; --boya:#F0B441; --transito:#6FA8DC; --frio:#2b5fa8;
+  --linea:rgba(239,230,210,.14); --linea2:rgba(239,230,210,.28);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#03090d;overflow:hidden}
+body{font-family:'Archivo',system-ui,sans-serif;color:var(--carta)}
+.escenario{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.lienzo{width:1600px;height:900px;position:relative;transform-origin:center center;flex:none}
+.slide{position:absolute;inset:0;background:var(--abismo);padding:70px 90px 80px;display:none;overflow:hidden}
+.slide.activa{display:block;animation:entra .35s ease}
+@keyframes entra{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide.activa{animation:none}}
+.slide::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(900px 500px at 110% -10%,rgba(72,179,156,.10),transparent 60%),
+  radial-gradient(700px 500px at -10% 120%,rgba(232,98,58,.08),transparent 60%);pointer-events:none}
+.slide>*{position:relative}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:20px;letter-spacing:.2em;text-transform:uppercase;color:var(--tenue);margin-bottom:14px}
+.eyebrow b{color:var(--boya);font-weight:600}
+h1{font-family:'Archivo Black',sans-serif;font-size:92px;line-height:.98;letter-spacing:-.02em;text-transform:uppercase}
+h2{font-family:'Archivo Black',sans-serif;font-size:56px;line-height:1.02;letter-spacing:-.015em;margin-bottom:22px}
+h1 em,h2 em{font-style:normal;color:var(--langostino)}
+h2 .v{color:var(--marea)} h2 .a{color:var(--boya)}
+p.lead{font-size:30px;line-height:1.35;color:var(--carta);max-width:1250px}
+p.lead b{color:var(--boya)}
+.sub{font-size:24px;color:var(--tenue);line-height:1.4}
+.mono{font-family:'IBM Plex Mono',monospace}
+.cols{display:flex;gap:34px}
+.col{flex:1;min-width:0}
+.card{background:var(--sonda);border:1px solid var(--linea);border-radius:18px;padding:24px 26px}
+.card h3{font-size:28px;margin-bottom:8px}
+.card p,.card li{font-size:22px;line-height:1.4;color:var(--carta)}
+.card .k{font-family:'IBM Plex Mono',monospace;font-size:16px;letter-spacing:.14em;text-transform:uppercase;color:var(--tenue);margin-bottom:6px}
+ul.lista{list-style:none}
+ul.lista li{padding-left:30px;position:relative;margin:10px 0;font-size:25px;line-height:1.35}
+ul.lista li::before{content:"";position:absolute;left:4px;top:13px;width:12px;height:12px;border-radius:3px;background:var(--marea)}
+.frase{font-family:'Archivo Black',sans-serif;font-size:44px;line-height:1.12}
+.cita{border-left:6px solid var(--boya);padding:10px 0 10px 26px;font-size:30px;line-height:1.35;font-style:italic}
+.cita span{display:block;font-style:normal;font-size:20px;color:var(--tenue);margin-top:8px;font-family:'IBM Plex Mono',monospace}
+.tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:17px;padding:5px 12px;border-radius:99px;border:1px solid var(--linea2);color:var(--carta);margin:0 8px 8px 0}
+.tag.v{border-color:var(--marea);color:var(--marea)} .tag.a{border-color:var(--boya);color:var(--boya)} .tag.r{border-color:var(--langostino);color:var(--langostino)}
+.pie{position:absolute;left:90px;right:90px;bottom:26px;display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:15px;color:#6b7c84;letter-spacing:.08em}
+svg text{font-family:'IBM Plex Mono',monospace}
+.fuente{position:absolute;right:90px;bottom:52px;font-family:'IBM Plex Mono',monospace;font-size:15px;color:#6b7c84;text-align:right;max-width:900px}
+.seccion{background:linear-gradient(135deg,#0E2C3D,#07161F 60%)}
+.seccion .num{font-family:'Archivo Black',sans-serif;font-size:260px;line-height:.8;color:rgba(240,180,65,.14);position:absolute;right:80px;bottom:40px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.regla{background:var(--sonda);border:1px solid var(--linea);border-top:6px solid var(--boya);border-radius:14px;padding:20px 20px}
+.regla .n{font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--tenue);letter-spacing:.12em}
+.regla .t{font-family:'Archivo Black',sans-serif;font-size:30px;line-height:1.1;margin:10px 0 14px}
+.regla .e{font-size:21px;line-height:1.4;color:var(--tenue)}
+.regla{min-height:380px}
+.regla .e b{color:var(--carta)}
+
+/* barra, notas, ayuda */
+.hud{position:fixed;left:0;right:0;bottom:0;height:5px;background:rgba(239,230,210,.08);z-index:5}
+.hud i{display:block;height:100%;background:var(--boya);width:0;transition:width .3s}
+.contador{position:fixed;right:14px;bottom:12px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6b7c84;z-index:5}
+.nav{position:fixed;left:14px;bottom:10px;display:flex;gap:6px;z-index:5;opacity:.25;transition:opacity .2s}
+.nav:hover{opacity:1}
+.nav button{font-family:'IBM Plex Mono',monospace;background:#0E2C3D;color:#EFE6D2;border:1px solid rgba(239,230,210,.25);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:13px}
+.notas{position:fixed;left:0;right:0;bottom:0;max-height:42vh;overflow:auto;background:rgba(3,9,13,.96);border-top:2px solid var(--boya);padding:16px 22px 34px;z-index:6;display:none;font-size:16px;line-height:1.5}
+.notas.show{display:block}
+.notas h4{font-family:'IBM Plex Mono',monospace;color:var(--boya);font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.notas b{color:var(--boya)}
+.notas ul{margin:6px 0 0 18px}
+aside.nota{display:none}
+.marca{position:absolute;top:16px;right:22px;display:flex;gap:8px;z-index:3}
+.marca span{background:#fff;border-radius:8px;height:40px;padding:4px 8px;display:flex;align-items:center}
+.marca img{height:30px;display:block}
+.logos{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.logo{background:#fff;border-radius:14px;height:96px;padding:12px 20px;display:flex;align-items:center;justify-content:center}
+.logo img{display:block;max-width:230px}
+.foto{padding:0}
+.foto figure{position:absolute;inset:0;margin:0;background:#0E2C3D}
+.foto figure img{width:100%;height:100%;object-fit:cover;display:block}
+.foto .falta-box{display:none}
+.foto figure.falta img{display:none}
+.foto figure.falta .falta-box{display:flex;flex-direction:column;justify-content:center;align-items:center;position:absolute;top:60px;bottom:60px;right:60px;left:52%;border:3px dashed rgba(239,230,210,.3);border-radius:24px;color:#B9AE96;font-family:'IBM Plex Mono',monospace;font-size:22px;text-align:center;gap:10px;padding:40px}
+.foto .velo{position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,22,31,.92) 0%,rgba(7,22,31,.55) 42%,rgba(7,22,31,0) 70%)}
+.foto .texto{position:absolute;left:90px;top:0;bottom:0;width:640px;display:flex;flex-direction:column;justify-content:center}
+.foto.contain figure{left:48%;background:#07161F}
+.foto.contain figure img{object-fit:contain}
+.foto.contain .velo{display:none}
+.foto.contain .texto{width:620px}
+.foto .credito{position:absolute;right:24px;bottom:18px;font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(239,230,210,.7);background:rgba(7,22,31,.6);padding:4px 10px;border-radius:6px}
+.dato{background:var(--sonda);border:1px solid var(--linea);border-radius:18px;padding:22px 24px}
+.dato .n{font-family:'Archivo Black',sans-serif;font-size:74px;line-height:1;color:var(--boya)}
+.dato .t{font-size:23px;line-height:1.35;margin-top:8px}
+.dato .c{font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--tenue);margin-top:10px}
+.biblio li{font-size:19px;line-height:1.45;margin:0 0 12px 0;list-style:none;padding-left:26px;position:relative;color:var(--carta)}
+.biblio li::before{content:"›";position:absolute;left:4px;color:var(--boya)}
+.biblio i{color:var(--tenue)}
+</style>
+</head>
+<body>
+<div class="escenario"><div class="lienzo" id="lienzo">
+
+<!-- ============ 1 · PORTADA ============ -->
+<section class="slide" data-sec="Inicio">
+  <div class="eyebrow">IA aplicada a la producción pesquera · <b>Clase 6</b> · UTN FRCh · PesquerosEnIA</div>
+  <h1 style="margin-top:40px">Machine learning<br>y modelos <em>predictivos</em></h1>
+  <p class="lead" style="margin-top:34px">Del dato de antes al dato del futuro.</p>
+  <svg width="1420" height="250" viewBox="0 0 1420 250" style="position:absolute;left:90px;bottom:84px" aria-hidden="true">
+    <line x1="0" y1="200" x2="1420" y2="200" stroke="#164055" stroke-width="2"/>
+    <g fill="#48B39C"><circle cx="40" cy="160" r="6"/><circle cx="110" cy="138" r="6"/><circle cx="180" cy="150" r="6"/><circle cx="250" cy="118" r="6"/><circle cx="320" cy="128" r="6"/><circle cx="390" cy="100" r="6"/><circle cx="460" cy="112" r="6"/><circle cx="530" cy="86" r="6"/><circle cx="600" cy="98" r="6"/><circle cx="670" cy="74" r="6"/><circle cx="740" cy="84" r="6"/></g>
+    <path d="M40 158 C200 130 400 108 740 80" fill="none" stroke="#48B39C" stroke-width="3" opacity=".6"/>
+    <line x1="780" y1="20" x2="780" y2="200" stroke="#F0B441" stroke-width="2" stroke-dasharray="6 6"/>
+    <text x="790" y="34" fill="#F0B441" font-size="16">HOY</text>
+    <path d="M780 76 C900 60 1050 52 1300 40 L1300 96 C1050 104 900 100 780 82 Z" fill="rgba(232,98,58,.18)"/>
+    <path d="M780 79 C900 70 1050 66 1300 66" fill="none" stroke="#E8623A" stroke-width="3" stroke-dasharray="10 8"/>
+    <text x="40" y="232" fill="#B9AE96" font-size="16">DATO DE ANTES · LO QUE PASÓ</text>
+    <text x="1300" y="232" fill="#E8623A" font-size="16" text-anchor="end">DATO DEL FUTURO · LO QUE ESTIMAMOS</text>
+  </svg>
+  <div class="pie"><span>Ariel Giamportone</span><span>martes 27/10/2026 · 18:00</span></div>
+  <aside class="nota"><h4>0:00 · Apertura (2 min)</h4>Bienvenida. Contá el plan: <b>10 min de repaso</b> (Clase 4 y la de Damián), después lo nuevo: cómo un modelo aprende de las mareas pasadas, cómo se le toma examen y por qué <b>el umbral es una decisión de plata</b>. Hoy hay <b>tres simuladores en vivo</b> y un notebook.<br>Teclas: <b>→</b> avanzar · <b>F</b> pantalla completa · <b>N</b> notas.</aside>
+</section>
+
+<!-- ============ 2 · INSTITUCIONES ============ -->
+<section class="slide" data-sec="Inicio" data-sin-marca>
+  <div class="eyebrow">Instituciones participantes</div>
+  <h2>Un curso sostenido por <em>el sector</em></h2>
+  <div class="logos" style="margin-top:30px"><div class="logo"><img src="../../branding/utn_frch.png" alt="UTN Facultad Regional Chubut" style="max-height:56px"></div><div class="logo"><img src="../../branding/ing_pesquera.png" alt="Ingeniería Pesquera UTN FRCh" style="max-height:88px"></div><div class="logo"><img src="../../branding/cidapal.png" alt="CIDAPAL UTN" style="max-height:72px"></div><div class="logo"><img src="../../branding/cfp.png" alt="Consejo Federal Pesquero" style="max-height:56px"></div><div class="logo"><img src="../../branding/capip.png" alt="CAPIP" style="max-height:56px"></div><div class="logo"><img src="../../branding/senasa.png" alt="SENASA" style="max-height:56px"></div><div class="logo"><img src="../../branding/pesquerosenia.png" alt="PesquerosEnIA" style="max-height:88px"></div></div>
+  <div class="cols" style="margin-top:44px">
+    <div class="card col"><div class="k">Dirección</div><p style="font-size:26px">Ing. Cristina Fernández · <b>Co-dirección:</b> Ing. Soraya Corvalán</p></div>
+    <div class="card col"><div class="k">Articulación</div><p style="font-size:26px"><b>SENASA</b> (convenio 2024) · <b>CAPIP</b> (convenio marco 2023) · <b>INIDEP</b></p></div>
+  </div>
+  <p class="sub" style="margin-top:26px">Departamento de Ingeniería Pesquera · UTN Facultad Regional Chubut · comunidad PesquerosEnIA</p>
+  <aside class="nota"><h4>0:02 · Instituciones (30 s)</h4>Agradecimiento breve a la red de instituciones. Mismo contenido que la bienvenida del aula.</aside>
+</section>
+
+<!-- ============ 3 · MAPA ============ -->
+<section class="slide" data-sec="Inicio">
+  <div class="eyebrow">El recorrido</div>
+  <h2>Estamos en la <em>estación 6</em></h2>
+  <svg width="1420" height="470" viewBox="0 0 1420 470" aria-label="Recorrido de las 10 clases">
+    <line x1="60" y1="170" x2="1360" y2="170" stroke="#164055" stroke-width="6"/>
+    <line x1="60" y1="170" x2="770" y2="170" stroke="#F0B441" stroke-width="6"/>
+    <g font-size="17">
+    <g><circle cx="60" cy="170" r="20" fill="#F0B441"/><text x="60" y="176" text-anchor="middle" fill="#07161F" font-weight="600">1</text><text x="60" y="226" text-anchor="middle" fill="#EFE6D2">Estrategia y</text><text x="60" y="248" text-anchor="middle" fill="#EFE6D2">transformación</text></g>
+    <g><circle cx="204" cy="170" r="20" fill="#F0B441"/><text x="204" y="176" text-anchor="middle" fill="#07161F" font-weight="600">2</text><text x="204" y="226" text-anchor="middle" fill="#EFE6D2">Fundamentos</text><text x="204" y="248" text-anchor="middle" fill="#EFE6D2">de IA y LLM</text></g>
+    <g><circle cx="348" cy="170" r="20" fill="#F0B441"/><text x="348" y="176" text-anchor="middle" fill="#07161F" font-weight="600">3</text><text x="348" y="226" text-anchor="middle" fill="#EFE6D2">Prompting y</text><text x="348" y="248" text-anchor="middle" fill="#EFE6D2">asistentes</text></g>
+    <g><circle cx="492" cy="170" r="20" fill="#F0B441"/><text x="492" y="176" text-anchor="middle" fill="#07161F" font-weight="600">4</text><text x="492" y="226" text-anchor="middle" fill="#EFE6D2">Datos y</text><text x="492" y="248" text-anchor="middle" fill="#EFE6D2">sensores</text></g>
+    <g><circle cx="636" cy="170" r="20" fill="#F0B441"/><text x="636" y="176" text-anchor="middle" fill="#07161F" font-weight="600">5</text><text x="636" y="226" text-anchor="middle" fill="#EFE6D2">Arquitectura</text><text x="636" y="248" text-anchor="middle" fill="#EFE6D2">y Big Data</text></g>
+    <g><circle cx="780" cy="170" r="32" fill="#E8623A"/><text x="780" y="178" text-anchor="middle" fill="#fff" font-weight="600" font-size="22">6</text><text x="780" y="236" text-anchor="middle" fill="#F0B441" font-weight="600">ML y modelos</text><text x="780" y="258" text-anchor="middle" fill="#F0B441" font-weight="600">predictivos</text><text x="780" y="112" text-anchor="middle" fill="#F0B441">HOY</text></g>
+    <g><circle cx="924" cy="170" r="20" fill="#164055"/><text x="924" y="176" text-anchor="middle" fill="#EFE6D2">7</text><text x="924" y="226" text-anchor="middle" fill="#B9AE96">Visión</text><text x="924" y="248" text-anchor="middle" fill="#B9AE96">artificial</text></g>
+    <g><circle cx="1068" cy="170" r="20" fill="#164055"/><text x="1068" y="176" text-anchor="middle" fill="#EFE6D2">8</text><text x="1068" y="226" text-anchor="middle" fill="#B9AE96">Optimización</text><text x="1068" y="248" text-anchor="middle" fill="#B9AE96">y agentes</text></g>
+    <g><circle cx="1212" cy="170" r="20" fill="#164055"/><text x="1212" y="176" text-anchor="middle" fill="#EFE6D2">9</text><text x="1212" y="226" text-anchor="middle" fill="#B9AE96">Tableros y</text><text x="1212" y="248" text-anchor="middle" fill="#B9AE96">visualización</text></g>
+    <g><circle cx="1356" cy="170" r="20" fill="#164055"/><text x="1356" y="176" text-anchor="middle" fill="#EFE6D2">10</text><text x="1356" y="226" text-anchor="middle" fill="#B9AE96">Cierre</text></g>
+    </g>
+    <rect x="60" y="310" width="1300" height="140" rx="16" fill="#0E2C3D" stroke="rgba(239,230,210,.14)"/>
+    <text x="90" y="352" fill="#B9AE96" font-size="18">POR QUÉ ESTA CLASE ES UNA BISAGRA</text>
+    <text x="90" y="392" fill="#EFE6D2" font-size="27" font-family="Archivo,sans-serif">Hasta acá: de dónde salen los datos (4) y cómo se ordenan (5).</text>
+    <text x="90" y="428" fill="#F0B441" font-size="27" font-family="Archivo,sans-serif">Desde hoy, los datos predicen → la 7 ve, la 8 actúa, la 9 muestra.</text>
+  </svg>
+  <aside class="nota"><h4>0:03 · Mapa (1 min)</h4>Ubicá al grupo: la 4 trajo los datos, la 5 (Damián) los ordenó. Hoy es la primera clase en la que <b>el dato produce algo que no estaba</b>: una predicción. Todo lo que sigue en el curso (visión, agentes, tableros) usa modelos como el de hoy.</aside>
+</section>
+
+<!-- ============ 4 · REPASO C4 ============ -->
+<section class="slide" data-sec="Repaso">
+  <div class="eyebrow">Repaso · <b>Clase 4</b> · Datos y sensores</div>
+  <h2>El valor está en <em>el cruce</em></h2>
+  <div class="grid4" style="margin-top:16px">
+    <div class="card"><div class="k">Fuentes</div><h3>El barco mide 24/7</h3><p>GPS, ecosonda, balanza, parte de pesca. Cada uno a su ritmo.</p></div>
+    <div class="card"><div class="k">Variables</div><h3>SST y clorofila</h3><p>La temperatura del mar y el «verde» ordenan dónde está el recurso.</p></div>
+    <div class="card"><div class="k">Rastro</div><h3>AIS y VMS</h3><p>La velocidad delata qué hace el barco. Un solo dato no alcanza.</p></div>
+    <div class="card"><div class="k">Calidad</div><h3>Cinco reglas</h3><p>Para no engañarse: unidades, huecos, fuentes cruzadas.</p></div>
+  </div>
+  <p class="lead" style="margin-top:34px">Hoy esas mismas variables (<b>SST, clorofila, profundidad</b>) son las que alimentan al modelo.</p>
+  <aside class="nota"><h4>0:04 · Repaso C4 (3 min)</h4>Una sola idea: <b>el cruce de capas</b>. Preguntá rápido: <i>"¿quién abrió el notebook de SST y clorofila?"</i>. Anticipá que hoy esas columnas pasan a llamarse <b>variables predictoras</b>.</aside>
+</section>
+
+<!-- ============ 5 · REPASO C5 ============ -->
+<section class="slide" data-sec="Repaso">
+  <div class="eyebrow">Repaso · <b>Clase 5</b> · Damián Giacone · «El viaje del dato»</div>
+  <h2>El dato hace el mismo viaje <em>que el lote</em></h2>
+  <svg width="1420" height="250" viewBox="0 0 1420 250" aria-label="El viaje del dato: captación, bodega, cámara, pizarrón, salida">
+    <g font-family="Archivo,sans-serif" font-weight="700" font-size="24">
+      <g transform="translate(0,30)"><rect width="250" height="130" rx="14" fill="#164055"/><text x="125" y="58" text-anchor="middle" fill="#EFE6D2">Captación</text><text x="125" y="94" text-anchor="middle" fill="#B9AE96" font-size="17" font-family="IBM Plex Mono,monospace">el parte, la balanza</text></g>
+      <g transform="translate(290,30)"><rect width="250" height="130" rx="14" fill="#1d5a6e"/><text x="125" y="58" text-anchor="middle" fill="#EFE6D2">Bodega</text><text x="125" y="94" text-anchor="middle" fill="#B9AE96" font-size="17" font-family="IBM Plex Mono,monospace">data lake</text></g>
+      <g transform="translate(580,30)"><rect width="250" height="130" rx="14" fill="#2f7f7a"/><text x="125" y="58" text-anchor="middle" fill="#EFE6D2">Cámara</text><text x="125" y="94" text-anchor="middle" fill="#EFE6D2" font-size="17" font-family="IBM Plex Mono,monospace">data warehouse</text></g>
+      <g transform="translate(870,30)"><rect width="250" height="130" rx="14" fill="#48B39C"/><text x="125" y="58" text-anchor="middle" fill="#07161F">Pizarrón</text><text x="125" y="94" text-anchor="middle" fill="#07161F" font-size="17" font-family="IBM Plex Mono,monospace">el dato de ahora</text></g>
+      <g transform="translate(1160,30)"><rect width="250" height="130" rx="14" fill="#F0B441"/><text x="125" y="58" text-anchor="middle" fill="#07161F">Salida</text><text x="125" y="94" text-anchor="middle" fill="#07161F" font-size="17" font-family="IBM Plex Mono,monospace">quien decide</text></g>
+      <g fill="#F0B441"><path d="M255 88 L284 95 L255 102 Z"/><path d="M545 88 L574 95 L545 102 Z"/><path d="M835 88 L864 95 L835 102 Z"/><path d="M1125 88 L1154 95 L1125 102 Z"/></g>
+    </g>
+    <rect x="0" y="190" width="1410" height="50" rx="12" fill="#0E2C3D" stroke="rgba(239,230,210,.14)"/>
+    <text x="24" y="222" fill="#B9AE96" font-size="19">Y por debajo de todo, la <tspan fill="#F0B441">gobernanza</tspan>: el HACCP del dato (propiedad, calidad, estándares, trazabilidad, acceso).</text>
+  </svg>
+  <div class="cita" style="margin-top:22px">Un asistente de inteligencia artificial no es más inteligente que los datos que alcanza a ver.<span>D. Giacone · El viaje del dato (Unidad 5), cap. 12</span></div>
+  <aside class="nota"><h4>0:07 · Repaso C5 (4 min)</h4>Reconocé el trabajo de Damián y recomendá su ebook (está en el aula de la Clase 5). Recorré la metáfora en una frase por estación. Remarcá la cita: hoy la vamos a <b>comprobar con números</b> (diapositiva 18).</aside>
+</section>
+
+<!-- ============ 6 · TRES TIEMPOS ============ -->
+<section class="slide" data-sec="Repaso">
+  <div class="eyebrow">El puente a hoy · <b>cap. 10 del libro de Damián</b></div>
+  <h2>El dato tiene <em>tres tiempos</em></h2>
+  <div class="grid3" style="margin-top:14px">
+    <div class="card"><div class="k">Dato de antes</div><h3>Lo que pasó</h3><p>«¿Cómo vino la cámara 2 el último mes?»</p><p style="color:var(--tenue);margin-top:10px">Vive en el lake y el warehouse. <b style="color:var(--carta)">Es un hecho.</b></p></div>
+    <div class="card"><div class="k">Dato de ahora</div><h3>Lo que está pasando</h3><p>«¿Cuánto marca la cámara 2 ahora?»</p><p style="color:var(--tenue);margin-top:10px">Vive en el pizarrón. <b style="color:var(--carta)">Es un hecho.</b></p></div>
+    <div class="card" style="border:2px solid var(--langostino)"><div class="k" style="color:var(--langostino)">Dato del futuro</div><h3>Lo que estimamos</h3><p>«¿Qué temperatura va a tener esta noche?»</p><p style="color:var(--tenue);margin-top:10px">Lo genera un modelo. <b style="color:var(--langostino)">No es un hecho: es una estimación.</b></p></div>
+  </div>
+  <p class="lead" style="margin-top:34px">Hoy aprendemos a <b>fabricar</b> el dato del futuro… y a <b>no confundirlo</b> con un hecho.</p>
+  <aside class="nota"><h4>0:11 · Tres tiempos (3 min)</h4>Es la bisagra entre la 5 y la 6. Usá el ejemplo del pronóstico del tiempo (es el de Damián): el pronóstico sirve para decidir antes, y es peligroso si se lo trata como un hecho. Todo lo de hoy es <b>cómo se fabrica un pronóstico y cuánto creerle</b>.</aside>
+</section>
+
+<!-- ============ 7 · CLÁSICA VS ML ============ -->
+<section class="slide" data-sec="1 · Aprender">
+  <div class="eyebrow">Parte 1 · <b>Aprender de los datos</b></div>
+  <h2>No le damos reglas: <em>le damos ejemplos</em></h2>
+  <svg width="1420" height="360" viewBox="0 0 1420 360" aria-label="Programación clásica frente a machine learning">
+    <g font-family="Archivo,sans-serif" font-size="25" font-weight="700">
+      <text x="0" y="26" fill="#B9AE96" font-size="18" font-family="IBM Plex Mono,monospace" font-weight="400">PROGRAMACIÓN CLÁSICA · alguien escribe la regla</text>
+      <rect x="0" y="40" width="290" height="100" rx="14" fill="#164055"/><text x="145" y="84" text-anchor="middle" fill="#EFE6D2">Reglas</text><text x="145" y="114" text-anchor="middle" fill="#B9AE96" font-size="17" font-family="IBM Plex Mono,monospace">«si SST &lt; 8 °C, no ir»</text>
+      <text x="312" y="100" text-anchor="middle" fill="#B9AE96" font-size="34">+</text>
+      <rect x="334" y="40" width="290" height="100" rx="14" fill="#164055"/><text x="479" y="98" text-anchor="middle" fill="#EFE6D2">Datos de hoy</text>
+      <path d="M636 90 H690" stroke="#B9AE96" stroke-width="4"/><path d="M688 80 L710 90 L688 100 Z" fill="#B9AE96"/>
+      <rect x="720" y="40" width="300" height="100" rx="14" fill="#0E2C3D" stroke="rgba(239,230,210,.28)"/><text x="870" y="98" text-anchor="middle" fill="#EFE6D2">Programa</text>
+      <path d="M1032 90 H1086" stroke="#B9AE96" stroke-width="4"/><path d="M1084 80 L1106 90 L1084 100 Z" fill="#B9AE96"/>
+      <rect x="1116" y="40" width="294" height="100" rx="14" fill="#0E2C3D" stroke="rgba(239,230,210,.28)"/><text x="1263" y="98" text-anchor="middle" fill="#EFE6D2">Respuesta</text>
+
+      <text x="0" y="206" fill="#48B39C" font-size="18" font-family="IBM Plex Mono,monospace" font-weight="400">MACHINE LEARNING · la regla se aprende de los ejemplos</text>
+      <rect x="0" y="220" width="290" height="100" rx="14" fill="#1d5a6e"/><text x="145" y="264" text-anchor="middle" fill="#EFE6D2">Mareas pasadas</text><text x="145" y="294" text-anchor="middle" fill="#B9AE96" font-size="17" font-family="IBM Plex Mono,monospace">SST, clorofila, prof.</text>
+      <text x="312" y="280" text-anchor="middle" fill="#48B39C" font-size="34">+</text>
+      <rect x="334" y="220" width="290" height="100" rx="14" fill="#1d5a6e"/><text x="479" y="264" text-anchor="middle" fill="#EFE6D2">Cómo les fue</text><text x="479" y="294" text-anchor="middle" fill="#B9AE96" font-size="17" font-family="IBM Plex Mono,monospace">buena / mala marea</text>
+      <path d="M636 270 H690" stroke="#48B39C" stroke-width="4"/><path d="M688 260 L710 270 L688 280 Z" fill="#48B39C"/>
+      <rect x="720" y="220" width="300" height="100" rx="14" fill="#0E2C3D" stroke="#48B39C"/><text x="870" y="264" text-anchor="middle" fill="#EFE6D2">Aprendizaje</text><text x="870" y="294" text-anchor="middle" fill="#B9AE96" font-size="17" font-family="IBM Plex Mono,monospace">el algoritmo</text>
+      <path d="M1032 270 H1086" stroke="#48B39C" stroke-width="4"/><path d="M1084 260 L1106 270 L1084 280 Z" fill="#48B39C"/>
+      <rect x="1116" y="220" width="294" height="100" rx="14" fill="#48B39C"/><text x="1263" y="264" text-anchor="middle" fill="#07161F">Modelo</text><text x="1263" y="294" text-anchor="middle" fill="#07161F" font-size="17" font-family="IBM Plex Mono,monospace">= las «reglas»</text>
+    </g>
+  </svg>
+  <p class="lead" style="margin-top:10px">Como un patrón joven que aprende de las mareas de los viejos: nadie le escribió las reglas, <b>las sacó de la experiencia</b>. Y el examen es si acierta en mareas que <b>nunca vio</b>.</p>
+  <aside class="nota"><h4>0:15 · Clásica vs. ML (5 min)</h4>💬 Abrí con: <b>"¿Cómo decide hoy el capitán a dónde ir?"</b> (experiencia, radio, la flota, el pronóstico). Eso es aprender de ejemplos. Diferencia clave: en la programación clásica alguien escribe la regla; en ML la regla <b>se infiere</b>. La palabra del día: <b>generalizar</b> (acertar en lo que no vio), no memorizar.</aside>
+</section>
+
+<!-- ============ 8 · DOS PREGUNTAS ============ -->
+<section class="slide" data-sec="1 · Aprender">
+  <div class="eyebrow">Parte 1 · <b>Aprender de los datos</b></div>
+  <h2>Dos preguntas que el capitán <em>ya se hace</em></h2>
+  <div class="cols" style="margin-top:16px">
+    <div class="card col" style="border-top:6px solid var(--marea)"><div class="k">Clasificación</div><h3 style="font-size:40px">¿Voy o no voy?</h3><p>La respuesta es una <b>categoría</b>: buena marea / mala marea.</p><p style="margin-top:12px;color:var(--tenue)">El modelo devuelve una <b style="color:var(--carta)">probabilidad</b>: «82 % de que sea buena».</p></div>
+    <div class="card col" style="border-top:6px solid var(--boya)"><div class="k">Regresión</div><h3 style="font-size:40px">¿Cuántos kilos?</h3><p>La respuesta es un <b>número</b>: kilos esperados por marea.</p><p style="margin-top:12px;color:var(--tenue)">El modelo devuelve un <b style="color:var(--carta)">valor y su error</b>: «3.700 kg, ± 124 kg».</p></div>
+  </div>
+  <p class="lead" style="margin-top:30px">Las dos son <b>aprendizaje supervisado</b>: aprenden de casos donde ya sabemos cómo terminó la historia.</p>
+  <aside class="nota"><h4>0:20 · Dos preguntas (3 min)</h4>Clasificación = categoría; regresión = número. Ejemplos del grupo: <i>"¿este lote pasa o no pasa?"</i> (clasificación), <i>"¿cuánto rinde esta línea mañana?"</i> (regresión). Las dos aparecen en el notebook y en los simuladores.</aside>
+</section>
+
+<!-- ============ 9 · EL PROBLEMA ============ -->
+<section class="slide" data-sec="2 · El caso">
+  <div class="eyebrow">Parte 2 · <b>El caso de hoy</b></div>
+  <h2>¿A qué zona <em>voy mañana?</em></h2>
+  <div class="cols" style="margin-top:6px">
+    <div class="col">
+      <div class="k mono" style="color:var(--tenue);font-size:17px;letter-spacing:.14em;margin-bottom:10px">8 VARIABLES PREDICTORAS (LO QUE SABEMOS ANTES DE SALIR)</div>
+      <div><span class="tag v">SST (°C)</span><span class="tag v">clorofila-a</span><span class="tag v">profundidad</span><span class="tag">salinidad</span><span class="tag">corriente</span><span class="tag">mes</span><span class="tag">latitud</span><span class="tag">longitud</span></div>
+      <div class="k mono" style="color:var(--tenue);font-size:17px;letter-spacing:.14em;margin:26px 0 10px">1 VARIABLE OBJETIVO (LO QUE QUEREMOS ANTICIPAR)</div>
+      <div><span class="tag a" style="font-size:22px">captura_exitosa: 1 = superó el umbral de captura de la empresa · 0 = no</span></div>
+    </div>
+  </div>
+  <div class="grid3" style="margin-top:34px">
+    <div class="dato"><div class="n">1.000</div><div class="t">mareas históricas para aprender</div></div>
+    <div class="dato"><div class="n" style="color:var(--marea)">69,9 %</div><div class="t">fueron buenas mareas (el resto, malas)</div></div>
+    <div class="dato"><div class="n" style="color:var(--transito)">3</div><div class="t">modelos que vamos a comparar</div></div>
+  </div>
+  <div class="fuente">Dataset didáctico simulado del curso (notebook clase06_ml_intermedio) · no son mareas reales</div>
+  <aside class="nota"><h4>0:23 · El caso (5 min)</h4>Decí claramente que es un <b>dataset didáctico simulado</b>: está armado para que la ecología de la merluza (agua de 8–12 °C, clorofila alta, ~140 m) se note. Sirve para aprender el método; en la diapositiva 18 vemos qué pasa con datos que no armamos nosotros. Retené el <b>69,9 %</b>: vuelve en la diapositiva 13.</aside>
+</section>
+
+<!-- ============ 10 · ENTRENAR Y EXAMINAR ============ -->
+<section class="slide" data-sec="3 · Entrenar">
+  <div class="eyebrow">Parte 3 · <b>Entrenar y tomar examen</b></div>
+  <h2>No se rinde el examen <em>con las preguntas vistas</em></h2>
+  <svg width="1420" height="300" viewBox="0 0 1420 300" aria-label="División en entrenamiento y prueba, y validación cruzada de 5 partes">
+    <text x="0" y="28" fill="#B9AE96" font-size="18">1 · SEPARAR · 1.000 MAREAS</text>
+    <rect x="0" y="44" width="1120" height="70" rx="12" fill="#1d5a6e"/><text x="560" y="88" text-anchor="middle" fill="#EFE6D2" font-size="24" font-family="Archivo,sans-serif" font-weight="700">Entrenamiento · 800 mareas (80 %)</text>
+    <rect x="1130" y="44" width="280" height="70" rx="12" fill="#E8623A"/><text x="1270" y="88" text-anchor="middle" fill="#fff" font-size="24" font-family="Archivo,sans-serif" font-weight="700">Prueba · 200</text>
+    <text x="1270" y="140" text-anchor="middle" fill="#E8623A" font-size="17">no se toca hasta el final</text>
+    <text x="0" y="190" fill="#B9AE96" font-size="18">2 · VALIDACIÓN CRUZADA (5 PARTES) · DENTRO DEL ENTRENAMIENTO</text>
+    <g font-size="15">
+      <g transform="translate(0,206)"><rect width="1120" height="16" rx="4" fill="#164055"/><rect x="0" width="224" height="16" rx="4" fill="#F0B441"/></g>
+      <g transform="translate(0,226)"><rect width="1120" height="16" rx="4" fill="#164055"/><rect x="224" width="224" height="16" rx="4" fill="#F0B441"/></g>
+      <g transform="translate(0,246)"><rect width="1120" height="16" rx="4" fill="#164055"/><rect x="448" width="224" height="16" rx="4" fill="#F0B441"/></g>
+      <g transform="translate(0,266)"><rect width="1120" height="16" rx="4" fill="#164055"/><rect x="672" width="224" height="16" rx="4" fill="#F0B441"/></g>
+      <g transform="translate(0,286)"><rect width="1120" height="14" rx="4" fill="#164055"/><rect x="896" width="224" height="14" rx="4" fill="#F0B441"/></g>
+    </g>
+    <text x="1140" y="236" fill="#F0B441" font-size="18">5 vueltas: cada vez,</text>
+    <text x="1140" y="260" fill="#F0B441" font-size="18">un quinto distinto</text>
+    <text x="1140" y="284" fill="#F0B441" font-size="18">hace de examen</text>
+  </svg>
+  <p class="lead" style="margin-top:18px"><b>Regla de oro:</b> la prueba es la única forma honesta de saber cómo le va a ir al modelo con <b>mareas futuras</b>.</p>
+  <aside class="nota"><h4>0:28 · Entrenar y examinar (6 min)</h4>Analogía: si el examen tiene las mismas preguntas que la práctica, aprobar no prueba nada. La validación cruzada es <b>tomar cinco exámenes distintos</b> y promediar: da un resultado más estable que uno solo. Mencioná (sin profundizar) que en pesca hay una trampa extra: <b>validación temporal</b> (entrenar con el pasado, evaluar con el futuro). Está en el notebook avanzado.</aside>
+</section>
+
+<!-- ============ 11 · TRES MODELOS ============ -->
+<section class="slide" data-sec="3 · Entrenar">
+  <div class="eyebrow">Parte 3 · <b>Tres modelos, una misma vara</b></div>
+  <h2>No hay un modelo «mejor»: <em>se comparan</em></h2>
+  <svg width="1420" height="330" viewBox="0 0 1420 330" aria-label="AUC en validación cruzada: regresión logística 0,681, random forest 0,797, gradient boosting 0,805">
+    <g font-size="17" fill="#6b7c84">
+      <line x1="380" y1="20" x2="380" y2="260" stroke="#164055"/><text x="380" y="288" text-anchor="middle">0,5 · moneda</text>
+      <line x1="740" y1="20" x2="740" y2="260" stroke="#164055" stroke-dasharray="4 6"/><text x="740" y="288" text-anchor="middle">0,7</text>
+      <line x1="1100" y1="20" x2="1100" y2="260" stroke="#164055" stroke-dasharray="4 6"/><text x="1100" y="288" text-anchor="middle">0,9</text>
+      <line x1="1280" y1="20" x2="1280" y2="260" stroke="#164055"/><text x="1280" y="288" text-anchor="middle">1,0 · perfecto</text>
+    </g>
+    <g font-family="Archivo,sans-serif" font-size="24" font-weight="700">
+      <text x="360" y="68" text-anchor="end" fill="#EFE6D2">Regresión logística</text>
+      <rect x="380" y="40" width="326" height="40" rx="6" fill="#6FA8DC"/><line x1="647" y1="60" x2="765" y2="60" stroke="#EFE6D2" stroke-width="2"/><text x="790" y="68" fill="#6FA8DC">0,681</text>
+      <text x="360" y="148" text-anchor="end" fill="#EFE6D2">Random Forest</text>
+      <rect x="380" y="120" width="535" height="40" rx="6" fill="#48B39C"/><line x1="854" y1="140" x2="976" y2="140" stroke="#EFE6D2" stroke-width="2"/><text x="1000" y="148" fill="#48B39C">0,797</text>
+      <text x="360" y="228" text-anchor="end" fill="#EFE6D2">Gradient Boosting</text>
+      <rect x="380" y="200" width="549" height="40" rx="6" fill="#F0B441"/><line x1="875" y1="220" x2="983" y2="220" stroke="#EFE6D2" stroke-width="2"/><text x="1008" y="228" fill="#F0B441">0,805</text>
+    </g>
+    <text x="380" y="322" fill="#B9AE96" font-size="17">AUC-ROC en validación cruzada (promedio de 5 vueltas · la línea blanca es ± 1 desvío)</text>
+  </svg>
+  <p class="lead" style="margin-top:6px">Los árboles le ganan a la línea recta. Entre los dos de arriba la diferencia es <b>menor que el desvío</b>: elegimos <b>Random Forest</b> porque además explica qué variables pesan.</p>
+  <div class="fuente">Notebook clase06_ml_intermedio · dataset didáctico simulado · scikit-learn</div>
+  <aside class="nota"><h4>0:34 · Comparar (5 min)</h4>AUC en una frase: <b>si tomo una marea buena y una mala al azar, ¿con qué probabilidad el modelo le da más puntaje a la buena?</b> 0,5 es tirar la moneda; 1 es perfecto. Lección de método: una diferencia de 0,008 con un desvío de 0,03 <b>no es una diferencia</b>. Random Forest = muchos árboles que votan (Breiman, 2001).</aside>
+</section>
+
+<!-- ============ 12 · SOBREAJUSTE ============ -->
+<section class="slide" data-sec="3 · Entrenar">
+  <div class="eyebrow">Parte 3 · <b>El enemigo</b></div>
+  <h2>El modelo que <em>memorizó</em> las mareas</h2>
+  <div class="cols">
+    <div class="col">
+      <svg width="100%" viewBox="0 0 760 420" aria-label="Esquema: el error de entrenamiento baja siempre; el de prueba baja y después sube">
+        <line x1="60" y1="20" x2="60" y2="360" stroke="#6b7c84"/><line x1="60" y1="360" x2="740" y2="360" stroke="#6b7c84"/>
+        <text x="30" y="200" fill="#B9AE96" font-size="17" transform="rotate(-90 30 200)" text-anchor="middle">error</text>
+        <text x="400" y="400" fill="#B9AE96" font-size="17" text-anchor="middle">complejidad del modelo →</text>
+        <path d="M70 120 C200 250 360 305 720 335" fill="none" stroke="#48B39C" stroke-width="5"/>
+        <path d="M70 95 C200 225 300 258 360 258 C450 258 560 195 720 70" fill="none" stroke="#E8623A" stroke-width="5"/>
+        <line x1="360" y1="40" x2="360" y2="360" stroke="#F0B441" stroke-dasharray="6 6" stroke-width="2"/>
+        <text x="372" y="60" fill="#F0B441" font-size="18">punto justo</text>
+        <text x="560" y="300" fill="#48B39C" font-size="18">entrenamiento</text>
+        <text x="650" y="170" fill="#E8623A" font-size="18">prueba</text>
+        <text x="440" y="210" fill="#B9AE96" font-size="17">sobreajuste →</text>
+      </svg>
+      <div class="mono" style="font-size:15px;color:#6b7c84">Esquema conceptual</div>
+    </div>
+    <div class="col">
+      <ul class="lista" style="margin-top:20px"><li>Rinde <b>perfecto</b> con las mareas que ya vio.</li><li><b>Falla</b> con las mareas nuevas.</li><li>Aprendió el <b>ruido</b>, no el patrón.</li></ul>
+      <div class="card" style="margin-top:26px;border-left:6px solid var(--boya)"><div class="k">🎛️ Simulador en vivo</div><p>Sobreajuste (overfitting): subí el grado del polinomio y mirá cómo se dispara el error de prueba.</p><p class="mono" style="font-size:16px;color:var(--tenue);margin-top:8px">Aula · Clase 6 · Simulador — Sobreajuste</p></div>
+    </div>
+  </div>
+  <aside class="nota"><h4>0:39 · Sobreajuste (8 min, con demo)</h4>Analogía: el alumno que se aprende de memoria las respuestas del parcial del año pasado. Abrí el simulador <b>c6_sobreajuste</b> (en el aula o en <span class="mono">pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/c6_sobreajuste.html</span>): grado bajo → no alcanza; grado medio → bien; grado alto → la curva pasa por todos los puntos y el error de prueba explota. Remedios: más datos, modelos más simples, y <b>siempre</b> evaluar en prueba.</aside>
+</section>
+
+<!-- ============ 13 · LA TRAMPA DE LA EXACTITUD ============ -->
+<section class="slide" data-sec="4 · Evaluar">
+  <div class="eyebrow">Parte 4 · <b>¿Le creemos al modelo?</b></div>
+  <h2>Acertar el 79 % <em>no dice mucho</em></h2>
+  <div class="cols" style="align-items:flex-start">
+    <div class="col">
+      <svg width="640" height="430" viewBox="0 0 640 430" aria-label="Matriz de confusión en 200 mareas de prueba: 27 verdaderos negativos, 33 falsos positivos, 9 falsos negativos, 131 verdaderos positivos">
+        <text x="390" y="22" text-anchor="middle" fill="#B9AE96" font-size="17">EL MODELO DIJO</text>
+        <text x="270" y="56" text-anchor="middle" fill="#EFE6D2" font-size="18">«no vayas»</text><text x="510" y="56" text-anchor="middle" fill="#EFE6D2" font-size="18">«andá»</text>
+        <text x="20" y="250" fill="#B9AE96" font-size="17" transform="rotate(-90 20 250)" text-anchor="middle">LO QUE PASÓ</text>
+        <text x="138" y="150" text-anchor="end" fill="#EFE6D2" font-size="18">mala marea</text><text x="138" y="320" text-anchor="end" fill="#EFE6D2" font-size="18">buena marea</text>
+        <rect x="150" y="70" width="236" height="160" rx="12" fill="#1d5a6e"/><text x="268" y="160" text-anchor="middle" fill="#EFE6D2" font-size="56" font-family="Archivo Black,sans-serif">27</text><text x="268" y="200" text-anchor="middle" fill="#B9AE96" font-size="16">acierto</text>
+        <rect x="394" y="70" width="236" height="160" rx="12" fill="#E8623A"/><text x="512" y="160" text-anchor="middle" fill="#fff" font-size="56" font-family="Archivo Black,sans-serif">33</text><text x="512" y="200" text-anchor="middle" fill="#fff" font-size="16">falso positivo</text>
+        <rect x="150" y="238" width="236" height="160" rx="12" fill="#F0B441"/><text x="268" y="328" text-anchor="middle" fill="#07161F" font-size="56" font-family="Archivo Black,sans-serif">9</text><text x="268" y="368" text-anchor="middle" fill="#07161F" font-size="16">falso negativo</text>
+        <rect x="394" y="238" width="236" height="160" rx="12" fill="#1d5a6e"/><text x="512" y="328" text-anchor="middle" fill="#EFE6D2" font-size="56" font-family="Archivo Black,sans-serif">131</text><text x="512" y="368" text-anchor="middle" fill="#B9AE96" font-size="16">acierto</text>
+      </svg>
+    </div>
+    <div class="col">
+      <div class="dato"><div class="n" style="color:var(--tenue)">70 %</div><div class="t">acierta un «modelo» que dice <b>siempre «andá»</b>, porque el 70 % de las mareas fueron buenas.</div></div>
+      <div class="dato" style="margin-top:18px"><div class="n">79 %</div><div class="t">acierta el Random Forest en las 200 mareas de prueba. Mejor… pero <b>mirá dónde se equivoca</b>.</div></div>
+      <div class="dato" style="margin-top:18px"><div class="n" style="color:var(--marea)">0,82</div><div class="t">AUC en prueba: la medida que no se deja engañar por el desbalance.</div></div>
+    </div>
+  </div>
+  <div class="fuente">Notebook clase06_ml_intermedio · 200 mareas de prueba · dataset didáctico simulado</div>
+  <aside class="nota"><h4>0:47 · Matriz (7 min)</h4>Primero el golpe: <b>decir siempre "andá" acierta el 70 %</b>, sin modelo. Por eso la exactitud sola engaña cuando las clases están desbalanceadas. Después la matriz: leela de a una celda, en idioma de barco. 💬 <b>"¿Cuál de los dos errores le duele más a su empresa?"</b> Dejá que discutan: es la pregunta de la próxima diapositiva.</aside>
+</section>
+
+<!-- ============ 14 · ERRORES EN PLATA ============ -->
+<section class="slide" data-sec="4 · Evaluar">
+  <div class="eyebrow">Parte 4 · <b>Los dos errores, en idioma de barco</b></div>
+  <h2>Cada error <em>cuesta distinto</em></h2>
+  <div class="cols" style="margin-top:20px">
+    <div class="card col" style="border-top:8px solid var(--langostino)"><div class="k" style="color:var(--langostino)">Falso positivo · 33</div><h3 style="font-size:40px">Fui y no había</h3><p style="font-size:26px">El modelo dijo «andá», salimos, y la marea fue mala.</p><p style="font-size:26px;margin-top:14px;color:var(--boya)">→ Gasoil, días de mar, tripulación.</p></div>
+    <div class="card col" style="border-top:8px solid var(--boya)"><div class="k" style="color:var(--boya)">Falso negativo · 9</div><h3 style="font-size:40px">No fui y había</h3><p style="font-size:26px">El modelo dijo «no vayas», nos quedamos, y era buena.</p><p style="font-size:26px;margin-top:14px;color:var(--boya)">→ Oportunidad perdida (y la captura se la lleva otro).</p></div>
+  </div>
+  <p class="lead" style="margin-top:30px">El modelo no sabe cuánto cuesta cada error. <b>Eso lo sabe la empresa.</b></p>
+  <aside class="nota"><h4>0:54 · Errores (3 min)</h4>Volvé a la discusión anterior y anotá en el chat qué error eligió cada uno como "el peor". Para un fresquero chico, el falso positivo (gasoil) puede ser el peor; para un congelador con cuota por usar, el falso negativo. <b>No hay respuesta única</b>: eso abre el umbral.</aside>
+</section>
+
+<!-- ============ 15 · UMBRAL ============ -->
+<section class="slide" data-sec="4 · Evaluar">
+  <div class="eyebrow">Parte 4 · <b>La perilla que decide</b></div>
+  <h2>El umbral es una decisión <em>económica</em></h2>
+  <p class="sub" style="margin-bottom:18px">El modelo da una probabilidad. El umbral dice desde cuánto salimos. Mismas 200 mareas, mismo modelo:</p>
+  <div class="grid3">
+    <div class="card"><div class="k">Umbral 0,3 · «salgo casi siempre»</div><p style="font-size:30px;margin-top:8px"><b style="color:var(--langostino)">54</b> falsos positivos</p><p style="font-size:30px"><b style="color:var(--boya)">1</b> falso negativo</p><p style="color:var(--tenue);margin-top:10px">Mucho gasoil, casi ninguna oportunidad perdida.</p></div>
+    <div class="card" style="border:2px solid var(--marea)"><div class="k">Umbral 0,5 · el de fábrica</div><p style="font-size:30px;margin-top:8px"><b style="color:var(--langostino)">33</b> falsos positivos</p><p style="font-size:30px"><b style="color:var(--boya)">9</b> falsos negativos</p><p style="color:var(--tenue);margin-top:10px">El que trae el programa. Nadie lo eligió.</p></div>
+    <div class="card"><div class="k">Umbral 0,7 · «salgo solo si es seguro»</div><p style="font-size:30px;margin-top:8px"><b style="color:var(--langostino)">15</b> falsos positivos</p><p style="font-size:30px"><b style="color:var(--boya)">39</b> falsos negativos</p><p style="color:var(--tenue);margin-top:10px">Ahorro gasoil, pierdo mareas buenas.</p></div>
+  </div>
+  <div class="card" style="margin-top:22px;border-left:6px solid var(--boya)"><p style="font-size:24px">🎛️ <b>Simulador en vivo:</b> «El umbral es una decisión económica» — poné el costo del gasoil y de la marea perdida, y buscá el umbral que más le conviene a <b>tu</b> empresa.</p></div>
+  <div class="fuente">Notebook clase06_ml_intermedio · Random Forest · 200 mareas de prueba · dataset didáctico simulado</div>
+  <aside class="nota"><h4>0:57 · Umbral (10 min, con demo)</h4>Tres columnas = tres empresas distintas, mismo modelo. Abrí el simulador <b>c6_umbral_decision</b>: cargá un costo alto de gasoil y mostrá cómo el umbral óptimo sube; después un costo alto de oportunidad y baja. Frase para cerrar: <b>"el 0,5 no es neutral: es una decisión que nadie tomó"</b>. Conectá con la ley de la Doctrina: la IA recomienda, la persona firma.</aside>
+</section>
+
+<!-- ============ 16 · IMPORTANCIA ============ -->
+<section class="slide" data-sec="5 · Interpretar">
+  <div class="eyebrow">Parte 5 · <b>Abrir la caja</b></div>
+  <h2>¿Qué variables <em>mandan?</em></h2>
+  <svg width="1420" height="420" viewBox="0 0 1420 420" aria-label="Importancia de variables del Random Forest">
+    <g font-size="21" font-family="Archivo,sans-serif">
+      <text x="300" y="38" text-anchor="end" fill="#EFE6D2">SST (°C)</text><rect x="320" y="16" width="700" height="32" rx="6" fill="#48B39C"/><text x="1036" y="40" fill="#48B39C" font-family="IBM Plex Mono,monospace">0,257</text>
+      <text x="300" y="88" text-anchor="end" fill="#EFE6D2">Profundidad</text><rect x="320" y="66" width="482" height="32" rx="6" fill="#48B39C"/><text x="818" y="90" fill="#48B39C" font-family="IBM Plex Mono,monospace">0,177</text>
+      <text x="300" y="138" text-anchor="end" fill="#EFE6D2">Clorofila-a</text><rect x="320" y="116" width="392" height="32" rx="6" fill="#48B39C"/><text x="728" y="140" fill="#48B39C" font-family="IBM Plex Mono,monospace">0,144</text>
+      <text x="300" y="188" text-anchor="end" fill="#B9AE96">Latitud</text><rect x="320" y="166" width="272" height="32" rx="6" fill="#164055"/><text x="608" y="190" fill="#B9AE96" font-family="IBM Plex Mono,monospace">0,100</text>
+      <text x="300" y="238" text-anchor="end" fill="#B9AE96">Longitud</text><rect x="320" y="216" width="245" height="32" rx="6" fill="#164055"/><text x="581" y="240" fill="#B9AE96" font-family="IBM Plex Mono,monospace">0,090</text>
+      <text x="300" y="288" text-anchor="end" fill="#B9AE96">Corriente</text><rect x="320" y="266" width="240" height="32" rx="6" fill="#164055"/><text x="576" y="290" fill="#B9AE96" font-family="IBM Plex Mono,monospace">0,088</text>
+      <text x="300" y="338" text-anchor="end" fill="#B9AE96">Salinidad</text><rect x="320" y="316" width="240" height="32" rx="6" fill="#164055"/><text x="576" y="340" fill="#B9AE96" font-family="IBM Plex Mono,monospace">0,088</text>
+      <text x="300" y="388" text-anchor="end" fill="#B9AE96">Mes</text><rect x="320" y="366" width="152" height="32" rx="6" fill="#164055"/><text x="488" y="390" fill="#B9AE96" font-family="IBM Plex Mono,monospace">0,056</text>
+    </g>
+  </svg>
+  <p class="lead" style="margin-top:4px">Las tres de arriba son <b>las capas de la Clase 4</b>. La importancia no es solo un dato del modelo: es <b>conocimiento del recurso</b>… si los datos son reales.</p>
+  <div class="fuente">Importancia de variables del Random Forest · notebook clase06_ml_intermedio · dataset didáctico simulado</div>
+  <aside class="nota"><h4>1:07 · Importancia (4 min)</h4>Leé las tres primeras: temperatura, profundidad y clorofila. Cuidado con la honestidad: en este dataset <b>salen primeras porque así lo armamos</b> (imita la ecología de la merluza). Con datos reales, la importancia es una <b>hipótesis para mostrarle a un biólogo</b>, no una verdad. Y la importancia dice "qué usa el modelo", no "qué causa la captura".</aside>
+</section>
+
+<!-- ============ 17 · REGRESIÓN Y ZONAS ============ -->
+<section class="slide" data-sec="5 · Interpretar">
+  <div class="eyebrow">Parte 5 · <b>De «¿voy?» a «¿cuántos kg?»</b></div>
+  <h2>Dos números <em>por zona</em></h2>
+  <div class="cols" style="align-items:flex-start">
+    <div class="col" style="flex:1.5">
+      <div class="card" style="padding:10px 0">
+        <table style="width:100%;border-collapse:collapse;font-size:23px">
+          <thead><tr style="color:var(--tenue);font-family:'IBM Plex Mono',monospace;font-size:16px;letter-spacing:.08em;text-align:left"><th style="padding:10px 22px">ZONA CANDIDATA (JULIO)</th><th style="padding:10px">SST</th><th style="padding:10px">CLOROF.</th><th style="padding:10px">PROF.</th><th style="padding:10px">PROB.</th><th style="padding:10px 22px">KG ESTIM.</th></tr></thead>
+          <tbody>
+            <tr style="border-top:1px solid var(--linea);background:rgba(72,179,156,.12)"><td style="padding:14px 22px"><b>A · Frente a Rawson</b></td><td style="padding:10px">9,2 °C</td><td style="padding:10px">3,1</td><td style="padding:10px">130 m</td><td style="padding:10px;color:var(--marea)"><b>99 %</b></td><td style="padding:10px 22px;color:var(--marea)"><b>3.719</b></td></tr>
+            <tr style="border-top:1px solid var(--linea)"><td style="padding:14px 22px">B · Norte, agua cálida</td><td style="padding:10px">14,5 °C</td><td style="padding:10px">0,9</td><td style="padding:10px">75 m</td><td style="padding:10px">68 %</td><td style="padding:10px 22px">2.069</td></tr>
+            <tr style="border-top:1px solid var(--linea)"><td style="padding:14px 22px">C · Sur, zona profunda</td><td style="padding:10px">6,8 °C</td><td style="padding:10px">1,2</td><td style="padding:10px">210 m</td><td style="padding:10px">68 %</td><td style="padding:10px 22px">1.741</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="sub" style="margin-top:16px">B y C empatan en probabilidad, pero no en kilos: la regresión <b style="color:var(--carta)">desempata</b>.</p>
+    </div>
+    <div class="col">
+      <div class="dato"><div class="n" style="font-size:60px">± 124 kg</div><div class="t">error medio (MAE) por marea, sobre ~2.370 kg promedio</div></div>
+      <div class="dato" style="margin-top:16px"><div class="n" style="font-size:60px;color:var(--marea)">R² 0,96</div><div class="t">explica casi toda la variación… <b>en un dataset armado</b></div></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:20px;border-left:6px solid var(--boya)"><p style="font-size:22px">🎛️ <b>Simulador en vivo:</b> «¿A qué zona voy mañana?» — mové SST, clorofila y profundidad y mirá cómo cambian la probabilidad y los kilos.</p></div>
+  <div class="fuente">Random Forest clasificador + regresor · notebook clase06_ml_intermedio · dataset didáctico simulado</div>
+  <aside class="nota"><h4>1:11 · Regresión y zonas (7 min, con demo)</h4>Leé la tabla como un capitán: la A es clara. B y C empatan en "¿voy?" pero no en "¿cuánto?": por eso conviene tener los dos modelos. Abrí <b>c6_zona_pesca</b> y probá el ejercicio del notebook: subí la clorofila de la zona B y mirá si cambia la recomendación. Retené el <b>R² 0,96</b>: la próxima diapositiva lo pone a prueba.</aside>
+</section>
+
+<!-- ============ 18 · PRUEBA DE REALIDAD ============ -->
+<section class="slide" data-sec="5 · Interpretar">
+  <div class="eyebrow">Parte 5 · <b>La prueba de realidad</b></div>
+  <h2>Mismo algoritmo, <em>otro dato</em></h2>
+  <div class="cols" style="margin-top:10px">
+    <div class="card col"><div class="k">Dataset didáctico · 1.000 mareas</div><div class="n" style="font-family:'Archivo Black',sans-serif;font-size:96px;color:var(--marea);line-height:1">R² 0,96</div><p style="margin-top:10px">Variables: <b>SST, clorofila, profundidad</b>… las que mandan.</p></div>
+    <div class="card col" style="border:2px solid var(--langostino)"><div class="k">Fishy · 200 lances (jul–sep 2026)</div><div class="n" style="font-family:'Archivo Black',sans-serif;font-size:96px;color:var(--langostino);line-height:1">R² −0,34</div><p style="margin-top:10px">Variables: especie, barco, zona, hora. <b>Peor que adivinar el promedio</b>: erra 186 kg por lance contra 160 kg de la línea base.</p></div>
+  </div>
+  <div class="cita" style="margin-top:28px">Un modelo predictivo sólo es tan bueno como el dato con el que se entrena.<span>D. Giacone · El viaje del dato (Unidad 5)</span></div>
+  <div class="fuente">Notebook clase06_prediccion_mcp · Random Forest regresor · datos sintéticos de Fishy (MCP del curso)</div>
+  <aside class="nota"><h4>1:18 · Prueba de realidad (6 min)</h4>El momento más importante de la clase. Mismo Random Forest; lo único que cambia es el dato. Con Fishy, el parte de pesca <b>no trae temperatura, clorofila ni profundidad</b>: el modelo no tiene de dónde aprender, y hasta encuentra "patrones" en la hora del lance (ruido). R² negativo = peor que responder siempre el promedio. Cerrá con la cita de Damián: <b>primero el viaje del dato, después el modelo</b>. Es el notebook del MCP que van a correr.</aside>
+</section>
+
+<!-- ============ 19 · ML EN EL MAR ============ -->
+<section class="slide" data-sec="6 · En el mar">
+  <div class="eyebrow">Datos · <b>el ML ya trabaja en el mar</b></div>
+  <h2>No es teoría: <em>ya está en uso</em></h2>
+  <div class="grid3" style="margin-top:10px">
+    <div class="dato"><div class="n" style="font-size:58px">22 mil millones</div><div class="t">de posiciones AIS clasificadas con <b>redes neuronales</b> para reconocer cuándo un barco está pescando: más de 70.000 buques.</div><div class="c">Kroodsma et al., 2018 · Science</div></div>
+    <div class="dato"><div class="n" style="font-size:58px;color:var(--langostino)">≈ 75 %</div><div class="t">de los pesqueros industriales <b>no son rastreados públicamente</b>: lo detectó un modelo de aprendizaje profundo sobre imágenes satelitales.</div><div class="c">Paolo et al., 2024 · Nature</div></div>
+    <div class="dato"><div class="n" style="font-size:58px;color:var(--marea)">EcoCast</div><div class="t">Mapas <b>diarios</b> que predicen dónde está la especie objetivo y dónde la captura incidental, con árboles potenciados (boosted trees), para la flota de pez espada de California.</div><div class="c">Hazen et al., 2018 · Science Advances</div></div>
+  </div>
+  <p class="lead" style="margin-top:30px">Lo mismo que hicimos hoy: <b>datos del pasado → modelo → mapa para decidir</b>. A escala planetaria.</p>
+  <aside class="nota"><h4>1:24 · ML en el mar (4 min)</h4>Tres casos con paper. Kroodsma y Paolo ya los vieron en la Clase 4 desde el lado del dato; hoy mirá el <b>modelo</b> que hay detrás. EcoCast es el más parecido a lo de hoy: árboles (como nuestro Gradient Boosting) que generan un mapa diario para que el capitán <b>elija dónde pescar evitando captura incidental</b>: el ML al servicio de la sostenibilidad, no solo del rendimiento.</aside>
+</section>
+
+<!-- ============ 20 · LÍMITES Y ÉTICA ============ -->
+<section class="slide" data-sec="7 · Límites">
+  <div class="eyebrow">Parte 7 · <b>Límites y uso responsable</b></div>
+  <h2>Antes de confiarle <em>una marea</em></h2>
+  <div class="grid4" style="margin-top:6px">
+    <div class="regla"><div class="n">LÍMITE 1</div><div class="t">Aprende del pasado</div><div class="e">Si el mar cambia (El Niño, calentamiento), el modelo queda viejo. <b>Hay que reentrenarlo y vigilarlo.</b></div></div>
+    <div class="regla"><div class="n">LÍMITE 2</div><div class="t">No ve todo</div><div class="e">Cuotas, vedas, precios, estado del barco, datos del INIDEP: <b>si no está en los datos, no existe para el modelo.</b></div></div>
+    <div class="regla"><div class="n">LÍMITE 3</div><div class="t">El examen honesto es en el tiempo</div><div class="e">Entrenar con el pasado y evaluar con el futuro. <b>Mezclar temporadas infla los resultados.</b></div></div>
+    <div class="regla" style="border-top-color:var(--langostino)"><div class="n">USO RESPONSABLE</div><div class="t">Optimizar, no exprimir</div><div class="e">Un modelo que hace más eficiente cada marea <b>no es permiso para más mareas</b> que las que permite la cuota.</div></div>
+  </div>
+  <p class="lead" style="margin-top:26px">El modelo <b>complementa</b> al capitán: le suma lo que una persona no puede procesar. <b>No lo reemplaza.</b></p>
+  <aside class="nota"><h4>1:28 · Límites (5 min)</h4>Recorré los cuatro. El último es el más importante para el sector: la eficiencia sin gestión del recurso es sobrepesca más rápida. Conectá con el foro de la semana: <b>"¿Le confiás una decisión al modelo? ¿Con qué garantías?"</b> — pedí que respondan allá con su caso.</aside>
+</section>
+
+<!-- ============ 21 · ETIQUETA ============ -->
+<section class="slide" data-sec="7 · Límites">
+  <div class="eyebrow">Parte 7 · <b>Volvemos al libro de Damián</b></div>
+  <h2>Toda predicción <em>lleva etiqueta</em></h2>
+  <div class="cols" style="align-items:center;margin-top:10px">
+    <div class="col">
+      <div class="card" style="border:2px dashed var(--boya);font-family:'IBM Plex Mono',monospace;font-size:22px;line-height:1.7;padding:26px 30px">
+        <div style="color:var(--boya);letter-spacing:.14em;font-size:17px">ETIQUETA · DATO DEL FUTURO</div>
+        <div>tipo: <b style="color:var(--langostino)">ESTIMADO</b> (no medido)</div>
+        <div>dice: zona A · 99 % · 3.719 kg</div>
+        <div>modelo: Random Forest · v1</div>
+        <div>generado: 27/10/2026 18:40</div>
+        <div>para: próxima marea (julio)</div>
+        <div>confianza: AUC 0,82 · ± 124 kg</div>
+      </div>
+    </div>
+    <div class="col">
+      <ul class="lista"><li>Se guarda <b>aparte</b> del dato medido, con su propia dirección.</li><li>Cuando pasa la marea, se <b>compara</b> con lo que realmente ocurrió: ese es el error real del modelo.</li><li>Sin etiqueta, una predicción <b>se confunde con un hecho</b>.</li></ul>
+    </div>
+  </div>
+  <div class="fuente">Etiqueta mínima del dato del futuro: D. Giacone, El viaje del dato, cap. 10 · ejemplo con las cifras de hoy</div>
+  <aside class="nota"><h4>1:33 · Etiqueta (3 min)</h4>Cierre del arco con Damián: la "etiqueta mínima" del capítulo 10 aplicada a nuestra predicción de hoy. Es el puente con la gobernanza (HACCP del dato) y con la Clase 8: un agente que actúa sobre predicciones necesita saber <b>que son predicciones</b>.</aside>
+</section>
+
+<!-- ============ 22 · NOTEBOOK ============ -->
+<section class="slide seccion" data-sec="Práctica">
+  <div class="eyebrow">Manos a la obra · <b>Notebooks en Colab</b></div>
+  <h2>Entrenar tu primer modelo, <em>sin instalar nada</em></h2>
+  <div class="grid4" style="margin-top:14px">
+    <div class="card" style="border-top:6px solid var(--marea)"><div class="k">🟢 Novato</div><h3>¿Conviene ir?</h3><p>Solo ▶: los datos, el patrón, el examen y la decisión de mañana.</p></div>
+    <div class="card" style="border-top:6px solid var(--boya)"><div class="k">🟡 Intermedio</div><h3>Flujo completo</h3><p>3 modelos, ROC, matriz, importancia, zonas y kilos + 2 ejercicios.</p></div>
+    <div class="card" style="border-top:6px solid var(--langostino)"><div class="k">🔴 Avanzado</div><h3>Como en la industria</h3><p>Ajuste de hiperparámetros y validación temporal.</p></div>
+    <div class="card" style="border-top:6px solid var(--transito)"><div class="k">🧪 Datos de Fishy</div><h3>La prueba de realidad</h3><p>Conectate en vivo al MCP y entrená con 200 lances.</p></div>
+  </div>
+  <div class="card" style="margin-top:26px"><p style="font-size:24px">📍 En el aula: sección Clase 6 → <b>Notebook de tu nivel (Colab)</b> → ▶ Ejecutar todo. Si te trabás: cambiá un número y volvé a correr la celda. <b>No se rompe nada.</b></p></div>
+  <div class="num">▶</div>
+  <aside class="nota"><h4>1:36 · Notebook (12 min)</h4>Conducí el <b>intermedio</b> en pantalla (corré la celda de setup antes de llegar acá). Momentos "ajá": la comparación de modelos, la matriz y la recomendación de zona. Si el tiempo da, corré el del MCP en vivo para mostrar el R² negativo. Pedí que hagan el <b>Ejercicio 2</b> (clorofila de la zona B) como parte de la actividad.</aside>
+</section>
+
+<!-- ============ 23 · EN EL AULA ============ -->
+<section class="slide" data-sec="Práctica">
+  <div class="eyebrow">En el aula esta semana · <b>Clase 6</b></div>
+  <h2>Para seguir <em>jugando con modelos</em></h2>
+  <div class="grid3" style="margin-top:6px">
+    <div class="card"><div class="k">🎛️ Simuladores</div><h3>Umbral · Zona · Sobreajuste</h3><p>Los tres de hoy, para repetir con tus números.</p></div>
+    <div class="card"><div class="k">🕸️ Caso aplicado</div><h3>Selectividad de artes</h3><p>La grilla en animación, dispositivos comparados con datos reales y la curva de selectividad.</p></div>
+    <div class="card"><div class="k">🧩 Caso DT-009</div><h3>Concentración de la renta</h3><p>Índices con datos oficiales del CFP: cuando el dato es el mensaje.</p></div>
+  </div>
+  <div class="grid3" style="margin-top:22px">
+    <div class="card" style="border-top:6px solid var(--boya)"><div class="k">📝 Actividad</div><h3>Interpretar un modelo</h3><p>Abierta desde hoy, sin fecha de cierre.</p></div>
+    <div class="card" style="border-top:6px solid var(--boya)"><div class="k">✅ Cuestionario</div><h3>5 preguntas</h3><p>Autoevaluación · se aprueba con 60 %.</p></div>
+    <div class="card" style="border-top:6px solid var(--boya)"><div class="k">💬 Foro</div><h3>¿Le confiás una decisión al modelo?</h3><p>Con qué garantías. Contá tu caso.</p></div>
+  </div>
+  <aside class="nota"><h4>1:48 · Aula (3 min)</h4>Recorrido rápido por la sección. Destacá la suite de <b>selectividad</b> (sale de un trabajo propio con datos reales) y el <b>foro</b>, que hasta ahora tiene 0 respuestas: pedí que lo abran esta semana. Recordá también los 4 micro-videos y el resumen en video.</aside>
+</section>
+
+<!-- ============ 24 · CIERRE ============ -->
+<section class="slide" data-sec="Cierre">
+  <div class="eyebrow">Cierre</div>
+  <h2>Lo que nos llevamos <em>hoy</em></h2>
+  <svg width="1420" height="200" viewBox="0 0 1420 200" aria-label="Síntesis: dato, entrenar, examinar, umbral, etiqueta">
+    <g font-family="Archivo,sans-serif" font-weight="700" font-size="26">
+    <g transform="translate(0,30)"><rect width="250" height="110" rx="14" fill="#164055"/><text x="125" y="64" text-anchor="middle" fill="#EFE6D2">Buen dato</text></g>
+    <g transform="translate(290,30)"><rect width="250" height="110" rx="14" fill="#1d5a6e"/><text x="125" y="64" text-anchor="middle" fill="#EFE6D2">Entrenar</text></g>
+    <g transform="translate(580,30)"><rect width="250" height="110" rx="14" fill="#2f7f7a"/><text x="125" y="64" text-anchor="middle" fill="#EFE6D2">Examinar</text></g>
+    <g transform="translate(870,30)"><rect width="250" height="110" rx="14" fill="#48B39C"/><text x="125" y="64" text-anchor="middle" fill="#07161F">Umbral</text></g>
+    <g transform="translate(1160,30)"><rect width="250" height="110" rx="14" fill="#F0B441"/><text x="125" y="64" text-anchor="middle" fill="#07161F">Etiqueta</text></g>
+    <g fill="#F0B441"><path d="M255 78 L284 85 L255 92 Z"/><path d="M545 78 L574 85 L545 92 Z"/><path d="M835 78 L864 85 L835 92 Z"/><path d="M1125 78 L1154 85 L1125 92 Z"/></g>
+    </g>
+  </svg>
+  <div class="cols">
+    <div class="card col"><div class="k">Esta semana</div><ul class="lista"><li>Notebook de tu nivel + Ejercicio 2</li><li>Actividad «Interpretar un modelo»</li><li>Cuestionario y foro</li></ul></div>
+    <div class="card col" style="border-left:6px solid var(--boya)"><div class="k">Próxima estación</div><p style="font-size:24px"><b>Clase 7 · Visión artificial en plantas pesqueras:</b> clasificar especies, contar, medir tallas y detectar defectos con imágenes.</p><p style="font-size:24px;margin-top:10px">Los modelos de hoy, pero <b>mirando</b>.</p></div>
+  </div>
+  <aside class="nota"><h4>1:51 · Cierre (6 min)</h4>Síntesis en una línea: <b>sin buen dato no hay modelo; sin examen honesto no hay confianza; el umbral es de la empresa; y toda predicción lleva etiqueta</b>. Actividades de la semana. Anticipá la Clase 7 (Damián, Soraya y equipo). Abrí preguntas.</aside>
+</section>
+
+<!-- ============ 25 · BIBLIOGRAFÍA ============ -->
+<section class="slide" data-sec="Cierre">
+  <div class="eyebrow">Fuentes de esta presentación</div>
+  <h2>Bibliografía</h2>
+  <ul class="biblio" style="margin-top:6px">
+    <li>Breiman, L. (2001). Random Forests. <i>Machine Learning</i>, 45, 5–32.</li>
+    <li>Fawcett, T. (2006). An introduction to ROC analysis. <i>Pattern Recognition Letters</i>, 27(8), 861–874.</li>
+    <li>Giacone, D. (2026). <i>El viaje del dato. Arquitectura de datos y Big Data, del barco al tablero.</i> Material de la Unidad 5, UTN FRCh. CC BY-NC 4.0.</li>
+    <li>Hazen, E. L. et al. (2018). A dynamic ocean management tool to reduce bycatch and support sustainable fisheries. <i>Science Advances</i>, 4(5), eaar3001.</li>
+    <li>Kroodsma, D. A. et al. (2018). Tracking the global footprint of fisheries. <i>Science</i>, 359(6378), 904–908.</li>
+    <li>Paolo, F. S. et al. (2024). Satellite mapping reveals extensive industrial activity at sea. <i>Nature</i>, 625, 85–91.</li>
+    <li>Pedregosa, F. et al. (2011). Scikit-learn: Machine Learning in Python. <i>Journal of Machine Learning Research</i>, 12, 2825–2830.</li>
+    <li>Cifras del caso: notebooks <b>clase06_ml_intermedio</b> (dataset didáctico simulado de 1.000 mareas) y <b>clase06_prediccion_mcp</b> (datos sintéticos de <b>Fishy</b>, MCP del curso), ejecutados el 26/10/2026.</li>
+  </ul>
+  <aside class="nota"><h4>Bibliografía</h4>No se proyecta en clase salvo que pregunten; queda para quien descargue la presentación del aula.</aside>
+</section>
+
+<!-- ============ 26 · FINAL ============ -->
+<section class="slide seccion" data-sec="Cierre" data-sin-marca>
+  <div class="eyebrow">IA aplicada a la producción pesquera · Clase 6</div>
+  <p class="frase" style="font-size:78px;margin-top:120px">El modelo pronostica.<br><span style="color:var(--boya)">La persona decide.</span></p>
+  <p class="lead" style="margin-top:50px">Nos vemos en el aula y en la comunidad PesquerosEnIA.</p>
+  <div class="logos" style="margin-top:46px;transform:scale(.72);transform-origin:left top"><div class="logo"><img src="../../branding/utn_frch.png" alt="UTN Facultad Regional Chubut" style="max-height:56px"></div><div class="logo"><img src="../../branding/ing_pesquera.png" alt="Ingeniería Pesquera UTN FRCh" style="max-height:88px"></div><div class="logo"><img src="../../branding/cidapal.png" alt="CIDAPAL UTN" style="max-height:72px"></div><div class="logo"><img src="../../branding/cfp.png" alt="Consejo Federal Pesquero" style="max-height:56px"></div><div class="logo"><img src="../../branding/capip.png" alt="CAPIP" style="max-height:56px"></div><div class="logo"><img src="../../branding/senasa.png" alt="SENASA" style="max-height:56px"></div><div class="logo"><img src="../../branding/pesquerosenia.png" alt="PesquerosEnIA" style="max-height:88px"></div></div>
+  <div class="pie"><span>Ariel Giamportone · UTN FRCh</span><span>github.com/PesquerosEnIA</span></div>
+  <aside class="nota"><h4>1:57 · Fin</h4>Dejala proyectada durante las preguntas finales.</aside>
+</section>
+
+
+</div></div>
+
+<div class="hud"><i id="barra"></i></div>
+<div class="contador" id="contador"></div>
+<div class="nav"><button type="button" id="bAnt" aria-label="Anterior">←</button><button type="button" id="bSig" aria-label="Siguiente">→</button><button type="button" id="bFull">F · pantalla completa</button><button type="button" id="bNotas">N · notas</button></div>
+<div class="notas" id="notas" aria-live="polite"></div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')], lienzo=document.getElementById('lienzo');
+slides.forEach(sl=>{ if(sl.dataset.sinMarca!==undefined) return; const m=document.createElement('div'); m.className='marca'; m.setAttribute('aria-hidden','true');
+  m.innerHTML='<span><img src="../../branding/utn_frch.png" alt=""></span><span><img src="../../branding/pesquerosenia.png" alt=""></span>'; sl.appendChild(m); });
+let i=0;
+function escalar(){ const s=Math.min(innerWidth/1600, innerHeight/900); lienzo.style.transform=`scale(${s})`; }
+function ir(n){
+  i=Math.max(0,Math.min(slides.length-1,n));
+  slides.forEach((s,k)=>s.classList.toggle('activa',k===i));
+  document.getElementById('barra').style.width=(100*(i+1)/slides.length)+'%';
+  document.getElementById('contador').textContent=`${slides[i].dataset.sec||''} · ${i+1} / ${slides.length}`;
+  const nota=slides[i].querySelector('aside.nota'); document.getElementById('notas').innerHTML=nota?nota.innerHTML:'';
+  if(location.hash!=='#'+(i+1)) history.replaceState(null,'','#'+(i+1));
+}
+function full(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); }
+function notas(){ document.getElementById('notas').classList.toggle('show'); }
+addEventListener('keydown',e=>{
+  if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();ir(i+1);}
+  else if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){e.preventDefault();ir(i-1);}
+  else if(e.key==='Home') ir(0); else if(e.key==='End') ir(slides.length-1);
+  else if(e.key==='f'||e.key==='F') full(); else if(e.key==='n'||e.key==='N') notas();
+});
+let x0=null; addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
+addEventListener('touchend',e=>{ if(x0===null) return; const d=e.changedTouches[0].clientX-x0; if(Math.abs(d)>50) ir(i+(d<0?1:-1)); x0=null; });
+document.getElementById('bAnt').onclick=()=>ir(i-1); document.getElementById('bSig').onclick=()=>ir(i+1);
+document.getElementById('bFull').onclick=full; document.getElementById('bNotas').onclick=notas;
+addEventListener('resize',escalar); escalar();
+ir((parseInt(location.hash.slice(1))||1)-1);
+</script>
+</body>
+</html>
