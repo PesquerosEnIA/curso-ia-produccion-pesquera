@@ -329,16 +329,15 @@
       const terminar=()=>{
         est.animando=false; est.prueba=null; asegurarEntrenada(); pintar(candidatas.length);
         const k=est.entrenada, e=errores(k,practica);
-        $('bE').disabled=true; $('bS').disabled=true;
+        $('bE').disabled=false; $('bE').textContent='↻ Entrenar de nuevo'; $('bS').disabled=true;
         const p=$('pFin'); p.classList.remove('oculto');
         p.innerHTML=`<b>Listo.</b> La regla ganadora: agua entre <b>${fmt(k.tMin)} y ${fmt(k.tMax)} °C</b> y clorofila de al menos
           <b>${fmt(k.cMin)}</b>. Se equivoca en <b>${e} de ${practica.length}</b> mareas de práctica (tu mejor marca: ${est.mejorManual}).
           Nadie le dijo «8 a 12 grados»: <b>lo sacó de los ejemplos</b>.`;
       };
-      if(est.entrenada){ est.historia=historiaCompleta(); terminar(); return; }
-      pintar(0);
       $('bE').onclick=()=>{
-        if(est.animando) return; est.animando=true; est.historia=[]; let i=0, emin=1e9; $('bE').disabled=true;
+        if(est.animando) return; est.animando=true; est.historia=[]; let i=0, emin=1e9;
+        $('bE').disabled=true; $('bS').disabled=false; $('pFin').classList.add('oculto');
         const paso=()=>{
           if(!est.animando || est.paso!==3) return;
           const fin=Math.min(candidatas.length,i+9);
@@ -350,6 +349,7 @@
         requestAnimationFrame(paso);
       };
       $('bS').onclick=()=>{ est.historia=historiaCompleta(); terminar(); };
+      if(est.entrenada){ est.historia=historiaCompleta(); terminar(); } else pintar(0);
     } },
 
   { nombre:'El examen', titulo:'Abrimos el sobre',
