@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · Entrená tu primer modelo — Clase 6</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --rojo:#d9534f; --ambar:#e6a417; --nada:#9aaab3;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:1040px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 14px;max-width:78ch}
+  .lead b{color:var(--tinta)}
+  .pasos{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;padding:0;list-style:none}
+  .pasos button{border:1px solid var(--linea);background:var(--panel);border-radius:999px;padding:6px 11px;
+    font-size:12.5px;font-weight:700;color:var(--gris);cursor:pointer;font-family:inherit}
+  .pasos button .n{display:inline-block;width:20px;height:20px;line-height:20px;border-radius:50%;background:var(--fondo);
+    text-align:center;margin-right:5px;font-size:11.5px}
+  .pasos button.hecho{color:var(--azul-osc)}
+  .pasos button.hecho .n{background:#d7ecf5}
+  .pasos button.activo{background:var(--azul);border-color:var(--azul);color:#fff}
+  .pasos button.activo .n{background:#fff;color:var(--azul)}
+  .grid{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+  .col-graf{flex:1 1 470px;min-width:0}
+  .col-txt{flex:1 1 360px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 6px;font-weight:800}
+  .panel h3{font-size:20px;line-height:1.25;margin:0 0 8px}
+  .panel p{font-size:14.5px;margin:0 0 10px}
+  svg{width:100%;height:auto;display:block}
+  .leg{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--gris);margin-top:8px}
+  .leg svg{display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:5px}
+  .jerga{margin-top:12px;background:#eef6fa;border:1px dashed #9cc7dc;border-radius:10px;padding:9px 12px;font-size:13px;color:var(--azul-osc)}
+  .jerga b{font-weight:800}
+  label.field{display:block;font-size:13.5px;font-weight:700;margin:10px 0 0}
+  .fieldval{font-weight:800;color:var(--azul)}
+  input[type=range]{width:100%;accent-color:var(--azul);height:26px}
+  .metrics{display:flex;gap:10px;margin:8px 0 6px;flex-wrap:wrap}
+  .metric{flex:1 1 120px;background:var(--fondo);border:1px solid var(--linea);border-radius:10px;padding:9px 12px}
+  .metric .k{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--gris)}
+  .metric .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+  .metric .s{font-size:12px;color:var(--gris)}
+  .metric.bien .v{color:var(--verde)} .metric.mal .v{color:var(--rojo)} .metric.azul .v{color:var(--azul)}
+  .btn{border:0;background:var(--azul);color:#fff;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn.sec{background:var(--fondo);color:var(--azul-osc);border:1px solid var(--linea)}
+  .botones{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  .nav{display:flex;justify-content:space-between;gap:8px;margin-top:14px}
+  .veredicto{border-radius:10px;padding:11px 13px;font-size:15px;font-weight:700;margin:10px 0}
+  .veredicto.si{background:#e3f4ec;color:#11633f} .veredicto.no{background:#fbe6e5;color:#8f2a26}
+  .seg{display:flex;border:1px solid var(--linea);border-radius:10px;overflow:hidden;margin:8px 0}
+  .seg button{flex:1;border:0;background:var(--fondo);padding:9px 6px;font-size:13px;font-weight:800;color:var(--gris);cursor:pointer;font-family:inherit}
+  .seg button.on{background:var(--azul);color:#fff}
+  table.glos{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px}
+  table.glos td{border-top:1px solid var(--linea);padding:6px 4px;vertical-align:top}
+  table.glos td:last-child{font-weight:800;color:var(--azul-osc)}
+  .oculto{display:none}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🎛️ Clase 6 · Simulador interactivo</div>
+  <h1>Entrená tu primer modelo, paso a paso</h1>
+  <p class="lead">Sin fórmulas. Vas a hacer con tus manos lo mismo que hace la computadora cuando «entrena»:
+  mirar mareas del pasado, <b>buscar una regla</b> que se equivoque poco, <b>tomarle examen</b> con mareas que no vio
+  y recién ahí <b>usarla para decidir</b>. Son 7 pasos cortos.</p>
+
+  <ol class="pasos" id="pasos"></ol>
+
+  <div class="grid">
+    <div class="col-graf">
+      <div class="panel">
+        <h2 id="grafTitulo">Las mareas del pasado</h2>
+        <svg id="graf" viewBox="0 0 540 400" role="img" aria-label="Gráfico de mareas según temperatura y clorofila"></svg>
+        <div class="leg" id="leyenda"></div>
+      </div>
+    </div>
+    <div class="col-txt">
+      <div class="panel" id="txt"></div>
+    </div>
+  </div>
+
+  <footer>
+    <b>Datos didácticos generados para aprender</b>, no mediciones reales: imitan la idea con la que trabaja
+    el notebook de la Clase 6 (la merluza prefiere agua de unos 8–12 °C con mucha clorofila) y le suman
+    «ruido» (mareas que salieron distinto de lo esperable), como en el mar. La regla que se entrena acá es la
+    pieza con la que se arma un árbol de decisión; un Random Forest junta cientos de árboles así y los hace votar.
+    · Ariel Giamportone | PesquerosEnIA · UTN FRCh
+  </footer>
+</div>
+
+<script>
+(function(){
+  // ---------- datos didácticos (semilla fija: todos ven las mismas mareas) ----------
+  function azar(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
+    t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+  const SEMILLA = 15;
+  const r = azar(SEMILLA);
+  const mareas = [];
+  for(let i=0;i<90;i++){
+    const T = Math.round((6 + r()*10)*10)/10;       // temperatura del agua, °C
+    const C = Math.round((0.2 + r()*3.8)*10)/10;    // clorofila, mg/m³
+    let buena = (T>=8 && T<=12.5 && C>=1.6);
+    if(r() < 0.12) buena = !buena;                  // ruido: el mar no es prolijo
+    mareas.push({T, C, buena, examen: i%3===2});
+  }
+  const practica = mareas.filter(m=>!m.examen);
+  const examen   = mareas.filter(m=>m.examen);
+
+  // ---------- modelos ----------
+  const dice = (regla,m) => m.T>=regla.tMin && m.T<=regla.tMax && m.C>=regla.cMin;
+  const errores = (regla,lista) => lista.filter(m=>dice(regla,m)!==m.buena).length;
+  const escala = m => [m.T/10, m.C/3.8];
+  function memorion(m){ // copia la respuesta de la marea de práctica más parecida
+    let mejor=null, dmin=1e9; const [a,b]=escala(m);
+    for(const p of practica){const [x,y]=escala(p);const d=(x-a)**2+(y-b)**2;if(d<dmin){dmin=d;mejor=p}}
+    return mejor.buena;
+  }
+  const candidatas = [];
+  for(let a=6;a<=12;a+=0.5) for(let b=a+1;b<=16;b+=0.5) for(let c=0;c<=3.5;c+=0.25)
+    candidatas.push({tMin:a,tMax:b,cMin:c});
+  function entrenarYa(){
+    let mejor=null, emin=1e9;
+    for(const k of candidatas){const e=errores(k,practica); if(e<emin){emin=e;mejor=k}}
+    return mejor;
+  }
+
+  // ---------- estado ----------
+  const est = {
+    paso:0, visitados:new Set([0]),
+    manual:{tMin:6,tMax:16,cMin:0}, mejorManual:null,
+    entrenada:null, animando:false, prueba:null, historia:[],
+    vistaMemo:false, pred:{T:10,C:2.5}
+  };
+  est.mejorManual = errores(est.manual,practica);
+
+  // ---------- gráfico ----------
+  const svg = document.getElementById('graf');
+  const X0=62, X1=520, Y0=350, Y1=18;
+  const px = T => X0 + (T-6)/10*(X1-X0);
+  const py = C => Y0 - (C-0)/4*(Y0-Y1);
+  const NS='http://www.w3.org/2000/svg';
+  function el(tag,attrs,txt){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(txt!=null)e.textContent=txt;return e}
+  function marca(g,m,modo,aro){
+    const x=px(m.T), y=py(m.C);
+    if(modo==='oculta'){
+      g.appendChild(el('circle',{cx:x,cy:y,r:7,fill:'#e7edf0',stroke:'#9aaab3','stroke-width':1.5}));
+      g.appendChild(el('text',{x:x,y:y+4,'text-anchor':'middle','font-size':10,'font-weight':800,fill:'#6b7f89'},'?'));
+    } else if(m.buena){
+      g.appendChild(el('circle',{cx:x,cy:y,r:6.5,fill:'#1f9d6b',stroke:'#fff','stroke-width':1.5,opacity:modo==='tenue'?.25:1}));
+    } else {
+      g.appendChild(el('path',{d:`M${x-5.5} ${y-5.5}L${x+5.5} ${y+5.5}M${x+5.5} ${y-5.5}L${x-5.5} ${y+5.5}`,
+        stroke:'#d9534f','stroke-width':3.2,'stroke-linecap':'round',opacity:modo==='tenue'?.25:1}));
+    }
+    if(aro) g.appendChild(el('circle',{cx:x,cy:y,r:11,fill:'none',stroke:'#e6a417','stroke-width':2.5}));
+  }
+  function zona(g,regla,estilo){
+    const x=px(regla.tMin), w=px(regla.tMax)-x, y=py(4), h=py(regla.cMin)-y;
+    g.appendChild(el('rect',{x,y,width:w,height:h,
+      fill: estilo==='prueba' ? 'none' : 'rgba(31,157,107,.13)',
+      stroke: estilo==='prueba' ? '#9aaab3' : '#1f9d6b','stroke-width':2,
+      'stroke-dasharray': estilo==='prueba' ? '5 4' : '0'}));
+    if(estilo!=='prueba') g.appendChild(el('text',{x:x+6,y:y+16,'font-size':12,'font-weight':800,fill:'#11633f'},'ANDÁ'));
+  }
+  function dibujar(o){
+    svg.innerHTML='';
+    const g=el('g',{}); svg.appendChild(g);
+    if(o.memo){ // pinta el mapa de decisiones del memorión
+      const cw=(X1-X0)/46, ch=(Y0-Y1)/34;
+      for(let i=0;i<46;i++) for(let j=0;j<34;j++){
+        const T=6+(i+.5)/46*10, C=4-(j+.5)/34*4;
+        g.appendChild(el('rect',{x:X0+i*cw,y:Y1+j*ch,width:cw+.5,height:ch+.5,
+          fill: memorion({T,C}) ? 'rgba(31,157,107,.17)' : 'rgba(217,83,79,.10)'}));
+      }
+    }
+    // ejes
+    g.appendChild(el('line',{x1:X0,y1:Y0,x2:X1,y2:Y0,stroke:'#9aaab3'}));
+    g.appendChild(el('line',{x1:X0,y1:Y0,x2:X0,y2:Y1,stroke:'#9aaab3'}));
+    for(let T=6;T<=16;T+=2){
+      g.appendChild(el('line',{x1:px(T),y1:Y0,x2:px(T),y2:Y0+5,stroke:'#9aaab3'}));
+      g.appendChild(el('text',{x:px(T),y:Y0+19,'text-anchor':'middle','font-size':14,fill:'#3f5a68'},T+' °C'));
+    }
+    for(let C=0;C<=4;C++){
+      g.appendChild(el('line',{x1:X0-5,y1:py(C),x2:X0,y2:py(C),stroke:'#9aaab3'}));
+      g.appendChild(el('text',{x:X0-9,y:py(C)+4,'text-anchor':'end','font-size':14,fill:'#3f5a68'},C));
+    }
+    g.appendChild(el('text',{x:(X0+X1)/2,y:396,'text-anchor':'middle','font-size':15,'font-weight':700,fill:'#0e2a38'},'Temperatura del agua →'));
+    const ty=el('text',{x:14,y:(Y0+Y1)/2,'text-anchor':'middle','font-size':15,'font-weight':700,fill:'#0e2a38',
+      transform:`rotate(-90 14 ${(Y0+Y1)/2})`},'Clorofila (qué tan «verde») →'); g.appendChild(ty);
+    if(o.prueba) zona(g,o.prueba,'prueba');
+    if(o.regla) zona(g,o.regla,'regla');
+    for(const m of mareas){
+      if(m.examen){
+        if(o.examen==='no') continue;
+        if(o.examen==='oculta'){marca(g,m,'oculta');continue}
+        const aro = o.aroExamen && (o.aroExamen(m));
+        marca(g,m,'normal',aro);
+      } else {
+        const aro = o.aroPractica && o.aroPractica(m);
+        marca(g,m,o.practicaTenue?'tenue':'normal',aro);
+      }
+    }
+    if(o.estrella){
+      const x=px(o.estrella.T), y=py(o.estrella.C), s=13;
+      let d=''; for(let k=0;k<10;k++){const a=-Math.PI/2+k*Math.PI/5, rr=k%2?s*.45:s; d+=(k?'L':'M')+(x+rr*Math.cos(a)).toFixed(1)+' '+(y+rr*Math.sin(a)).toFixed(1)}
+      g.appendChild(el('path',{d:d+'Z',fill:'#e6a417',stroke:'#0e2a38','stroke-width':1.5}));
+      g.appendChild(el('text',{x:x+16,y:y-10,'font-size':12,'font-weight':800,fill:'#0e2a38'},'mañana'));
+    }
+  }
+  function leyenda(items){
+    const L=document.getElementById('leyenda'); L.innerHTML='';
+    const ic={
+      buena:'<svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5" fill="#1f9d6b"/></svg>',
+      mala:'<svg viewBox="0 0 14 14"><path d="M2 2L12 12M12 2L2 12" stroke="#d9534f" stroke-width="3" stroke-linecap="round"/></svg>',
+      oculta:'<svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="#e7edf0" stroke="#9aaab3"/></svg>',
+      error:'<svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5" fill="none" stroke="#e6a417" stroke-width="2.2"/></svg>',
+      zona:'<svg viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" fill="rgba(31,157,107,.2)" stroke="#1f9d6b" stroke-width="1.6"/></svg>',
+      memo:'<svg viewBox="0 0 14 14"><rect x="1" y="1" width="6" height="12" fill="rgba(31,157,107,.3)"/><rect x="7" y="1" width="6" height="12" fill="rgba(217,83,79,.2)"/></svg>'
+    };
+    const txt={buena:'Marea buena',mala:'Marea mala',oculta:'En el sobre del examen (no se ve)',
+      error:'Error de la regla',zona:'Donde la regla dice «ANDÁ»',memo:'Lo que diría el memorión en cada lugar'};
+    for(const k of items){const s=document.createElement('span');s.innerHTML=ic[k]+txt[k];L.appendChild(s)}
+  }
+
+  // ---------- pasos ----------
+  const nf = n => n.toLocaleString('es-AR');
+  const pct = (a,b) => Math.round(100*a/b)+' %';
+  const nBuenas = mareas.filter(m=>m.buena).length;
+  function asegurarEntrenada(){ if(!est.entrenada){ est.entrenada=entrenarYa(); } }
+
+  const PASOS = [
+  { nombre:'Los ejemplos', titulo:'Las mareas del pasado',
+    html:()=>`<h2>Paso 1 de 7</h2><h3>Primero, ejemplos con la respuesta</h3>
+      <p>Cada marca es una <b>marea que ya terminó</b>. De cada una sabemos dos cosas que se conocían <b>antes de salir</b>:
+      la temperatura del agua (eje horizontal) y cuánta clorofila había, o sea qué tan «verde» estaba el mar (eje vertical).
+      Y sabemos <b>cómo terminó</b>: buena ● o mala ✕.</p>
+      <div class="metrics"><div class="metric azul"><div class="k">Mareas</div><div class="v">${mareas.length}</div></div>
+      <div class="metric bien"><div class="k">Buenas</div><div class="v">${nBuenas}</div></div>
+      <div class="metric mal"><div class="k">Malas</div><div class="v">${mareas.length-nBuenas}</div></div></div>
+      <p>Mirá un rato el gráfico: <b>¿dónde se juntan las buenas?</b> Un capitán con años de mar hace esto en la cabeza.
+      La máquina va a hacer lo mismo, pero contando.</p>
+      <div class="jerga">En la jerga: <b>datos etiquetados</b>. Cada ejemplo trae la respuesta («etiqueta»). Las dos
+      columnas que se conocen antes de salir son las <b>variables predictoras</b>.</div>`,
+    dibujo:()=>{dibujar({examen:'normal'});leyenda(['buena','mala'])} },
+
+  { nombre:'El sobre', titulo:'Guardamos el examen',
+    html:()=>`<h2>Paso 2 de 7</h2><h3>Antes de enseñar, guardamos el examen en un sobre</h3>
+      <p>Apartamos <b>1 de cada 3 mareas</b> y las metemos en un sobre cerrado (los puntos grises con ?).
+      Mientras aprende, el modelo <b>no las va a ver</b>. Al final le tomamos examen con ellas.</p>
+      <div class="metrics"><div class="metric azul"><div class="k">Para practicar</div><div class="v">${practica.length}</div><div class="s">el modelo las ve</div></div>
+      <div class="metric"><div class="k">En el sobre</div><div class="v">${examen.length}</div><div class="s">no las ve</div></div></div>
+      <p>¿Por qué? Porque si el examen tiene las mismas preguntas que la práctica, aprobar no prueba nada.
+      Lo que nos importa es cómo le va con <b>mareas que todavía no pasaron</b>.</p>
+      <div class="jerga">En la jerga: <b>datos de entrenamiento</b> (las 60) y <b>datos de prueba</b> o «test» (las 30).
+      Separarlos es la regla de oro del machine learning.</div>`,
+    dibujo:()=>{dibujar({examen:'oculta'});leyenda(['buena','mala','oculta'])} },
+
+  { nombre:'Probá vos', titulo:'Tu regla',
+    html:()=>`<h2>Paso 3 de 7</h2><h3>Probá vos: armá una regla</h3>
+      <p>«Voy si el agua está entre <b id="vA"></b> y <b id="vB"></b>, y la clorofila es al menos <b id="vC"></b>.»
+      La zona verde es donde tu regla dice <b>ANDÁ</b>. Las marcas con aro amarillo son <b>errores</b>.</p>
+      <label class="field">Agua desde: <span class="fieldval" id="lA"></span></label>
+      <input type="range" id="sA" min="6" max="15" step="0.5">
+      <label class="field">Agua hasta: <span class="fieldval" id="lB"></span></label>
+      <input type="range" id="sB" min="7" max="16" step="0.5">
+      <label class="field">Clorofila mínima: <span class="fieldval" id="lC"></span></label>
+      <input type="range" id="sC" min="0" max="3.5" step="0.25">
+      <div class="metrics"><div class="metric mal"><div class="k">Errores de tu regla</div><div class="v" id="mE"></div><div class="s">en las ${practica.length} mareas de práctica</div></div>
+      <div class="metric azul"><div class="k">Tu mejor marca</div><div class="v" id="mM"></div><div class="s">menos errores logrados</div></div></div>
+      <p>Arrancaste con la regla «<b>siempre andá</b>»: se equivoca en todas las malas. Mové las perillas hasta
+      equivocarte lo menos posible. <b>Eso es entrenar</b>.</p>
+      <div class="jerga">En la jerga: las perillas son los <b>parámetros</b> del modelo, y contar errores es la
+      <b>función de error</b> (o de pérdida). Entrenar = buscar los parámetros con menos error.</div>`,
+    montar:()=>{
+      const sA=$('sA'),sB=$('sB'),sC=$('sC');
+      sA.value=est.manual.tMin; sB.value=est.manual.tMax; sC.value=est.manual.cMin;
+      const act=()=>{
+        const a=+sA.value; if(+sB.value<=a) sB.value=Math.min(16,a+0.5);
+        est.manual={tMin:a,tMax:+sB.value,cMin:+sC.value};
+        const e=errores(est.manual,practica); est.mejorManual=Math.min(est.mejorManual,e);
+        $('lA').textContent=$('vA').textContent=fmt(est.manual.tMin)+' °C';
+        $('lB').textContent=$('vB').textContent=fmt(est.manual.tMax)+' °C';
+        $('lC').textContent=$('vC').textContent=fmt(est.manual.cMin);
+        $('mE').textContent=e; $('mM').textContent=est.mejorManual;
+        dibujar({examen:'oculta',regla:est.manual,aroPractica:m=>dice(est.manual,m)!==m.buena});
+      };
+      [sA,sB,sC].forEach(s=>s.addEventListener('input',act)); act();
+      leyenda(['buena','mala','zona','error','oculta']);
+    } },
+
+  { nombre:'Que entrene', titulo:'La máquina prueba reglas',
+    html:()=>`<h2>Paso 4 de 7</h2><h3>Que la máquina pruebe todas</h3>
+      <p>La computadora hace lo mismo que vos, pero <b>sin cansarse</b>: prueba ${nf(candidatas.length)} combinaciones
+      de perillas, cuenta los errores de cada una con las ${practica.length} mareas de práctica y se queda con la que menos se equivoca.</p>
+      <div class="botones"><button class="btn" id="bE">▶ Entrenar</button><button class="btn sec" id="bS">Saltar al final</button></div>
+      <div class="metrics"><div class="metric"><div class="k">Reglas probadas</div><div class="v" id="mP">0</div><div class="s">de ${nf(candidatas.length)}</div></div>
+      <div class="metric mal"><div class="k">Mejor hasta ahora</div><div class="v" id="mB">—</div><div class="s">errores</div></div></div>
+      <svg id="curva" viewBox="0 0 400 90" aria-label="Errores de la mejor regla a medida que prueba"></svg>
+      <p id="pFin" class="oculto"></p>
+      <div class="jerga">En la jerga: esto es el <b>entrenamiento</b> (u <b>optimización</b>). La curva que baja es la
+      «curva de aprendizaje». Un Random Forest hace algo parecido con cientos de árboles de reglas y los hace votar.</div>`,
+    montar:()=>{
+      leyenda(['buena','mala','zona','oculta']);
+      const pintar=(i)=>{
+        $('mP').textContent=nf(i);
+        const mejor=est.historia.length?est.historia[est.historia.length-1]:null;
+        $('mB').textContent=mejor?mejor.e:'—';
+        dibujar({examen:'oculta',regla:mejor?mejor.k:null,prueba:est.prueba});
+        const c=$('curva'); c.innerHTML='';
+        c.appendChild(el('line',{x1:30,y1:75,x2:395,y2:75,stroke:'#9aaab3'}));
+        c.appendChild(el('text',{x:2,y:14,'font-size':10,fill:'#3f5a68'},'errores'));
+        c.appendChild(el('text',{x:395,y:88,'text-anchor':'end','font-size':10,fill:'#3f5a68'},'reglas probadas →'));
+        if(est.historia.length){
+          const emax=est.historia[0].e; let d='';
+          est.historia.forEach((h,j)=>{const x=30+h.i/candidatas.length*365, y=75-h.e/emax*58;
+            const xn= j+1<est.historia.length ? 30+est.historia[j+1].i/candidatas.length*365 : 30+i/candidatas.length*365;
+            d+=(j?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)+'L'+xn.toFixed(1)+' '+y.toFixed(1)});
+          c.appendChild(el('path',{d,fill:'none',stroke:'#0a7fb4','stroke-width':2.5}));
+        }
+      };
+      const terminar=()=>{
+        est.animando=false; est.prueba=null; asegurarEntrenada(); pintar(candidatas.length);
+        const k=est.entrenada, e=errores(k,practica);
+        $('bE').disabled=true; $('bS').disabled=true;
+        const p=$('pFin'); p.classList.remove('oculto');
+        p.innerHTML=`<b>Listo.</b> La regla ganadora: agua entre <b>${fmt(k.tMin)} y ${fmt(k.tMax)} °C</b> y clorofila de al menos
+          <b>${fmt(k.cMin)}</b>. Se equivoca en <b>${e} de ${practica.length}</b> mareas de práctica (tu mejor marca: ${est.mejorManual}).
+          Nadie le dijo «8 a 12 grados»: <b>lo sacó de los ejemplos</b>.`;
+      };
+      if(est.entrenada){ est.historia=historiaCompleta(); terminar(); return; }
+      pintar(0);
+      $('bE').onclick=()=>{
+        if(est.animando) return; est.animando=true; est.historia=[]; let i=0, emin=1e9; $('bE').disabled=true;
+        const paso=()=>{
+          if(!est.animando || est.paso!==3) return;
+          const fin=Math.min(candidatas.length,i+9);
+          for(;i<fin;i++){const k=candidatas[i],e=errores(k,practica);if(e<emin){emin=e;est.historia.push({i,e,k})}}
+          est.prueba=candidatas[Math.min(i,candidatas.length-1)];
+          pintar(i);
+          if(i<candidatas.length) requestAnimationFrame(paso); else terminar();
+        };
+        requestAnimationFrame(paso);
+      };
+      $('bS').onclick=()=>{ est.historia=historiaCompleta(); terminar(); };
+    } },
+
+  { nombre:'El examen', titulo:'Abrimos el sobre',
+    html:()=>{ asegurarEntrenada(); const k=est.entrenada;
+      const ep=practica.length-errores(k,practica), ex=examen.length-errores(k,examen);
+      return `<h2>Paso 5 de 7</h2><h3>El examen: mareas que nunca vio</h3>
+      <p>Abrimos el sobre. Las ${examen.length} mareas grises ahora muestran cómo terminaron, y la regla
+      entrenada dice «andá» o «no vayas» para cada una. Los aros amarillos son sus errores <b>en el examen</b>.</p>
+      <div class="metrics"><div class="metric azul"><div class="k">Aciertos en la práctica</div><div class="v">${pct(ep,practica.length)}</div><div class="s">${ep} de ${practica.length} · ya las había visto</div></div>
+      <div class="metric bien"><div class="k">Aciertos en el examen</div><div class="v">${pct(ex,examen.length)}</div><div class="s">${ex} de ${examen.length} · nunca las vio</div></div></div>
+      <p>${ex/examen.length < ep/practica.length ? 'Le fue <b>un poco peor en el examen</b> que en la práctica, y es lo normal.' : 'Esta vez le fue parecido en el examen y en la práctica: buena señal.'}
+      El número que vale es el del examen: es lo que podés esperar <b>mañana</b>, con mareas nuevas.</p>
+      <div class="jerga">En la jerga: <b>evaluar en el conjunto de prueba</b>. Que funcione con lo que no vio se llama
+      <b>generalizar</b>, y es todo el objetivo del machine learning.</div>`},
+    dibujo:()=>{ asegurarEntrenada(); const k=est.entrenada;
+      dibujar({examen:'normal',practicaTenue:true,regla:k,aroExamen:m=>dice(k,m)!==m.buena});
+      leyenda(['buena','mala','zona','error']); } },
+
+  { nombre:'El memorión', titulo:'Regla simple vs. memorión',
+    html:()=>{ asegurarEntrenada(); const k=est.entrenada;
+      const rx=examen.length-errores(k,examen), rp=practica.length-errores(k,practica);
+      const mp=practica.filter(m=>memorion(m)===m.buena).length, mx=examen.filter(m=>memorion(m)===m.buena).length;
+      return `<h2>Paso 6 de 7</h2><h3>El memorión: aprobar la práctica no es saber</h3>
+      <p>Imaginá un aprendiz que no saca ninguna regla: <b>se acuerda de cada marea</b> y, ante una nueva, copia la
+      respuesta de la más parecida que vio. Mirá su mapa: está lleno de islitas.</p>
+      <div class="seg"><button id="vR">Regla simple</button><button id="vM">Memorión</button></div>
+      <div class="metrics"><div class="metric"><div class="k">Regla simple</div><div class="v">${pct(rx,examen.length)}</div><div class="s">examen · práctica ${pct(rp,practica.length)}</div></div>
+      <div class="metric mal"><div class="k">Memorión</div><div class="v">${pct(mx,examen.length)}</div><div class="s">examen · práctica ${pct(mp,practica.length)}</div></div></div>
+      <p>En la práctica el memorión saca <b>100 %</b>: no se equivoca nunca, porque se acuerda de todo. En el examen,
+      <b>pierde contra la regla simple</b>. ¿Por qué? Porque también memorizó el <b>ruido</b>: esas mareas raras que salieron
+      buenas en agua caliente, o malas en el mejor lugar, por pura suerte.</p>
+      <div class="jerga">En la jerga: <b>sobreajuste</b> (overfitting). El modelo memoriza en vez de aprender el patrón.
+      Por eso nunca alcanza con mirar cómo le va en la práctica.</div>`},
+    montar:()=>{
+      const v=()=>{ $('vR').classList.toggle('on',!est.vistaMemo); $('vM').classList.toggle('on',est.vistaMemo);
+        if(est.vistaMemo){ dibujar({examen:'normal',memo:true,aroExamen:m=>memorion(m)!==m.buena}); leyenda(['buena','mala','memo','error']); }
+        else { dibujar({examen:'normal',regla:est.entrenada,aroExamen:m=>dice(est.entrenada,m)!==m.buena}); leyenda(['buena','mala','zona','error']); } };
+      $('vR').onclick=()=>{est.vistaMemo=false;v()}; $('vM').onclick=()=>{est.vistaMemo=true;v()};
+      v();
+    } },
+
+  { nombre:'Mañana', titulo:'La marea de mañana',
+    html:()=>`<h2>Paso 7 de 7</h2><h3>Mañana: el modelo aconseja, vos decidís</h3>
+      <p>Llega el pronóstico para la zona de mañana. Cargalo con las perillas: la ⭐ es la marea que todavía no ocurrió.</p>
+      <label class="field">Temperatura del agua: <span class="fieldval" id="lT"></span></label>
+      <input type="range" id="sT" min="6" max="16" step="0.1">
+      <label class="field">Clorofila: <span class="fieldval" id="lK"></span></label>
+      <input type="range" id="sK" min="0" max="4" step="0.1">
+      <div class="veredicto" id="ver"></div>
+      <p id="hist"></p>
+      <div class="jerga">En la jerga: <b>predicción</b> (o inferencia). Es un <b>dato del futuro</b>: una estimación, no un hecho.
+      Lleva etiqueta y no reemplaza la firma del capitán.</div>
+      <h2 style="margin-top:16px">Lo que hiciste hoy</h2>
+      <table class="glos">
+        <tr><td>Juntaste mareas con su resultado</td><td>datos etiquetados</td></tr>
+        <tr><td>Guardaste un tercio en un sobre</td><td>entrenamiento / prueba</td></tr>
+        <tr><td>Moviste perillas contando errores</td><td>parámetros y función de error</td></tr>
+        <tr><td>La máquina probó miles de reglas</td><td>entrenar</td></tr>
+        <tr><td>Abriste el sobre</td><td>evaluar · generalizar</td></tr>
+        <tr><td>El memorión aprobó la práctica y no el examen</td><td>sobreajuste</td></tr>
+        <tr><td>Consultaste la marea de mañana</td><td>predecir</td></tr>
+      </table>`,
+    montar:()=>{ asegurarEntrenada(); const k=est.entrenada;
+      const sT=$('sT'), sK=$('sK'); sT.value=est.pred.T; sK.value=est.pred.C;
+      const dentro=practica.filter(m=>dice(k,m)), buenasDentro=dentro.filter(m=>m.buena).length;
+      const fuera=practica.filter(m=>!dice(k,m)), malasFuera=fuera.filter(m=>!m.buena).length;
+      const act=()=>{
+        est.pred={T:+sT.value,C:+sK.value};
+        $('lT').textContent=fmt(est.pred.T,1)+' °C'; $('lK').textContent=fmt(est.pred.C,1);
+        const si=dice(k,est.pred), V=$('ver');
+        V.className='veredicto '+(si?'si':'no');
+        V.textContent= si ? 'La regla dice: ANDÁ' : 'La regla dice: NO VAYAS';
+        $('hist').innerHTML = si
+          ? `Su historial: en la práctica, cuando dijo «andá», la marea fue buena <b>${buenasDentro} de ${dentro.length} veces (${pct(buenasDentro,dentro.length)})</b>. Es una buena pista, no una garantía.`
+          : `Su historial: en la práctica, cuando dijo «no vayas», la marea fue mala <b>${malasFuera} de ${fuera.length} veces (${pct(malasFuera,fuera.length)})</b>. Hay cosas que no ve: cuotas, precio, clima, el estado del barco.`;
+        dibujar({examen:'normal',practicaTenue:true,regla:k,estrella:est.pred});
+      };
+      sT.addEventListener('input',act); sK.addEventListener('input',act); act();
+      leyenda(['buena','mala','zona']);
+    } }
+  ];
+
+  function historiaCompleta(){ const h=[]; let emin=1e9;
+    candidatas.forEach((k,i)=>{const e=errores(k,practica); if(e<emin){emin=e;h.push({i,e,k})}}); return h; }
+  function $(id){return document.getElementById(id)}
+  function fmt(v,d){ return (+v).toLocaleString('es-AR',{minimumFractionDigits:d||0,maximumFractionDigits:d==null?2:d}); }
+
+  function ir(i){
+    est.animando=false; est.paso=i; est.visitados.add(i);
+    const P=PASOS[i];
+    $('grafTitulo').textContent=P.titulo;
+    $('txt').innerHTML = P.html() + `<div class="nav">
+      <button class="btn sec" id="ant" ${i===0?'disabled':''}>← Anterior</button>
+      <button class="btn" id="sig">${i===PASOS.length-1?'Volver a empezar':'Siguiente →'}</button></div>`;
+    $('ant').onclick=()=>ir(i-1);
+    $('sig').onclick=()=>ir(i===PASOS.length-1?0:i+1);
+    if(P.dibujo) P.dibujo();
+    if(P.montar) P.montar();
+    pintarPasos();
+  }
+  function pintarPasos(){
+    const ol=$('pasos'); ol.innerHTML='';
+    PASOS.forEach((P,i)=>{const li=document.createElement('li'),b=document.createElement('button');
+      b.innerHTML=`<span class="n">${i+1}</span>${P.nombre}`;
+      b.className=(i===est.paso?'activo':'')+(est.visitados.has(i)&&i!==est.paso?' hecho':'');
+      b.onclick=()=>ir(i); li.appendChild(b); ol.appendChild(li)});
+  }
+  const h=/paso(\d)/.exec(location.hash);
+  ir(h ? Math.min(PASOS.length,Math.max(1,+h[1]))-1 : 0);
+})();
+</script>
+</body>
+</html>

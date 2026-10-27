@@ -302,7 +302,8 @@ aside.nota{display:none}
     <text x="1140" y="284" fill="#F0B441" font-size="18">hace de examen</text>
   </svg>
   <p class="lead" style="margin-top:18px"><b>Regla de oro:</b> la prueba es la única forma honesta de saber cómo le va a ir al modelo con <b>mareas futuras</b>.</p>
-  <aside class="nota"><h4>0:28 · Entrenar y examinar (6 min)</h4>Analogía: si el examen tiene las mismas preguntas que la práctica, aprobar no prueba nada. La validación cruzada es <b>tomar cinco exámenes distintos</b> y promediar: da un resultado más estable que uno solo. Mencioná (sin profundizar) que en pesca hay una trampa extra: <b>validación temporal</b> (entrenar con el pasado, evaluar con el futuro). Está en el notebook avanzado.</aside>
+  <div class="card" style="margin-top:14px;border-left:6px solid var(--boya);padding-top:12px;padding-bottom:12px"><div class="k">🎛️ Simulador en vivo · empezá por acá</div><p>Entrená tu primer modelo: el sobre del examen, una regla a mano, la máquina que prueba 2.535 reglas, el examen y el memorión.</p><p class="mono" style="font-size:16px;color:var(--tenue);margin-top:6px">Aula · Clase 6 · c6_entrenar_modelo</p></div>
+  <aside class="nota"><h4>0:28 · Entrenar y examinar (9 min, con demo)</h4>Abrí <b>c6_entrenar_modelo</b> (en el aula o en <span class="mono">pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/c6_entrenar_modelo.html</span>) y recorré los pasos 1 a 5: el sobre, «siempre andá» = 44 errores, pedí a alguien que dicte valores para las perillas, después ▶ Entrenar (la regla ganadora sale sola: 8–12 °C y clorofila ≥ 1,25, 4 errores) y el examen: 93 % en práctica, 87 % en el examen. El paso 6 (memorión) se guarda para la diapositiva 12. Analogía: si el examen tiene las mismas preguntas que la práctica, aprobar no prueba nada. La validación cruzada es <b>tomar cinco exámenes distintos</b> y promediar: da un resultado más estable que uno solo. Mencioná (sin profundizar) que en pesca hay una trampa extra: <b>validación temporal</b> (entrenar con el pasado, evaluar con el futuro). Está en el notebook avanzado.</aside>
 </section>
 
 <!-- ============ 11 · TRES MODELOS ============ -->
@@ -328,7 +329,7 @@ aside.nota{display:none}
   </svg>
   <p class="lead" style="margin-top:6px">Los árboles le ganan a la línea recta. Entre los dos de arriba la diferencia es <b>menor que el desvío</b>: elegimos <b>Random Forest</b> porque además explica qué variables pesan.</p>
   <div class="fuente">Notebook clase06_ml_intermedio · dataset didáctico simulado · scikit-learn</div>
-  <aside class="nota"><h4>0:34 · Comparar (5 min)</h4>AUC en una frase: <b>si tomo una marea buena y una mala al azar, ¿con qué probabilidad el modelo le da más puntaje a la buena?</b> 0,5 es tirar la moneda; 1 es perfecto. Lección de método: una diferencia de 0,008 con un desvío de 0,03 <b>no es una diferencia</b>. Random Forest = muchos árboles que votan (Breiman, 2001).</aside>
+  <aside class="nota"><h4>0:37 · Comparar (4 min)</h4>AUC en una frase: <b>si tomo una marea buena y una mala al azar, ¿con qué probabilidad el modelo le da más puntaje a la buena?</b> 0,5 es tirar la moneda; 1 es perfecto. Lección de método: una diferencia de 0,008 con un desvío de 0,03 <b>no es una diferencia</b>. Random Forest = muchos árboles que votan (Breiman, 2001).</aside>
 </section>
 
 <!-- ============ 12 · SOBREAJUSTE ============ -->
@@ -353,10 +354,10 @@ aside.nota{display:none}
     </div>
     <div class="col">
       <ul class="lista" style="margin-top:20px"><li>Rinde <b>perfecto</b> con las mareas que ya vio.</li><li><b>Falla</b> con las mareas nuevas.</li><li>Aprendió el <b>ruido</b>, no el patrón.</li></ul>
-      <div class="card" style="margin-top:26px;border-left:6px solid var(--boya)"><div class="k">🎛️ Simulador en vivo</div><p>Sobreajuste (overfitting): subí el grado del polinomio y mirá cómo se dispara el error de prueba.</p><p class="mono" style="font-size:16px;color:var(--tenue);margin-top:8px">Aula · Clase 6 · Simulador — Sobreajuste</p></div>
+      <div class="card" style="margin-top:26px;border-left:6px solid var(--boya)"><div class="k">🎛️ Simulador en vivo</div><p>«Entrená tu primer modelo», paso 6: el memorión saca 100 % en la práctica y 63 % en el examen. Y el de sobreajuste: subí el grado del polinomio.</p><p class="mono" style="font-size:16px;color:var(--tenue);margin-top:8px">Aula · Clase 6 · Simuladores</p></div>
     </div>
   </div>
-  <aside class="nota"><h4>0:39 · Sobreajuste (8 min, con demo)</h4>Analogía: el alumno que se aprende de memoria las respuestas del parcial del año pasado. Abrí el simulador <b>c6_sobreajuste</b> (en el aula o en <span class="mono">pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/c6_sobreajuste.html</span>): grado bajo → no alcanza; grado medio → bien; grado alto → la curva pasa por todos los puntos y el error de prueba explota. Remedios: más datos, modelos más simples, y <b>siempre</b> evaluar en prueba.</aside>
+  <aside class="nota"><h4>0:41 · Sobreajuste (6 min, con demo)</h4>Analogía: el alumno que se aprende de memoria las respuestas del parcial del año pasado. Primero volvé a <b>c6_entrenar_modelo</b>, paso 6 «El memorión»: 100 % en la práctica, 63 % en el examen, contra 87 % de la regla simple. Después, si da el tiempo, el simulador <b>c6_sobreajuste</b> (en el aula o en <span class="mono">pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/c6_sobreajuste.html</span>): grado bajo → no alcanza; grado medio → bien; grado alto → la curva pasa por todos los puntos y el error de prueba explota. Remedios: más datos, modelos más simples, y <b>siempre</b> evaluar en prueba.</aside>
 </section>
 
 <!-- ============ 13 · LA TRAMPA DE LA EXACTITUD ============ -->
@@ -546,7 +547,7 @@ aside.nota{display:none}
   <div class="eyebrow">En el aula esta semana · <b>Clase 6</b></div>
   <h2>Para seguir <em>jugando con modelos</em></h2>
   <div class="grid3" style="margin-top:6px">
-    <div class="card"><div class="k">🎛️ Simuladores</div><h3>Umbral · Zona · Sobreajuste</h3><p>Los tres de hoy, para repetir con tus números.</p></div>
+    <div class="card"><div class="k">🎛️ Simuladores</div><h3>Entrenar · Umbral · Zona · Sobreajuste</h3><p>Los cuatro de hoy, para repetir a tu ritmo.</p></div>
     <div class="card"><div class="k">🕸️ Caso aplicado</div><h3>Selectividad de artes</h3><p>La grilla en animación, dispositivos comparados con datos reales y la curva de selectividad.</p></div>
     <div class="card"><div class="k">🧩 Caso DT-009</div><h3>Concentración de la renta</h3><p>Índices con datos oficiales del CFP: cuando el dato es el mensaje.</p></div>
   </div>
