@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · Abrí la caja: ¿por qué dijo eso? — Clase 6</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --rojo:#d9534f; --ambar:#e6a417;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:1040px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 14px;max-width:78ch}
+  .lead b{color:var(--tinta)}
+  .pasos{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;padding:0;list-style:none}
+  .pasos button{border:1px solid var(--linea);background:var(--panel);border-radius:999px;padding:6px 11px;
+    font-size:12.5px;font-weight:700;color:var(--gris);cursor:pointer;font-family:inherit}
+  .pasos button .n{display:inline-block;width:20px;height:20px;line-height:20px;border-radius:50%;background:var(--fondo);
+    text-align:center;margin-right:5px;font-size:11.5px}
+  .pasos button.hecho{color:var(--azul-osc)}
+  .pasos button.hecho .n{background:#d7ecf5}
+  .pasos button.activo{background:var(--azul);border-color:var(--azul);color:#fff}
+  .pasos button.activo .n{background:#fff;color:var(--azul)}
+  .grid{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+  .col-graf{flex:1 1 470px;min-width:0}
+  .col-txt{flex:1 1 360px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 6px;font-weight:800}
+  .panel h3{font-size:20px;line-height:1.25;margin:0 0 8px}
+  .panel p{font-size:14.5px;margin:0 0 10px}
+  svg{width:100%;height:auto;display:block}
+  .jerga{margin-top:12px;background:#eef6fa;border:1px dashed #9cc7dc;border-radius:10px;padding:9px 12px;font-size:13px;color:var(--azul-osc)}
+  .jerga b{font-weight:800}
+  .mareas{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+  .mareas button{flex:1 1 120px;border:1px solid var(--linea);background:var(--fondo);border-radius:10px;padding:7px 8px;
+    font-size:12.5px;font-weight:700;color:var(--azul-osc);cursor:pointer;text-align:left;font-family:inherit;line-height:1.3}
+  .mareas button small{display:block;font-weight:500;color:var(--gris);font-size:11.5px}
+  .mareas button.on{border-color:var(--azul);background:#e3f1f8;box-shadow:inset 0 0 0 1px var(--azul)}
+  label.field{display:block;font-size:13.5px;font-weight:700;margin:8px 0 0}
+  .fieldval{font-weight:800;color:var(--azul)}
+  input[type=range]{width:100%;accent-color:var(--azul);height:26px}
+  .grande{display:flex;align-items:center;gap:14px;background:var(--fondo);border:1px solid var(--linea);border-radius:12px;padding:12px 14px;margin:10px 0}
+  .grande .v{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+  .grande .k{font-size:13px;color:var(--gris)}
+  .btn{border:0;background:var(--azul);color:#fff;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn.sec{background:var(--fondo);color:var(--azul-osc);border:1px solid var(--linea)}
+  .nav{display:flex;justify-content:space-between;gap:8px;margin-top:14px}
+  details{margin:8px 0;font-size:13.5px}
+  details summary{cursor:pointer;font-weight:700;color:var(--azul-osc)}
+  table.t{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+  table.t th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--gris);padding:4px}
+  table.t td{border-top:1px solid var(--linea);padding:5px 4px;vertical-align:top}
+  table.t td.n{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+  .leg{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--gris);margin-top:8px}
+  .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .ojo{border-left:4px solid var(--ambar);background:#fdf6e3;border-radius:8px;padding:9px 12px;font-size:13.5px;margin:10px 0}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🎛️ Clase 6 · Simulador interactivo · explicabilidad</div>
+  <h1>Abrí la caja: ¿por qué dijo eso el modelo?</h1>
+  <p class="lead">Un modelo dice «87 % de que sea buena marea». El capitán, con razón, pregunta <b>¿por qué?</b>
+  Acá vas a ver las dos herramientas más usadas para responder esa pregunta, <b>SHAP</b> y <b>LIME</b>,
+  explicadas con cosas de barco y sin fórmulas. Son 4 pasos.</p>
+
+  <ol class="pasos" id="pasos"></ol>
+
+  <div class="grid">
+    <div class="col-graf">
+      <div class="panel">
+        <h2 id="grafTitulo"></h2>
+        <svg id="graf" viewBox="0 0 540 380" role="img" aria-label="Gráfico de la explicación"></svg>
+        <div class="leg" id="leyenda"></div>
+      </div>
+    </div>
+    <div class="col-txt">
+      <div class="panel" id="txt"></div>
+    </div>
+  </div>
+
+  <footer>
+    <b>Datos y modelo didácticos</b>, generados para aprender: 700 mareas inventadas con una regla parecida a la ecología
+    de la merluza (agua templada, con alimento y a la profundidad justa) más un 10 % de «ruido». La <b>hora del lance</b>
+    está a propósito: en estos datos no tiene nada que ver con la captura. El modelo es de «25 vecinas»: busca las 25 mareas
+    del pasado más parecidas y cuenta cuántas fueron buenas. SHAP se calcula exacto (las 16 combinaciones); LIME, con 400
+    mareas vecinas inventadas. · Ariel Giamportone | PesquerosEnIA · UTN FRCh
+  </footer>
+</div>
+
+<script>
+(function(){
+  // ---------- datos didácticos (semilla fija) ----------
+  function azar(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
+    t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+  const r = azar(21);
+  const VARS = [
+    {k:'T', nombre:'Temperatura del agua', corto:'Temperatura', rango:[6,16],  paso:0.1, unidad:'°C', lime:1,   limeTxt:'+1 °C'},
+    {k:'C', nombre:'Clorofila (qué tan «verde»)', corto:'Clorofila', rango:[0.2,4], paso:0.1, unidad:'mg/m³', lime:0.5, limeTxt:'+0,5 de clorofila'},
+    {k:'P', nombre:'Profundidad', corto:'Profundidad', rango:[40,260], paso:5, unidad:'m', lime:20,  limeTxt:'+20 m'},
+    {k:'H', nombre:'Hora del lance', corto:'Hora', rango:[0,23], paso:1, unidad:'h', lime:3,   limeTxt:'+3 horas'}
+  ];
+  const mareas=[];
+  for(let i=0;i<700;i++){
+    const m={T:6+r()*10, C:0.2+r()*3.8, P:40+r()*220, H:Math.floor(r()*24)};
+    let buena = (m.T>=7.5 && m.T<=13) && m.C>=1.0 && (m.P>=60 && m.P<=230);
+    if(r()<0.10) buena=!buena;
+    m.buena=buena; mareas.push(m);
+  }
+  const entreno = mareas.slice(0,600), nuevas = mareas.slice(600);
+  const fondo = entreno.filter((m,i)=>i%6===0).slice(0,80);   // mareas «cualquiera» para el punto de partida
+
+  // ---------- el modelo: 25 vecinas ----------
+  const K=25;
+  const nrm = (v,x) => (x-v.rango[0])/(v.rango[1]-v.rango[0]);
+  const tabla = entreno.map(m=>({q:VARS.map(v=>nrm(v,m[v.k])), b:m.buena?1:0}));
+  function prob(x){
+    const q=VARS.map(v=>nrm(v,x[v.k]));
+    const dist=new Float64Array(K).fill(1e9), lab=new Uint8Array(K);
+    for(const t of tabla){
+      let d=0; for(let j=0;j<4;j++){const e=q[j]-t.q[j]; d+=e*e}
+      if(d<dist[K-1]){ let p=K-1; while(p>0 && dist[p-1]>d){dist[p]=dist[p-1];lab[p]=lab[p-1];p--} dist[p]=d; lab[p]=t.b; }
+    }
+    let s=0; for(let j=0;j<K;j++) s+=lab[j]; return s/K;
+  }
+
+  // ---------- SHAP exacto (4 variables → 16 combinaciones) ----------
+  const fact=n=>n<2?1:n*fact(n-1);
+  function shap(x){
+    const v=new Array(16);
+    for(let mask=0;mask<16;mask++){
+      if(mask===15){v[mask]=prob(x);continue}
+      let s=0;
+      for(const b of fondo){const z={}; VARS.forEach((vv,j)=>z[vv.k]=(mask>>j)&1?x[vv.k]:b[vv.k]); s+=prob(z)}
+      v[mask]=s/fondo.length;
+    }
+    const phi=VARS.map((_,j)=>{let f=0;
+      for(let mask=0;mask<16;mask++){ if((mask>>j)&1) continue;
+        let s=0; for(let t=0;t<4;t++) if((mask>>t)&1) s++;
+        f+= fact(s)*fact(4-s-1)/fact(4)*(v[mask|(1<<j)]-v[mask]); }
+      return f;});
+    return {base:v[0], final:v[15], phi, v};
+  }
+
+  // ---------- LIME (vecinas inventadas + recta ponderada) ----------
+  const SD={T:1.2,C:0.5,P:30,H:4};
+  function lime(x){
+    const rr=azar(99); const gauss=()=>{let u=0,w=0;while(u===0)u=rr();w=rr();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*w)};
+    const filas=[];
+    for(let i=0;i<400;i++){
+      const z=VARS.map(()=>gauss()); const y={};
+      VARS.forEach((v,j)=>{y[v.k]=Math.min(v.rango[1],Math.max(v.rango[0],x[v.k]+z[j]*SD[v.k]))});
+      const zz=VARS.map((v,j)=>(y[v.k]-x[v.k])/SD[v.k]);
+      const p=prob(y), w=Math.exp(-zz.reduce((a,b)=>a+b*b,0)/(2*1.5*1.5));
+      filas.push({y,zz,p,w});
+    }
+    // mínimos cuadrados ponderados: p ≈ b0 + Σ bj·zj
+    const n=5, A=Array.from({length:n},()=>new Array(n).fill(0)), B=new Array(n).fill(0);
+    for(const f of filas){const xr=[1,...f.zz];
+      for(let i=0;i<n;i++){B[i]+=f.w*xr[i]*f.p; for(let j=0;j<n;j++) A[i][j]+=f.w*xr[i]*xr[j]}}
+    for(let i=0;i<n;i++) A[i][i]+=1e-6;
+    for(let c=0;c<n;c++){ let piv=c; for(let i=c+1;i<n;i++) if(Math.abs(A[i][c])>Math.abs(A[piv][c])) piv=i;
+      [A[c],A[piv]]=[A[piv],A[c]]; [B[c],B[piv]]=[B[piv],B[c]];
+      for(let i=0;i<n;i++){ if(i===c) continue; const f=A[i][c]/A[c][c]; for(let j=c;j<n;j++) A[i][j]-=f*A[c][j]; B[i]-=f*B[c]; } }
+    const b=B.map((s,i)=>s/A[i][i]);
+    const efecto=VARS.map((v,j)=>b[j+1]/SD[v.k]*v.lime);   // cambio de probabilidad por «un paso» natural
+    return {filas, efecto};
+  }
+
+  // ---------- estado ----------
+  const PRESETS=[
+    {nombre:'A · Frente costero', x:{T:10.2,C:2.9,P:120,H:4}},
+    {nombre:'B · Agua cálida',   x:{T:15.0,C:2.7,P:130,H:4}},
+    {nombre:'C · Agua clara y honda', x:{T:10.4,C:0.7,P:235,H:15}},
+    {nombre:'D · En el borde',   x:{T:12.3,C:1.4,P:190,H:22}}
+  ];
+  const est={paso:0, visitados:new Set([0]), preset:0, x:{...PRESETS[0].x}, cache:{}};
+  const clave=()=>VARS.map(v=>est.x[v.k]).join('|');
+  function calc(tipo){ const k=tipo+clave(); if(!(k in est.cache)) est.cache[k]= tipo==='shap'?shap(est.x):lime(est.x); return est.cache[k]; }
+
+  // ---------- utilidades ----------
+  const $=id=>document.getElementById(id);
+  const NS='http://www.w3.org/2000/svg';
+  function el(tag,attrs,txt){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(txt!=null)e.textContent=txt;return e}
+  const nf=(v,d=0)=>(+v).toLocaleString('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d});
+  const pc=p=>nf(p*100)+' %';
+  const pts=p=>Math.round(Math.abs(p*100))===0?'0 pts':(p>=0?'+':'−')+nf(Math.abs(p*100))+' pts';
+  function valTxt(v,x){ return v.k==='H' ? String(Math.round(x)).padStart(2,'0')+' h' : nf(x, v.k==='P'?0:1)+' '+v.unidad; }
+  function leyenda(html){ $('leyenda').innerHTML=html; }
+  const color=p=>{ // rojo → ámbar → verde
+    const a=[217,83,79], m=[230,164,23], b=[31,157,107];
+    const [c1,c2,t]= p<0.5?[a,m,p/0.5]:[m,b,(p-0.5)/0.5];
+    return `rgb(${c1.map((c,i)=>Math.round(c+(c2[i]-c)*t)).join(',')})`; };
+
+  function selectorMareas(conSliders){
+    let h=`<div class="mareas">${PRESETS.map((P,i)=>`<button data-i="${i}" class="${est.preset===i?'on':''}">${P.nombre}
+      <small>${valTxt(VARS[0],P.x.T)} · clorof. ${nf(P.x.C,1)} · ${P.x.P} m</small></button>`).join('')}</div>`;
+    if(conSliders) h+=VARS.map(v=>`<label class="field">${v.nombre}: <span class="fieldval" id="l${v.k}"></span></label>
+      <input type="range" id="s${v.k}" min="${v.rango[0]}" max="${v.rango[1]}" step="${v.paso}">`).join('');
+    return h;
+  }
+  function montarSelector(alCambiar){
+    document.querySelectorAll('.mareas button').forEach(b=>b.onclick=()=>{
+      est.preset=+b.dataset.i; est.x={...PRESETS[est.preset].x}; ir(est.paso); });
+    VARS.forEach(v=>{ const s=$('s'+v.k); if(!s) return; s.value=est.x[v.k];
+      $('l'+v.k).textContent=valTxt(v,est.x[v.k]);
+      s.oninput=()=>{ est.x[v.k]=+s.value; est.preset=-1; $('l'+v.k).textContent=valTxt(v,est.x[v.k]);
+        document.querySelectorAll('.mareas button').forEach(b=>b.classList.remove('on')); alCambiar(); }; });
+  }
+
+  // ---------- dibujos ----------
+  function dibujarFicha(){ // paso 1: la marea y lo que dice el modelo
+    const svg=$('graf'); svg.innerHTML=''; svg.setAttribute('viewBox','0 0 540 380');
+    const p=prob(est.x);
+    svg.appendChild(el('text',{x:20,y:34,'font-size':15,'font-weight':800,fill:'#075d86'},'LO QUE SABEMOS ANTES DE SALIR'));
+    VARS.forEach((v,i)=>{
+      const y=60+i*58;
+      svg.appendChild(el('rect',{x:20,y,width:500,height:46,rx:10,fill:'#f4f8fa',stroke:'#d9e4e9'}));
+      svg.appendChild(el('text',{x:36,y:y+29,'font-size':16,fill:'#3f5a68'},v.nombre));
+      svg.appendChild(el('text',{x:504,y:y+30,'font-size':19,'font-weight':800,'text-anchor':'end',fill:'#0e2a38'},valTxt(v,est.x[v.k])));
+    });
+    svg.appendChild(el('text',{x:20,y:318,'font-size':15,'font-weight':800,fill:'#075d86'},'EL MODELO DICE'));
+    svg.appendChild(el('rect',{x:20,y:330,width:500,height:22,rx:11,fill:'#e7edf0'}));
+    svg.appendChild(el('rect',{x:20,y:330,width:Math.max(22,500*p),height:22,rx:11,fill:color(p)}));
+    svg.appendChild(el('text',{x:30,y:372,'font-size':14,fill:'#3f5a68'},`${pc(p)} de que sea buena marea · ${Math.round(p*K)} de sus 25 vecinas fueron buenas`));
+    leyenda('');
+  }
+
+  function dibujarCascada(){
+    const s=calc('shap'), svg=$('graf'); svg.innerHTML='';
+    const angosto=svg.getBoundingClientRect().width<480, W=angosto?380:540;
+    svg.setAttribute('viewBox',`0 0 ${W} 400`);
+    const X0=angosto?118:170, X1=W-20, px=p=>X0+p*(X1-X0);
+    const orden=VARS.map((v,j)=>({v,f:s.phi[j]})).sort((a,b)=>Math.abs(b.f)-Math.abs(a.f));
+    const filas=[{tipo:'base',t:angosto?'Partida':'Punto de partida',sub:angosto?'marea cualquiera':'una marea cualquiera',val:s.base}]
+      .concat(orden.map(o=>({tipo:'var',t:o.v.corto,sub:valTxt(o.v,est.x[o.v.k]),val:o.f})))
+      .concat([{tipo:'fin',t:'Esta marea',sub:angosto?'dice el modelo':'lo que dice el modelo',val:s.final}]);
+    for(let p=0;p<=1.0001;p+=angosto?0.5:0.25){
+      svg.appendChild(el('line',{x1:px(p),y1:16,x2:px(p),y2:356,stroke:'#e3eaee'}));
+      svg.appendChild(el('text',{x:px(p),y:374,'text-anchor':'middle','font-size':13,fill:'#3f5a68'},nf(p*100)+' %'));
+    }
+    svg.appendChild(el('text',{x:(X0+X1)/2,y:396,'text-anchor':'middle','font-size':13,'font-weight':700,fill:'#0e2a38'},'Probabilidad de buena marea →'));
+    let acum=s.base;
+    filas.forEach((f,i)=>{
+      const y=22+i*56, h=30;
+      svg.appendChild(el('text',{x:8,y:y+14,'font-size':15,'font-weight':800,fill:'#0e2a38'},f.t));
+      svg.appendChild(el('text',{x:8,y:y+32,'font-size':12.5,fill:'#3f5a68'},f.sub));
+      let a,b,fill,lab;
+      if(f.tipo==='base'){a=0;b=f.val;fill='#9aaab3';lab=pc(f.val)}
+      else if(f.tipo==='fin'){a=0;b=f.val;fill=color(f.val);lab=pc(f.val)}
+      else {a=acum;b=acum+f.val;acum=b;fill=f.val>=0?'#1f9d6b':'#d9534f';lab=pts(f.val)}
+      const xa=px(Math.min(a,b)), w=Math.max(2,Math.abs(px(b)-px(a)));
+      svg.appendChild(el('rect',{x:xa,y,width:w,height:h,rx:5,fill}));
+      const derecha = Math.max(a,b)<0.78, adentro = !derecha && f.tipo!=='var';
+      svg.appendChild(el('text',{x:derecha?xa+w+6:(adentro?xa+w-8:xa-6),y:y+20,'text-anchor':derecha?'start':'end','font-size':14,'font-weight':800,
+        fill: adentro ? '#fff' : (f.tipo==='var' ? (f.val>=0?'#11633f':'#8f2a26') : '#0e2a38')},lab));
+      if(f.tipo==='var' && i<filas.length-2) svg.appendChild(el('line',{x1:px(b),y1:y+h,x2:px(b),y2:y+56,stroke:'#9aaab3','stroke-dasharray':'3 3'}));
+    });
+    leyenda('<span><span class="sw" style="background:#1f9d6b"></span>Empuja hacia «buena»</span><span><span class="sw" style="background:#d9534f"></span>Empuja hacia «mala»</span><span><span class="sw" style="background:#9aaab3"></span>Punto de partida</span>');
+  }
+
+  function dibujarLupa(){
+    const L=calc('lime'), svg=$('graf'); svg.innerHTML=''; svg.setAttribute('viewBox','0 0 540 380');
+    const T=VARS[0], C=VARS[1];
+    const X0=56,X1=520,Y0=330,Y1=16;
+    const px=t=>X0+(t-T.rango[0])/(T.rango[1]-T.rango[0])*(X1-X0), py=c=>Y0-(c-0)/4*(Y0-Y1);
+    svg.appendChild(el('line',{x1:X0,y1:Y0,x2:X1,y2:Y0,stroke:'#9aaab3'}));
+    svg.appendChild(el('line',{x1:X0,y1:Y0,x2:X0,y2:Y1,stroke:'#9aaab3'}));
+    for(let t=6;t<=16;t+=2) svg.appendChild(el('text',{x:px(t),y:Y0+18,'text-anchor':'middle','font-size':13,fill:'#3f5a68'},t+' °C'));
+    for(let c=0;c<=4;c++) svg.appendChild(el('text',{x:X0-8,y:py(c)+4,'text-anchor':'end','font-size':13,fill:'#3f5a68'},c));
+    svg.appendChild(el('text',{x:(X0+X1)/2,y:372,'text-anchor':'middle','font-size':14,'font-weight':700,fill:'#0e2a38'},'Temperatura del agua →'));
+    svg.appendChild(el('text',{x:14,y:(Y0+Y1)/2,'text-anchor':'middle','font-size':14,'font-weight':700,fill:'#0e2a38',transform:`rotate(-90 14 ${(Y0+Y1)/2})`},'Clorofila →'));
+    for(const f of L.filas) svg.appendChild(el('circle',{cx:px(f.y.T),cy:py(f.y.C),r:3+4*f.w,fill:color(f.p),opacity:.35+.5*f.w}));
+    const x=px(est.x.T), y=py(est.x.C), s=14; let d='';
+    for(let k=0;k<10;k++){const a=-Math.PI/2+k*Math.PI/5, rr=k%2?s*.45:s; d+=(k?'L':'M')+(x+rr*Math.cos(a)).toFixed(1)+' '+(y+rr*Math.sin(a)).toFixed(1)}
+    svg.appendChild(el('path',{d:d+'Z',fill:'#e6a417',stroke:'#0e2a38','stroke-width':1.5}));
+    leyenda('<span>Cada punto: una marea vecina inventada, pintada según lo que dijo el modelo</span><span><span class="sw" style="background:#d9534f"></span>mala</span><span><span class="sw" style="background:#e6a417"></span>dudosa</span><span><span class="sw" style="background:#1f9d6b"></span>buena</span><span>· más grande = más parecida a ⭐</span>');
+  }
+
+  function barras(svgId, items, fmt, titulo, W=540){ // barras horizontales centradas en cero
+    const svg=$(svgId); svg.innerHTML='';
+    const H=40+items.length*48; svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+    const max=Math.max(0.05,...items.map(i=>Math.abs(i.val))), X0=W<500?130:200, X1=W-20, cero = items.some(i=>i.val<0) ? (X0+X1)/2 : X0;
+    const esc=v=>v/max*(X1-cero-40);
+    if(titulo) svg.appendChild(el('text',{x:8,y:18,'font-size':13,'font-weight':800,fill:'#075d86'},titulo));
+    svg.appendChild(el('line',{x1:cero,y1:26,x2:cero,y2:H-6,stroke:'#9aaab3'}));
+    items.forEach((it,i)=>{
+      const y=34+i*48;
+      svg.appendChild(el('text',{x:8,y:y+19,'font-size':15,'font-weight':700,fill:'#0e2a38'},it.t));
+      if(it.sub) svg.appendChild(el('text',{x:8,y:y+36,'font-size':12,fill:'#3f5a68'},it.sub));
+      const w=esc(it.val), xa=w>=0?cero:cero+w;
+      svg.appendChild(el('rect',{x:xa,y:y+4,width:Math.max(2,Math.abs(w)),height:24,rx:4,fill:it.color||(it.val>=0?'#1f9d6b':'#d9534f')}));
+      svg.appendChild(el('text',{x:w>=0?cero+Math.abs(w)+6:xa-6,y:y+21,'text-anchor':w>=0?'start':'end','font-size':14,'font-weight':800,fill:'#0e2a38'},fmt(it.val)));
+    });
+  }
+
+  // ---------- pasos ----------
+  const PASOS=[
+  { nombre:'La pregunta', titulo:'La marea y lo que dice el modelo',
+    html:()=>`<h2>Paso 1 de 4</h2><h3>«¿Por qué me decís que vaya?»</h3>
+      <p>Elegí una marea (o mové las perillas). El modelo busca las <b>25 mareas del pasado más parecidas</b> y cuenta
+      cuántas fueron buenas. Es pariente del «memorión» del otro simulador, pero escucha a 25 vecinas en vez de a una.</p>
+      ${selectorMareas(true)}
+      <p>Fijate en la marea <b>B</b>: tiene clorofila alta y buena profundidad, y aun así el modelo dice que no.
+      ¿Qué variable la hunde? Adivinalo antes de pasar al paso 2.</p>
+      <div class="jerga">En la jerga: <b>explicabilidad</b> (en inglés <i>explainability</i> o <i>XAI</i>). Un modelo que
+      decide sin poder explicar por qué es una <b>caja negra</b>.</div>`,
+    montar:()=>{ montarSelector(dibujarFicha); dibujarFicha(); } },
+
+  { nombre:'SHAP · el reparto', titulo:'SHAP: el reparto a la parte',
+    html:()=>{ const s=calc('shap'); const top=VARS.map((v,j)=>({v,f:s.phi[j]})).sort((a,b)=>Math.abs(b.f)-Math.abs(a.f))[0];
+      return `<h2>Paso 2 de 4</h2><h3>SHAP: el reparto «a la parte»</h3>
+      ${selectorMareas(false)}
+      <p>En la pesca la marea se cobra <b>a la parte</b>: lo que se gana se reparte según lo que aportó cada uno.
+      SHAP hace lo mismo con la predicción.</p>
+      <p>Arranca de lo que el modelo diría de <b>una marea cualquiera</b> (${pc(s.base)}) y reparte la diferencia hasta
+      llegar a <b>esta</b> marea (${pc(s.final)}) entre las variables. Las barras verdes empujan hacia «buena», las rojas
+      hacia «mala», y <b>suman justo</b>: ${pc(s.base)} ${s.phi.map(f=>pts(f)).join(' ')} = ${pc(s.final)}.</p>
+      <p>Para esta marea, la que más pesa es la <b>${top.v.corto.toLowerCase()}</b> (${pts(top.f)}).</p>
+      <details><summary>¿Cómo sabe cuánto aportó cada una? Ver las 16 combinaciones</summary>
+      <p style="margin-top:6px">Para ser justo, SHAP le pregunta al modelo qué diría <b>sabiendo solo algunas</b> variables
+      (las otras se rellenan con mareas cualquiera), en todas las combinaciones posibles. Lo que aporta cada variable es lo que
+      suma, en promedio, cuando «entra al grupo».</p>
+      <table class="t"><tr><th>El modelo sabe…</th><th style="text-align:right">dice</th></tr>
+      ${[0,1,2,4,8,3,5,9,6,10,12,7,11,13,14,15].map(m=>`<tr><td>${m===0?'nada (marea cualquiera)':VARS.filter((v,j)=>(m>>j)&1).map(v=>v.corto).join(' + ')}</td><td class="n">${pc(s.v[m])}</td></tr>`).join('')}
+      </table></details>
+      <div class="jerga">En la jerga: <b>valores SHAP</b>. Vienen de los «valores de Shapley», una idea de teoría de juegos de
+      Lloyd Shapley (1953, Nobel de Economía 2012) para repartir con justicia entre jugadores. Lundberg y Lee (2017) la
+      llevaron a los modelos de machine learning.</div>`},
+    montar:()=>{ montarSelector(()=>{}); dibujarCascada(); } },
+
+  { nombre:'LIME · la lupa', titulo:'LIME: mareas vecinas alrededor de ⭐',
+    html:()=>{ const L=calc('lime');
+      const items=VARS.map((v,j)=>({v,e:L.efecto[j]})).sort((a,b)=>Math.abs(b.e)-Math.abs(a.e));
+      return `<h2>Paso 3 de 4</h2><h3>LIME: la lupa</h3>
+      ${selectorMareas(false)}
+      <p>LIME no reparte: <b>mira de cerca</b>. Inventa 400 mareas <b>parecidas</b> a esta (moviendo un poco cada número),
+      le pregunta al modelo por cada una y busca la regla más simple, una recta, que explique lo que pasa <b>en este barrio</b>.</p>
+      <p>Responde la pregunta del capitán práctico: <b>«¿y si…?»</b></p>
+      <svg id="barrasLime" aria-label="Efecto local de cada variable"></svg>
+      <p style="margin-top:8px">${Math.abs(items[0].e)<0.06
+        ? `Acá <b>casi nada la mueve</b>: la marea está bien adentro de su zona y cambiar un poco no cambia la decisión.
+           Probá la <b>D</b>, que está en el borde: ahí un poco de clorofila o un grado de temperatura la dan vuelta.`
+        : `Cerca de esta marea, lo que más mueve la decisión es la <b>${items[0].v.corto.toLowerCase()}</b>:
+           ${items[0].v.limeTxt} cambia la probabilidad en <b>${pts(items[0].e)}</b>. Vale <b>solo acá</b>: en otra marea la
+           respuesta puede ser otra.`}</p>
+      <div class="jerga">En la jerga: <b>LIME</b> (<i>Local Interpretable Model-agnostic Explanations</i>), de Ribeiro, Singh y
+      Guestrin (2016). Es el método con el que mostraron que un clasificador de lobos y huskies miraba <b>la nieve</b> y no al animal.</div>`},
+    montar:()=>{ montarSelector(()=>{}); dibujarLupa(); const L=calc('lime');
+      barras('barrasLime', VARS.map((v,j)=>({t:v.corto, sub:'si '+v.limeTxt, val:L.efecto[j]})), pts, 'SI CAMBIÁS UN POCO…', 400); } },
+
+  { nombre:'En general', titulo:'Qué mira el modelo en general',
+    html:()=>`<h2>Paso 4 de 4</h2><h3>En general: ¿qué mira el modelo?</h3>
+      <p>Si juntamos las explicaciones SHAP de <b>muchas</b> mareas nuevas (promediando cuánto pesa cada variable, sin importar
+      si empuja para arriba o para abajo) vemos qué usa el modelo <b>en general</b>.</p>
+      <p id="resGlobal">Calculando 100 mareas…</p>
+      <div class="ojo"><b>La hora del lance</b> queda última, cerca de cero: en estos datos no tiene nada que ver con la captura.
+      Una variable así es <b>candidata a sacarse</b>: no ayuda y le mete ruido a las vecinas que busca el modelo.
+      Lo probás en el simulador «Elegí bien: variables y modelo».</div>
+      <h2 style="margin-top:14px">SHAP o LIME, ¿cuál uso?</h2>
+      <table class="t">
+        <tr><th></th><th>SHAP</th><th>LIME</th></tr>
+        <tr><td>Pregunta</td><td>¿Cuánto aportó cada variable?</td><td>¿Qué pasa si muevo un poco?</td></tr>
+        <tr><td>Idea</td><td>Reparto a la parte</td><td>Lupa sobre el barrio</td></tr>
+        <tr><td>Fuerte en</td><td>Justo y suma exacto; sirve para ver lo general</td><td>Rápido, cualquier modelo, intuitivo</td></tr>
+        <tr><td>Ojo con</td><td>Lento con muchas variables</td><td>Aproximado: cambia con el tamaño del barrio</td></tr>
+      </table>
+      <div class="ojo"><b>Tres advertencias.</b>
+      <ol style="margin:6px 0 0 18px;padding:0">
+        <li>Explican <b>al modelo, no al mar</b>. Si la hora hubiera salido importante, no significaría que la hora cause la pesca: significaría que el modelo la usa, y habría que preguntarse por qué.</li>
+        <li>Importancia no es causa: el modelo usa lo que <b>acompaña</b> a la captura, no necesariamente lo que la produce.</li>
+        <li>Sirven para detectar a tiempo un modelo que mira «la nieve». Por eso conviene mirarlas <b>antes</b> de confiarle una decisión.</li>
+      </ol></div>`,
+    montar:()=>{
+      const svg=$('graf'); svg.innerHTML=''; leyenda('');
+      setTimeout(()=>{
+        const muestra=nuevas.slice(0,100), suma=[0,0,0,0];
+        for(const m of muestra){ const s=shap(m); s.phi.forEach((f,j)=>suma[j]+=Math.abs(f)); }
+        const imp=suma.map(s=>s/muestra.length);
+        barras('graf', VARS.map((v,j)=>({t:v.corto, val:imp[j], color: v.k==='H'?'#9aaab3':'#0a7fb4'})), x=>nf(x*100,1)+' pts', 'PESO PROMEDIO DE CADA VARIABLE (|SHAP|, 100 MAREAS NUEVAS)');
+        const orden=VARS.map((v,j)=>({v,i:imp[j]})).sort((a,b)=>b.i-a.i);
+        const p=$('resGlobal'); if(p) p.innerHTML=`Manda la <b>${orden[0].v.corto.toLowerCase()}</b> (${nf(orden[0].i*100,1)} pts en promedio), después la
+          <b>${orden[1].v.corto.toLowerCase()}</b> y la <b>${orden[2].v.corto.toLowerCase()}</b>. La <b>hora</b>: ${nf(imp[3]*100,1)} pts.`;
+      },30);
+    } }
+  ];
+
+  function ir(i){
+    est.paso=i; est.visitados.add(i);
+    const P=PASOS[i];
+    $('grafTitulo').textContent=P.titulo;
+    $('txt').innerHTML=P.html()+`<div class="nav">
+      <button class="btn sec" id="ant" ${i===0?'disabled':''}>← Anterior</button>
+      <button class="btn" id="sig">${i===PASOS.length-1?'Volver a empezar':'Siguiente →'}</button></div>`;
+    $('ant').onclick=()=>ir(i-1);
+    $('sig').onclick=()=>ir(i===PASOS.length-1?0:i+1);
+    P.montar();
+    const ol=$('pasos'); ol.innerHTML='';
+    PASOS.forEach((Q,j)=>{const li=document.createElement('li'),b=document.createElement('button');
+      b.innerHTML=`<span class="n">${j+1}</span>${Q.nombre}`;
+      b.className=(j===est.paso?'activo':'')+(est.visitados.has(j)&&j!==est.paso?' hecho':'');
+      b.onclick=()=>ir(j); li.appendChild(b); ol.appendChild(li)});
+  }
+  window.__c6x={prob,shap,lime,PRESETS,nuevas,entreno};
+  const h=/paso(\d)/.exec(location.hash);
+  ir(h ? Math.min(PASOS.length,Math.max(1,+h[1]))-1 : 0);
+})();
+</script>
+</body>
+</html>

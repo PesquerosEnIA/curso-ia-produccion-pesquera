@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · Elegí bien: variables y modelo — Clase 6</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --rojo:#d9534f; --ambar:#e6a417;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:1040px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 14px;max-width:78ch}
+  .lead b{color:var(--tinta)}
+  .pasos{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;padding:0;list-style:none}
+  .pasos button{border:1px solid var(--linea);background:var(--panel);border-radius:999px;padding:6px 11px;
+    font-size:12.5px;font-weight:700;color:var(--gris);cursor:pointer;font-family:inherit}
+  .pasos button .n{display:inline-block;width:20px;height:20px;line-height:20px;border-radius:50%;background:var(--fondo);
+    text-align:center;margin-right:5px;font-size:11.5px}
+  .pasos button.hecho{color:var(--azul-osc)}
+  .pasos button.hecho .n{background:#d7ecf5}
+  .pasos button.activo{background:var(--azul);border-color:var(--azul);color:#fff}
+  .pasos button.activo .n{background:#fff;color:var(--azul)}
+  .grid{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+  .col-graf{flex:1 1 470px;min-width:0}
+  .col-txt{flex:1 1 360px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 6px;font-weight:800}
+  .panel h3{font-size:20px;line-height:1.25;margin:0 0 8px}
+  .panel p{font-size:14.5px;margin:0 0 10px}
+  svg{width:100%;height:auto;display:block}
+  .jerga{margin-top:12px;background:#eef6fa;border:1px dashed #9cc7dc;border-radius:10px;padding:9px 12px;font-size:13px;color:var(--azul-osc)}
+  .jerga b{font-weight:800}
+  .vars{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+  .var{display:flex;align-items:center;gap:10px;border:1px solid var(--linea);border-radius:10px;padding:8px 10px;background:var(--fondo);cursor:pointer}
+  .var input{width:20px;height:20px;accent-color:var(--azul);flex:none}
+  .var .nm{font-weight:700;font-size:14px}
+  .var .ds{font-size:12px;color:var(--gris)}
+  .var.on{background:#e3f1f8;border-color:var(--azul)}
+  .btn{border:0;background:var(--azul);color:#fff;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn.sec{background:var(--fondo);color:var(--azul-osc);border:1px solid var(--linea)}
+  .nav{display:flex;justify-content:space-between;gap:8px;margin-top:14px}
+  .msg{border-radius:10px;padding:10px 13px;font-size:14px;margin:10px 0}
+  .msg.bien{background:#e3f4ec;color:#11633f} .msg.mal{background:#fbe6e5;color:#8f2a26} .msg.meh{background:#fdf6e3;color:#7a5600}
+  .msg b{font-weight:800}
+  .caso{border:1px solid var(--linea);border-radius:12px;padding:12px;margin:0 0 12px;background:var(--panel)}
+  .caso .q{font-weight:700;font-size:15px;margin:0 0 8px}
+  .opc{display:flex;flex-wrap:wrap;gap:6px}
+  .opc button{flex:1 1 200px;border:1px solid var(--linea);background:var(--fondo);border-radius:9px;padding:8px 10px;font-size:13px;
+    font-weight:700;color:var(--azul-osc);cursor:pointer;text-align:left;font-family:inherit}
+  .opc button.ok{background:#e3f4ec;border-color:#1f9d6b;color:#11633f}
+  .opc button.meh{background:#fdf6e3;border-color:#e6a417;color:#7a5600}
+  .opc button.no{background:#fbe6e5;border-color:#d9534f;color:#8f2a26}
+  .lista{margin:6px 0 0;padding:0;list-style:none;counter-reset:n}
+  .lista li{counter-increment:n;position:relative;padding:8px 0 8px 40px;border-top:1px solid var(--linea);font-size:14px}
+  .lista li::before{content:counter(n);position:absolute;left:0;top:8px;width:28px;height:28px;border-radius:50%;background:var(--azul);
+    color:#fff;font-weight:800;text-align:center;line-height:28px;font-size:13px}
+  .lista li b{display:block;font-size:15px}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🎛️ Clase 6 · Simulador interactivo · elegir bien</div>
+  <h1>Elegí bien: las variables y el modelo</h1>
+  <p class="lead">Antes de entrenar hay dos decisiones que pesan más que el algoritmo: <b>qué datos le das</b> y
+  <b>qué tipo de modelo conviene para el caso</b>. Acá las probás vos: armás el modelo con las variables que elijas,
+  le tomás examen, y después resolvés cinco casos del sector. Son 3 pasos.</p>
+
+  <ol class="pasos" id="pasos"></ol>
+
+  <div class="grid" id="grid">
+    <div class="col-graf" id="colGraf">
+      <div class="panel">
+        <h2 id="grafTitulo"></h2>
+        <svg id="graf" viewBox="0 0 540 380" role="img" aria-label="Resultados del examen de cada intento"></svg>
+        <div id="debajo"></div>
+      </div>
+    </div>
+    <div class="col-txt">
+      <div class="panel" id="txt"></div>
+    </div>
+  </div>
+
+  <footer>
+    <b>Datos y modelo didácticos</b>, generados para aprender: 1.000 mareas inventadas (700 para entrenar, 300 para el examen)
+    con la misma regla del simulador «Abrí la caja» (agua templada, con alimento y a la profundidad justa) y 10 % de ruido.
+    La hora y el día de salida no tienen nada que ver con la captura; los kilos descargados son el resultado de la marea.
+    El modelo es de «25 vecinas». · Ariel Giamportone | PesquerosEnIA · UTN FRCh
+  </footer>
+</div>
+
+<script>
+(function(){
+  // ---------- datos didácticos (semilla fija) ----------
+  function azar(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
+    t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+  const r=azar(21);
+  const gauss=()=>{let u=0;while(u===0)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r())};
+  const VARS=[
+    {k:'T',nombre:'Temperatura del agua',ds:'Del satélite o del pronóstico.',antes:true, rango:[6,16]},
+    {k:'C',nombre:'Clorofila',ds:'Qué tan «verde» está el mar (satélite).',antes:true, rango:[0.2,4]},
+    {k:'P',nombre:'Profundidad',ds:'De la carta náutica.',antes:true, rango:[40,260]},
+    {k:'H',nombre:'Hora del lance',ds:'A qué hora se cala la red.',antes:true, rango:[0,23]},
+    {k:'D',nombre:'Día de la semana de salida',ds:'Lunes, martes…',antes:true, rango:[0,6]},
+    {k:'KG',nombre:'Kilos descargados en puerto',ds:'Lo que se pesó al volver.',antes:false, rango:[0,4000]}
+  ];
+  const mareas=[];
+  for(let i=0;i<1000;i++){
+    const m={T:6+r()*10, C:0.2+r()*3.8, P:40+r()*220, H:Math.floor(r()*24), D:Math.floor(r()*7)};
+    let buena=(m.T>=7.5 && m.T<=13) && m.C>=1.0 && (m.P>=60 && m.P<=230);
+    if(r()<0.10) buena=!buena;
+    m.buena=buena;
+    m.KG=Math.max(0,Math.min(4000,(buena?2600:1100)+gauss()*450));
+    mareas.push(m);
+  }
+  const entreno=mareas.slice(0,700), examen=mareas.slice(700);
+  const tasaBuenas=entreno.filter(m=>m.buena).length/entreno.length;
+  const base=examen.filter(m=>m.buena===(tasaBuenas>=0.5)).length/examen.length; // «siempre lo mismo»
+
+  // ---------- modelo de 25 vecinas con las variables elegidas ----------
+  const K=25;
+  const nrm=(v,x)=>(x-v.rango[0])/(v.rango[1]-v.rango[0]);
+  function evaluar(ks){
+    if(!ks.length) return base;
+    const vs=VARS.filter(v=>ks.includes(v.k));
+    const tr=entreno.map(m=>({q:vs.map(v=>nrm(v,m[v.k])),b:m.buena?1:0}));
+    let ok=0;
+    for(const m of examen){
+      const q=vs.map(v=>nrm(v,m[v.k]));
+      const dist=new Float64Array(K).fill(1e9), lab=new Uint8Array(K);
+      for(const t of tr){ let d=0; for(let j=0;j<q.length;j++){const e=q[j]-t.q[j]; d+=e*e}
+        if(d<dist[K-1]){let p=K-1; while(p>0&&dist[p-1]>d){dist[p]=dist[p-1];lab[p]=lab[p-1];p--} dist[p]=d; lab[p]=t.b;} }
+      let s=0; for(let j=0;j<K;j++) s+=lab[j];
+      if((s/K>=0.5)===m.buena) ok++;
+    }
+    return ok/examen.length;
+  }
+
+  // ---------- estado ----------
+  const est={paso:0, visitados:new Set([0]), sel:['T'], intentos:[], casos:{}};
+  const $=id=>document.getElementById(id);
+  const NS='http://www.w3.org/2000/svg';
+  function el(tag,attrs,txt){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(txt!=null)e.textContent=txt;return e}
+  const pc=p=>Math.round(p*100)+' %';
+  const corto={T:'Temp.',C:'Clorof.',P:'Prof.',H:'Hora',D:'Día',KG:'Kg desc.'};
+
+  function dibujarIntentos(){
+    const svg=$('graf'); svg.innerHTML='';
+    const n=Math.max(est.intentos.length,1), W=540, X0=50, X1=525, Y0=290, Y1=20;
+    const py=p=>Y0-(p-0.4)/0.6*(Y0-Y1);
+    for(let p=0.4;p<=1.001;p+=0.1){
+      svg.appendChild(el('line',{x1:X0,y1:py(p),x2:X1,y2:py(p),stroke:'#e3eaee'}));
+      svg.appendChild(el('text',{x:X0-8,y:py(p)+4,'text-anchor':'end','font-size':14,fill:'#3f5a68'},Math.round(p*100)+'%'));
+    }
+    if(!est.intentos.length){
+      svg.appendChild(el('text',{x:(X0+X1)/2,y:170,'text-anchor':'middle','font-size':16,fill:'#3f5a68'},'Elegí variables y tocá «Entrenar y tomar examen»'));
+    }
+    const vis=est.intentos.slice(-7), bw=Math.min(70,(X1-X0)/7-14);
+    vis.forEach((it,i)=>{
+      const x=X0+10+i*((X1-X0)/7), trampa=it.ks.includes('KG');
+      const fill= trampa ? '#d9534f' : (it.acc<=base+0.01 ? '#9aaab3' : '#0a7fb4');
+      svg.appendChild(el('rect',{x,y:py(it.acc),width:bw,height:Math.max(2,Y0-py(it.acc)),rx:5,fill}));
+      svg.appendChild(el('text',{x:x+bw/2,y:py(it.acc)-7,'text-anchor':'middle','font-size':17,'font-weight':800,fill:'#0e2a38'},pc(it.acc)));
+      it.ks.forEach((k,j)=>svg.appendChild(el('text',{x:x+bw/2,y:Y0+20+j*17,'text-anchor':'middle','font-size':14,
+        fill:k==='KG'?'#8f2a26':'#3f5a68','font-weight':k==='KG'?800:400},corto[k])));
+      if(trampa) svg.appendChild(el('text',{x:x+bw/2,y:py(it.acc)+22,'text-anchor':'middle','font-size':18},'⚠️'));
+    });
+    svg.appendChild(el('line',{x1:X0,y1:py(base),x2:X1,y2:py(base),stroke:'#e6a417','stroke-width':3,'stroke-dasharray':'8 6'}));
+    const maxFilas=Math.max(1,...vis.map(v=>v.ks.length));
+    svg.setAttribute('viewBox',`0 0 ${W} ${Y0+28+maxFilas*17}`);
+    $('debajo').innerHTML=`<p style="font-size:13.5px;margin:8px 0 0"><span style="display:inline-block;width:26px;border-top:3px dashed #e6a417;vertical-align:middle;margin-right:6px"></span><b>Sin modelo</b> («siempre no vayas»): <b>${pc(base)}</b>. Un modelo que no supera esta línea no sirve.</p>
+      <p style="font-size:13px;color:#3f5a68;margin:6px 0 0">Cada barra: un intento, con los aciertos en las 300 mareas del examen.
+      Debajo, las variables que usó. Se ven los últimos 7.</p>`;
+  }
+
+  function mensaje(it, prev){
+    const tiene=k=>it.ks.includes(k);
+    if(tiene('KG')) return `<div class="msg mal">⚠️ <b>${pc(it.acc)}… es una trampa.</b> Los kilos descargados se conocen
+      <b>al volver a puerto</b>: para decidir si salir, ese dato no existe. El modelo «acierta» porque le soplaste la respuesta.
+      En la jerga: <b>fuga de información</b> (<i>data leakage</i>). Es el error más caro, porque en el examen parece genial y en el mar no sirve para nada.</div>`;
+    if(!it.ks.length) return `<div class="msg meh">Sin variables, el modelo solo puede decir siempre lo mismo: acierta el <b>${pc(it.acc)}</b>.
+      Esa es la <b>línea base</b>: cualquier modelo tiene que ganarle.</div>`;
+    const ruido=it.ks.filter(k=>k==='H'||k==='D');
+    if(ruido.length && prev && !prev.ks.includes('KG') && it.acc<prev.acc)
+      return `<div class="msg meh">Agregaste <b>${ruido.map(k=>corto[k].toLowerCase()).join(' y ')}</b> y el examen <b>bajó</b> (${pc(prev.acc)} → ${pc(it.acc)}).
+      No tienen nada que ver con la captura, pero el modelo igual las usa para buscar mareas «parecidas», y se confunde.
+      <b>Más variables no es mejor</b>: cada una tiene que ganarse el lugar.</div>`;
+    if(ruido.length) return `<div class="msg meh"><b>${pc(it.acc)}</b>. Ojo con <b>${ruido.map(k=>corto[k].toLowerCase()).join(' y ')}</b>: no tienen nada que ver
+      con la captura. Probá sacarlas y compará.</div>`;
+    if(prev && it.acc>prev.acc+0.01) return `<div class="msg bien"><b>${pc(it.acc)}</b>, mejor que el intento anterior (${pc(prev.acc)}).
+      Las variables que agregaste <b>aportan información</b> sobre dónde está el pescado.</div>`;
+    return `<div class="msg bien"><b>${pc(it.acc)}</b> de aciertos en el examen, contra ${pc(base)} sin modelo.</div>`;
+  }
+
+  // ---------- casos ----------
+  const OPC={R:'Una regla fija (no hace falta ML)', S:'Modelo simple que se lee entero (árbol chico, regresión)',
+             E:'Ensamble de árboles (Random Forest, boosting) + SHAP', N:'Red neuronal (deep learning)'};
+  const CASOS=[
+    {q:'Que suene una alarma si la cámara de congelado pasa de −18 °C.', ok:'R', meh:[],
+     fb:{R:'Exacto. La regla ya existe y está en la norma: no hay nada que aprender. Meter ML acá agrega riesgo sin beneficio. Es la ley de la Doctrina: <b>la regla bloquea</b>.',
+         x:'Acá no hay nada que predecir: el límite de −18 °C ya está escrito. Una <b>regla fija</b> es más simple, más segura y auditable.'}},
+    {q:'Reconocer la especie de cada pescado en fotos de la cinta de la planta.', ok:'N', meh:[],
+     fb:{N:'Exacto. Con <b>imágenes</b> (y sonido o texto) las redes neuronales son las que funcionan. Necesitan miles de fotos etiquetadas. Es la Clase 7.',
+         x:'Con fotos, las reglas o los árboles no alcanzan: hace falta una <b>red neuronal</b> que aprenda a «ver». Es la Clase 7.'}},
+    {q:'Estimar los kilos por zona con 1.000 mareas y 8 variables oceanográficas en una planilla.', ok:'E', meh:['S'],
+     fb:{E:'Exacto. Con <b>datos en tabla</b> y una cantidad media de ejemplos, los ensambles de árboles suelen ganar. Con SHAP se explica cada predicción. Es lo que hicimos en la Clase 6.',
+         S:'Puede andar y es buen punto de partida (línea base). Pero con 1.000 mareas y 8 variables en tabla, un <b>ensamble de árboles</b> suele acertar más, y con SHAP igual se explica.',
+         x:'Son <b>datos en tabla</b> con una cantidad media de ejemplos: ahí rinden los <b>ensambles de árboles</b> (y con SHAP se explican). Una red neuronal sería exagerar.'}},
+    {q:'El inspector tiene que justificar por escrito por qué rechazó cada lote.', ok:'S', meh:['E','R'],
+     fb:{S:'Exacto. Cuando <b>cada decisión se defiende</b> (auditoría, reclamo, inspección), conviene un modelo que se lea entero: «se rechazó porque la temperatura superó X y la histamina superó Y».',
+         E:'Puede servir con SHAP, pero cada explicación es una aproximación. Si cada rechazo se tiene que defender ante un reclamo, un <b>modelo simple que se lee entero</b> es más sólido.',
+         R:'Si el criterio ya está en la norma, sí: una regla. Si hay que aprenderlo de datos, que sea un <b>modelo simple que se lee entero</b>.',
+         x:'Si cada rechazo se tiene que defender, una caja negra es un problema. Conviene un <b>modelo simple que se lea entero</b>.'}},
+    {q:'Querés predecir la captura, pero tenés solo 40 mareas registradas.', ok:'S', meh:[],
+     fb:{S:'Exacto. Con <b>pocos datos</b>, los modelos complejos memorizan (el memorión del primer simulador). Uno simple, más <b>juntar más datos</b>, es lo honesto.',
+         x:'Con 40 mareas, un modelo complejo <b>memoriza</b> en vez de aprender (acordate del memorión). Conviene uno <b>simple</b>, y ponerse a juntar más datos.'}}
+  ];
+
+  // ---------- pasos ----------
+  const PASOS=[
+  { nombre:'Las variables', titulo:'Aciertos en el examen de cada intento',
+    html:()=>`<h2>Paso 1 de 3</h2><h3>¿Qué variables le das?</h3>
+      <p>Marcá las variables con las que querés entrenar el modelo y tocá el botón. Después cambiá la selección y volvé a probar.
+      Ideas para probar en orden:</p>
+      <ol style="margin:0 0 10px 18px;padding:0;font-size:14px"><li>Solo temperatura.</li><li>Sumá clorofila y profundidad.</li>
+      <li>Sumá hora y día.</li><li>Probá los kilos descargados.</li></ol>
+      <div class="vars">${VARS.map(v=>`<label class="var ${est.sel.includes(v.k)?'on':''}"><input type="checkbox" data-k="${v.k}" ${est.sel.includes(v.k)?'checked':''}>
+        <span><span class="nm">${v.nombre}</span><br><span class="ds">${v.ds}</span></span></label>`).join('')}</div>
+      <button class="btn" id="bE">Entrenar y tomar examen</button>
+      <div id="msg">${est.intentos.length?mensaje(est.intentos[est.intentos.length-1],est.intentos[est.intentos.length-2]):''}</div>
+      <div class="jerga">En la jerga: <b>selección de variables</b> (<i>feature selection</i>). La pregunta clave para cada una:
+      <b>¿la voy a tener en el momento de decidir?</b> Si no, es fuga de información.</div>`,
+    montar:()=>{
+      document.querySelectorAll('.var input').forEach(c=>c.onchange=()=>{
+        est.sel=[...document.querySelectorAll('.var input:checked')].map(x=>x.dataset.k);
+        c.closest('.var').classList.toggle('on',c.checked); });
+      $('bE').onclick=()=>{
+        $('bE').disabled=true; $('bE').textContent='Entrenando…';
+        setTimeout(()=>{
+          const ks=VARS.map(v=>v.k).filter(k=>est.sel.includes(k));
+          const it={ks,acc:evaluar(ks)};
+          const prev=est.intentos[est.intentos.length-1];
+          est.intentos.push(it);
+          $('msg').innerHTML=mensaje(it,prev);
+          $('bE').disabled=false; $('bE').textContent='Entrenar y tomar examen';
+          dibujarIntentos();
+        },20);
+      };
+      dibujarIntentos();
+    } },
+
+  { nombre:'El modelo', titulo:'¿Qué modelo para qué caso?', ancho:true,
+    html:()=>{ const hechos=Object.keys(est.casos).length, bien=Object.entries(est.casos).filter(([i,o])=>CASOS[i].ok===o).length;
+      return `<h2>Paso 2 de 3</h2><h3>Cada caso pide su modelo</h3>
+      <p>No hay un modelo «mejor» en general: hay uno que conviene <b>para cada caso</b>. Elegí una opción en cada caso y leé por qué.</p>
+      <p id="marcador"><b>${bien} de ${CASOS.length}</b> justos${hechos?` · ${hechos} respondidos`:''}.</p>
+      <div class="jerga">Lo que pesa en la elección: <b>qué tipo de dato</b> es (tabla, imagen), <b>cuántos ejemplos</b> hay,
+      <b>si hay que explicar cada decisión</b> y <b>si de verdad hace falta aprender algo</b> o alcanza una regla.</div>`},
+    montar:()=>{
+      const svg=$('graf'); svg.style.display='none';
+      const cont=$('debajo');
+      cont.innerHTML=CASOS.map((c,i)=>`<div class="caso"><p class="q">${i+1}. ${c.q}</p><div class="opc">
+        ${Object.entries(OPC).map(([k,t])=>`<button data-c="${i}" data-o="${k}">${t}</button>`).join('')}</div><div id="fb${i}"></div></div>`).join('');
+      const pintar=i=>{
+        const c=CASOS[i], o=est.casos[i]; if(!o) return;
+        cont.querySelectorAll(`button[data-c="${i}"]`).forEach(b=>{b.className='';
+          if(b.dataset.o===c.ok) b.className='ok'; else if(b.dataset.o===o) b.className=c.meh.includes(o)?'meh':'no';});
+        const tipo=o===c.ok?'bien':(c.meh.includes(o)?'meh':'mal');
+        $('fb'+i).innerHTML=`<div class="msg ${tipo}">${c.fb[o]||c.fb.x}</div>`;
+      };
+      cont.querySelectorAll('.opc button').forEach(b=>b.onclick=()=>{
+        est.casos[+b.dataset.c]=b.dataset.o; pintar(+b.dataset.c);
+        const hechos=Object.keys(est.casos).length, bien=Object.entries(est.casos).filter(([i,o])=>CASOS[i].ok===o).length;
+        $('marcador').innerHTML=`<b>${bien} de ${CASOS.length}</b> justos · ${hechos} respondidos.`;
+      });
+      CASOS.forEach((_,i)=>pintar(i));
+    } },
+
+  { nombre:'La lista', titulo:'Lista de chequeo para elegir',
+    html:()=>`<h2>Paso 3 de 3</h2><h3>Antes de entrenar, seis preguntas</h3>
+      <p>Llevate esta lista. Sirve para cualquier proyecto de IA en la empresa, no solo para predecir capturas.</p>
+      <div class="jerga">Y dos costumbres que no se negocian: <b>comparar siempre contra la línea base</b> (decir siempre lo mismo,
+      o el promedio) y <b>tomar examen con datos que el modelo no vio</b>. Después, <b>abrir la caja</b> con SHAP o LIME
+      antes de confiarle una decisión.</div>`,
+    montar:()=>{
+      const svg=$('graf'); svg.style.display='none';
+      $('debajo').innerHTML=`<ol class="lista">
+        <li><b>¿Hace falta ML, o alcanza una regla?</b>Si el criterio ya está escrito (una norma, un límite), usá la regla. ML es para cuando hay que aprender un patrón de los datos.</li>
+        <li><b>¿Qué tipo de dato es?</b>Tabla (planillas, sensores) → árboles y ensambles. Imágenes, sonido o texto → redes neuronales.</li>
+        <li><b>¿Cuántos ejemplos con respuesta tengo?</b>Pocos → modelo simple y juntar más. Muchos → se puede subir la complejidad, siempre mirando el examen.</li>
+        <li><b>¿Cada variable existe en el momento de decidir?</b>Si se conoce después (kilos descargados, resultado de laboratorio), es fuga de información: afuera.</li>
+        <li><b>¿Cada variable se gana el lugar?</b>Sumala, tomá examen y compará. Si no mejora (o empeora), sacala. Más no es mejor.</li>
+        <li><b>¿Hay que explicar cada decisión, y quién firma?</b>Si cada decisión se defiende, modelo que se lee entero. Si no, ensamble + SHAP/LIME. Siempre: la IA recomienda, la persona firma.</li>
+      </ol>`;
+    } }
+  ];
+
+  function ir(i){
+    est.paso=i; est.visitados.add(i);
+    const P=PASOS[i];
+    $('graf').style.display=''; $('debajo').innerHTML='';
+    $('grafTitulo').textContent=P.titulo;
+    $('txt').innerHTML=P.html()+`<div class="nav">
+      <button class="btn sec" id="ant" ${i===0?'disabled':''}>← Anterior</button>
+      <button class="btn" id="sig">${i===PASOS.length-1?'Volver a empezar':'Siguiente →'}</button></div>`;
+    $('ant').onclick=()=>ir(i-1);
+    $('sig').onclick=()=>ir(i===PASOS.length-1?0:i+1);
+    P.montar();
+    const ol=$('pasos'); ol.innerHTML='';
+    PASOS.forEach((Q,j)=>{const li=document.createElement('li'),b=document.createElement('button');
+      b.innerHTML=`<span class="n">${j+1}</span>${Q.nombre}`;
+      b.className=(j===est.paso?'activo':'')+(est.visitados.has(j)&&j!==est.paso?' hecho':'');
+      b.onclick=()=>ir(j); li.appendChild(b); ol.appendChild(li)});
+  }
+  window.__c6e={evaluar,base,tasaBuenas};
+  const h=/paso(\d)/.exec(location.hash);
+  ir(h ? Math.min(PASOS.length,Math.max(1,+h[1]))-1 : 0);
+})();
+</script>
+</body>
+</html>
