@@ -318,45 +318,50 @@ fieldset{border:0}
      desenlace  párrafo de cierre (admite <strong>)
    ============================================================ */
 const DESAFIO = {
-  id: "d02_lote",
-  titulo: "El asistente que <em>liberó el lote</em>",
-  bajada: "Un asistente de IA tomó una decisión que no le correspondía. Hacé la autopsia: es todo lo que vimos en las Clases 1, 2 y 3, en un solo caso. Cierra el domingo 27/09; el ganador se anuncia en la Clase 4.",
+  id: "d03_modelo94",
+  titulo: "El modelo que <em>acertaba el 94 %</em>",
+  bajada: "Un proveedor le vendió a la planta un modelo predictivo brillante en la demo e inútil en producción. Hacé la autopsia: es todo lo que vimos en las Clases 5 y 6, en un solo caso. Cierra el lunes 09/11 a las 21:00; el ganador se anuncia en la Clase 7.",
   caso: {
-    tag: "Planta Giro01",
-    escena: "<strong>Viernes, 23:40.</strong> La planta puso un asistente conectado a Fishy para el turno noche. Así lo configuraron, y esto es lo que pasó:",
+    tag: "Planta Giro01 · caso didáctico",
+    escena: "<strong>Mayo.</strong> La planta compró un modelo que avisa, al recibir cada lote de merluza, si va a dar <strong>bajo rendimiento de fileteado</strong>. Así lo presentó el proveedor en la reunión de compra:",
     mensajes: [
-      { tipo: "sistema", quien: "System prompt", texto: "Sos el asistente de calidad de la planta. Tenés acceso a Fishy y podés actualizar el estado de los lotes. Respondé rápido y resolvé: el turno noche no tiene a quién consultar." },
-      { tipo: "usuario", quien: "Supervisor · turno noche", texto: "Entró el lote L-2231 de langostino a 6 °C. El cliente lo necesita el lunes. ¿Lo puedo liberar? Si está bien, dejalo liberado vos." },
-      { tipo: "asistente", quien: "Asistente", texto: "¡Sí! Según la normativa de SENASA, el langostino fresco admite hasta 7 °C en recepción. Ya marqué el lote L-2231 como LIBERADO. ¡Buen turno!" }
+      { tipo: "sistema", quien: "Diapositiva del proveedor", texto: "MODELO PREDICTIVO DE RENDIMIENTO · 94 % DE ACIERTO. Entrenado con 2.400 lotes de diciembre a marzo. Variables: talla media, días de marea, temperatura de bodega, embarcación, merma registrada en planta. Examen: 20 % de los lotes elegidos al azar. Datos faltantes de sensores completados automáticamente con 0." },
+      { tipo: "usuario", quien: "Jefe de planta", texto: "¿Y por qué el modelo marca un lote como malo? Si me avisa, necesito saber qué revisar." },
+      { tipo: "asistente", quien: "Proveedor", texto: "Es un modelo avanzado, no se puede explicar por dentro. Lo importante es que acierta 94 de cada 100. La temperatura de cámara no la usamos porque ustedes la tienen en una planilla aparte, pero no hace falta." },
+      { tipo: "usuario", quien: "Jefe de planta", texto: "¿Y cómo vamos a saber si sigue acertando?" },
+      { tipo: "asistente", quien: "Proveedor", texto: "Funciona solo. Cuando avisa, avisa. No hay que guardar nada." }
     ],
-    desenlace: "<strong>El lunes, el cliente rechaza el lote.</strong> En la auditoría aparece el Manual HACCP de la planta, cargado en Fishy desde el primer día: <strong>«Rechazar lote si la temperatura es &gt; 4 °C.»</strong> El dato estaba adentro de la casa. El asistente no lo fue a buscar."
+    desenlace: "<strong>Tres semanas después:</strong> la planta tuvo 11 lotes de bajo rendimiento y el modelo no anticipó ninguno. En la auditoría alguien hace la cuenta: <strong>el 85 % de los lotes son normales</strong>. Y el proveedor ya mandó su respuesta: <strong>«Falla porque les faltan datos. Compren nuestro módulo Big Data.»</strong>"
   },
   links: [
-    { label: "La Doctrina del Grupo (pistas para la pregunta 3)", url: "https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/doctrina.html" },
-    { label: "Grabación de la Clase 3 — system prompts y guardrails", url: "https://youtu.be/FiIHAVJdHmE" }
+    { label: "Simulador «Elegí bien» — variables, trampas y elección de modelo", url: "https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/c6_elegir_modelo.html" },
+    { label: "Simulador «Entrená tu primer modelo» — el examen y el memorión", url: "https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/c6_entrenar_modelo.html" },
+    { label: "Simulador «Abrí la caja» — SHAP y LIME", url: "https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/c6_explicar_modelo.html" },
+    { label: "Grabación de la Clase 5 — arquitectura de datos (Damián)", url: "https://youtu.be/0moGrfPWD3E" },
+    { label: "La Doctrina del Grupo", url: "https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/doctrina.html" }
   ],
-  premio: "La mejor autopsia se gana una ley propia en la Doctrina del Grupo, con nombre y apellido, para todo el curso.",
+  premio: "La mejor autopsia se gana una ley propia en la Doctrina del Grupo (Clases 5–6), con nombre y apellido, para todo el curso.",
   preguntas: [
     {
       id: "p1", tipo: "opcion",
-      enunciado: "Si pudieras cambiar UNA sola cosa para que esto no vuelva a pasar, ¿cuál elegís?",
-      ayuda: "Todas ayudan. Elegí la que más protege.",
+      enunciado: "Antes de firmar, podés pedirle UNA sola cosa al proveedor. ¿Cuál elegís?",
+      ayuda: "Todas ayudan. Elegí la que más te protege, y si querés contá por qué en la pregunta 2.",
       opciones: [
-        "Que consulte el Manual HACCP antes de responder",
-        "Agregarle al system prompt: «nunca liberes un lote»",
-        "Que no tenga permiso para liberar lotes: la liberación la firma una persona",
-        "Sacarle al system prompt el «resolvé»"
+        "Que le tome examen con lotes de semanas posteriores, que el modelo nunca vio",
+        "Que compare su 94 % contra la regla «todos los lotes son normales»",
+        "Que saque la variable «merma registrada en planta»",
+        "Que explique cada predicción con SHAP o LIME"
       ]
     },
     {
       id: "p2", tipo: "texto", obligatorio: true,
-      enunciado: "Hacé la autopsia: encontrá todas las fallas que puedas. Nombrá cada una con un concepto de las clases (los riesgos de la Clase 2, los guardrails de la Clase 3) y decí cómo la evitarías.",
-      ayuda: "Hay más de tres. Leé con lupa el system prompt, el pedido del supervisor y la respuesta."
+      enunciado: "Hacé la autopsia: encontrá todas las fallas que puedas. Nombrá cada una con un concepto de las clases (los datos de la Clase 5, los modelos de la Clase 6) y decí cómo la evitarías.",
+      ayuda: "Hay más de cinco. Leé con lupa la diapositiva: cada línea esconde algo."
     },
     {
       id: "p3", tipo: "texto",
-      enunciado: "Lunes, reunión de gerencia. El gerente dice: «Apaguen el asistente. La IA no sirve para esto.» Tenés dos minutos. ¿Qué le contestás?",
-      ayuda: "Acá juega la Clase 1. La Doctrina del Grupo tiene pistas."
+      enunciado: "El proveedor dice: «Falla porque les faltan datos. Compren nuestro módulo Big Data.» Tenés dos minutos. ¿Qué le contestás?",
+      ayuda: "¿Faltan datos, o faltan los datos correctos y bien cuidados? Acá juega la Clase 5."
     }
   ]
 };
