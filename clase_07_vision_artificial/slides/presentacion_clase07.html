@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clase 7 · La cámara en la línea</title>
+<meta name="description" content="Presentación de la Clase 7 (caso aplicado) del curso IA Aplicada a la Producción Pesquera (UTN FRCh · PesquerosEnIA): visión artificial en la línea de filetes, umbral, zona de duda con humano en el bucle, deriva por luz y qué necesita una planta para empezar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --abismo:#07161F; --sonda:#0E2C3D; --plataforma:#164055; --carta:#EFE6D2; --tenue:#B9AE96;
+  --langostino:#E8623A; --marea:#48B39C; --boya:#F0B441; --transito:#6FA8DC; --frio:#2b5fa8;
+  --linea:rgba(239,230,210,.14); --linea2:rgba(239,230,210,.28);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#03090d;overflow:hidden}
+body{font-family:'Archivo',system-ui,sans-serif;color:var(--carta)}
+.escenario{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.lienzo{width:1600px;height:900px;position:relative;transform-origin:center center;flex:none}
+.slide{position:absolute;inset:0;background:var(--abismo);padding:70px 90px 80px;display:none;overflow:hidden}
+.slide.activa{display:block;animation:entra .35s ease}
+@keyframes entra{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide.activa{animation:none}}
+.slide::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(900px 500px at 110% -10%,rgba(72,179,156,.10),transparent 60%),
+  radial-gradient(700px 500px at -10% 120%,rgba(232,98,58,.08),transparent 60%);pointer-events:none}
+.slide>*{position:relative}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:20px;letter-spacing:.2em;text-transform:uppercase;color:var(--tenue);margin-bottom:14px}
+.eyebrow b{color:var(--boya);font-weight:600}
+h1{font-family:'Archivo Black',sans-serif;font-size:92px;line-height:.98;letter-spacing:-.02em;text-transform:uppercase}
+h2{font-family:'Archivo Black',sans-serif;font-size:56px;line-height:1.02;letter-spacing:-.015em;margin-bottom:22px}
+h1 em,h2 em{font-style:normal;color:var(--langostino)}
+h2 .v{color:var(--marea)} h2 .a{color:var(--boya)}
+p.lead{font-size:30px;line-height:1.35;color:var(--carta);max-width:1250px}
+p.lead b{color:var(--boya)}
+.sub{font-size:24px;color:var(--tenue);line-height:1.4}
+.mono{font-family:'IBM Plex Mono',monospace}
+.cols{display:flex;gap:34px}
+.col{flex:1;min-width:0}
+.card{background:var(--sonda);border:1px solid var(--linea);border-radius:18px;padding:24px 26px}
+.card h3{font-size:28px;margin-bottom:8px}
+.card p,.card li{font-size:22px;line-height:1.4;color:var(--carta)}
+.card .k{font-family:'IBM Plex Mono',monospace;font-size:16px;letter-spacing:.14em;text-transform:uppercase;color:var(--tenue);margin-bottom:6px}
+ul.lista{list-style:none}
+ul.lista li{padding-left:30px;position:relative;margin:10px 0;font-size:25px;line-height:1.35}
+ul.lista li::before{content:"";position:absolute;left:4px;top:13px;width:12px;height:12px;border-radius:3px;background:var(--marea)}
+.frase{font-family:'Archivo Black',sans-serif;font-size:44px;line-height:1.12}
+.cita{border-left:6px solid var(--boya);padding:10px 0 10px 26px;font-size:30px;line-height:1.35;font-style:italic}
+.cita span{display:block;font-style:normal;font-size:20px;color:var(--tenue);margin-top:8px;font-family:'IBM Plex Mono',monospace}
+.tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:17px;padding:5px 12px;border-radius:99px;border:1px solid var(--linea2);color:var(--carta);margin:0 8px 8px 0}
+.tag.v{border-color:var(--marea);color:var(--marea)} .tag.a{border-color:var(--boya);color:var(--boya)} .tag.r{border-color:var(--langostino);color:var(--langostino)}
+.pie{position:absolute;left:90px;right:90px;bottom:26px;display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:15px;color:#6b7c84;letter-spacing:.08em}
+svg text{font-family:'IBM Plex Mono',monospace}
+.fuente{position:absolute;right:90px;bottom:52px;font-family:'IBM Plex Mono',monospace;font-size:15px;color:#6b7c84;text-align:right;max-width:900px}
+.seccion{background:linear-gradient(135deg,#0E2C3D,#07161F 60%)}
+.seccion .num{font-family:'Archivo Black',sans-serif;font-size:260px;line-height:.8;color:rgba(240,180,65,.14);position:absolute;right:80px;bottom:40px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.regla{background:var(--sonda);border:1px solid var(--linea);border-top:6px solid var(--boya);border-radius:14px;padding:20px 20px}
+.regla .n{font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--tenue);letter-spacing:.12em}
+.regla .t{font-family:'Archivo Black',sans-serif;font-size:30px;line-height:1.1;margin:10px 0 14px}
+.regla .e{font-size:21px;line-height:1.4;color:var(--tenue)}
+.regla{min-height:380px}
+.regla .e b{color:var(--carta)}
+
+/* barra, notas, ayuda */
+.hud{position:fixed;left:0;right:0;bottom:0;height:5px;background:rgba(239,230,210,.08);z-index:5}
+.hud i{display:block;height:100%;background:var(--boya);width:0;transition:width .3s}
+.contador{position:fixed;right:14px;bottom:12px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6b7c84;z-index:5}
+.nav{position:fixed;left:14px;bottom:10px;display:flex;gap:6px;z-index:5;opacity:.25;transition:opacity .2s}
+.nav:hover{opacity:1}
+.nav button{font-family:'IBM Plex Mono',monospace;background:#0E2C3D;color:#EFE6D2;border:1px solid rgba(239,230,210,.25);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:13px}
+.notas{position:fixed;left:0;right:0;bottom:0;max-height:42vh;overflow:auto;background:rgba(3,9,13,.96);border-top:2px solid var(--boya);padding:16px 22px 34px;z-index:6;display:none;font-size:16px;line-height:1.5}
+.notas.show{display:block}
+.notas h4{font-family:'IBM Plex Mono',monospace;color:var(--boya);font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.notas b{color:var(--boya)}
+.notas ul{margin:6px 0 0 18px}
+aside.nota{display:none}
+.marca{position:absolute;top:16px;right:22px;display:flex;gap:8px;z-index:3}
+.marca span{background:#fff;border-radius:8px;height:40px;padding:4px 8px;display:flex;align-items:center}
+.marca img{height:30px;display:block}
+.logos{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.logo{background:#fff;border-radius:14px;height:96px;padding:12px 20px;display:flex;align-items:center;justify-content:center}
+.logo img{display:block;max-width:230px}
+.foto{padding:0}
+.foto figure{position:absolute;inset:0;margin:0;background:#0E2C3D}
+.foto figure img{width:100%;height:100%;object-fit:cover;display:block}
+.foto .falta-box{display:none}
+.foto figure.falta img{display:none}
+.foto figure.falta .falta-box{display:flex;flex-direction:column;justify-content:center;align-items:center;position:absolute;top:60px;bottom:60px;right:60px;left:52%;border:3px dashed rgba(239,230,210,.3);border-radius:24px;color:#B9AE96;font-family:'IBM Plex Mono',monospace;font-size:22px;text-align:center;gap:10px;padding:40px}
+.foto .velo{position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,22,31,.92) 0%,rgba(7,22,31,.55) 42%,rgba(7,22,31,0) 70%)}
+.foto .texto{position:absolute;left:90px;top:0;bottom:0;width:640px;display:flex;flex-direction:column;justify-content:center}
+.foto.contain figure{left:48%;background:#07161F}
+.foto.contain figure img{object-fit:contain}
+.foto.contain .velo{display:none}
+.foto.contain .texto{width:620px}
+.foto .credito{position:absolute;right:24px;bottom:18px;font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(239,230,210,.7);background:rgba(7,22,31,.6);padding:4px 10px;border-radius:6px}
+.dato{background:var(--sonda);border:1px solid var(--linea);border-radius:18px;padding:22px 24px}
+.dato .n{font-family:'Archivo Black',sans-serif;font-size:74px;line-height:1;color:var(--boya)}
+.dato .t{font-size:23px;line-height:1.35;margin-top:8px}
+.dato .c{font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--tenue);margin-top:10px}
+.biblio li{font-size:19px;line-height:1.45;margin:0 0 12px 0;list-style:none;padding-left:26px;position:relative;color:var(--carta)}
+.biblio li::before{content:"›";position:absolute;left:4px;color:var(--boya)}
+.biblio i{color:var(--tenue)}
+</style>
+</head>
+<body>
+<div class="escenario"><div class="lienzo" id="lienzo">
+
+<!-- ============ 1 · PORTADA ============ -->
+<section class="slide" data-sec="Inicio">
+  <div class="eyebrow">IA aplicada a la producción pesquera · <b>Clase 7</b> · Visión artificial · el caso aplicado</div>
+  <h1 style="margin-top:40px">La cámara<br>en la <em>línea</em></h1>
+  <p class="lead" style="margin-top:34px">Del filete que pasa al filete que se decide.</p>
+  <svg width="1420" height="260" viewBox="0 0 1420 260" style="position:absolute;left:90px;bottom:80px" aria-label="Ilustración: cinta con filetes pasando bajo una cámara">
+    <rect x="0" y="170" width="1420" height="26" rx="13" fill="#164055"/>
+    <g fill="#0E2C3D"><circle cx="20" cy="183" r="9"/><circle cx="1400" cy="183" r="9"/></g>
+    <g>
+      <path d="M90 166 q60 -34 150 -10 q-20 14 -150 10 Z" fill="#EFE6D2"/>
+      <path d="M330 166 q60 -34 150 -10 q-20 14 -150 10 Z" fill="#EFE6D2"/>
+      <path d="M570 166 q60 -34 150 -10 q-20 14 -150 10 Z" fill="#EFE6D2"/><circle cx="640" cy="154" r="6" fill="#b3261e" opacity=".7"/>
+      <path d="M810 166 q60 -34 150 -10 q-20 14 -150 10 Z" fill="#EFE6D2"/>
+      <path d="M1050 166 q60 -34 150 -10 q-20 14 -150 10 Z" fill="#EFE6D2"/>
+    </g>
+    <rect x="590" y="0" width="120" height="56" rx="10" fill="#0E2C3D" stroke="#F0B441" stroke-width="3"/>
+    <circle cx="650" cy="28" r="15" fill="#07161F" stroke="#F0B441" stroke-width="3"/>
+    <path d="M610 56 L560 160 L760 160 L690 56 Z" fill="rgba(240,180,65,.12)"/>
+    <rect x="610" y="120" width="80" height="34" fill="none" stroke="#E8623A" stroke-width="3" stroke-dasharray="6 4"/>
+    <text x="700" y="114" fill="#E8623A" font-size="16">87 · revisar</text>
+    <path d="M1250 140 L1320 100" stroke="#E8623A" stroke-width="6" stroke-linecap="round"/>
+    <text x="1320" y="90" fill="#B9AE96" font-size="15" text-anchor="end">expulsor</text>
+    <text x="0" y="236" fill="#B9AE96" font-size="16">ILUSTRACIÓN · 300 FILETES POR MINUTO · CADA UNO CON SU PUNTAJE</text>
+  </svg>
+  <div class="pie"><span>Ariel Giamportone</span><span>martes 10/11/2026 · 18:00</span></div>
+  <aside class="nota"><h4>+0:00 · Apertura (1 min)</h4>Tomá la posta de la parte de fundamentos: <i>"Ya vieron cómo ve una máquina. Ahora vamos a la planta: qué hace una empresa con eso, qué decide y qué puede salir mal."</i> Hoy hay <b>dos simuladores en vivo</b>.<br>Teclas: <b>→</b> avanzar · <b>F</b> pantalla completa · <b>N</b> notas.</aside>
+</section>
+
+<!-- ============ 2 · DESAFÍO D03 ============ -->
+<section class="slide" data-sec="Inicio">
+  <div class="eyebrow">Desafío de la semana · <b>d03 · El modelo que acertaba el 94 %</b></div>
+  <h2>Una ley nueva <em>en la Doctrina</em></h2>
+  <div class="cols" style="margin-top:10px">
+    <div class="card col" style="flex:1.5;border-left:6px solid var(--boya)">
+      <div class="k">🏆 Corolario de Carla Campos · Clase 6</div>
+      <p class="frase" style="font-size:46px;margin:10px 0 18px">Un modelo que no le gana a la regla de siempre no es un modelo: es una demo.</p>
+      <p style="color:var(--tenue)">Fue la única que vio que decir siempre «normal» acertaba el <b style="color:var(--carta)">85 %</b>… y que el modelo, en producción, dio <b style="color:var(--carta)">83 %</b>.</p>
+    </div>
+    <div class="col">
+      <div class="card" style="margin-bottom:18px"><div class="k">Mención</div><h3>Carolina Nieto</h3><p>Cada falla con su solución. Y el dato clave: 0 de 11 lotes malos detectados.</p></div>
+      <div class="card"><div class="k">Mención</div><h3>Agustín Fermín</h3><p>La biología de la merluza a lo largo del año, que ningún dataset de verano te cuenta.</p></div>
+    </div>
+  </div>
+  <aside class="nota"><h4>+0:01 · Desafío (3 min)</h4>Anunciá a Carla y leé la ley en voz alta. Nombrá a Carolina y a Agustín. Contá en una frase las dos fallas que nadie encontró: <b>«embarcación» como variable sustituta</b> y que <b>nadie puso precio al lote malo que se escapa</b>. Esa segunda es justo el tema de hoy.</aside>
+</section>
+
+<!-- ============ 3 · PUENTE ============ -->
+<section class="slide" data-sec="Puente">
+  <div class="eyebrow">El puente · <b>de los fundamentos a la planta</b></div>
+  <h2>Es el modelo de la Clase 6, <em>pero mirando</em></h2>
+  <svg width="1420" height="330" viewBox="0 0 1420 330" aria-label="Una imagen es una grilla de números que entra a un modelo y sale un puntaje">
+    <g transform="translate(0,20)">
+      <text x="0" y="0" fill="#B9AE96" font-size="18">1 · LA FOTO DEL FILETE</text>
+      <rect x="0" y="16" width="260" height="260" rx="14" fill="#0E2C3D"/>
+      <path d="M30 170 q90 -110 210 -40 q-30 40 -210 40 Z" fill="#EFE6D2"/><circle cx="140" cy="140" r="12" fill="#b3261e" opacity=".75"/>
+    </g>
+    <path d="M285 166 H345" stroke="#F0B441" stroke-width="4"/><path d="M343 156 L365 166 L343 176 Z" fill="#F0B441"/>
+    <g transform="translate(380,20)">
+      <text x="0" y="0" fill="#B9AE96" font-size="18">2 · PARA LA MÁQUINA: NÚMEROS</text>
+      <g font-size="17" fill="#EFE6D2">
+        <rect x="0" y="16" width="300" height="260" rx="14" fill="#0E2C3D"/>
+        <text x="20" y="60">212 214 210 208 205</text><text x="20" y="96">215 211 209 207 201</text>
+        <text x="20" y="132">213 <tspan fill="#E8623A">118 104</tspan> 206 203</text><text x="20" y="168">210 <tspan fill="#E8623A">121 109</tspan> 204 200</text>
+        <text x="20" y="204">208 206 203 201 198</text><text x="20" y="240" fill="#B9AE96">… millones de píxeles</text>
+      </g>
+    </g>
+    <path d="M705 166 H765" stroke="#F0B441" stroke-width="4"/><path d="M763 156 L785 166 L763 176 Z" fill="#F0B441"/>
+    <g transform="translate(800,20)">
+      <text x="0" y="0" fill="#B9AE96" font-size="18">3 · EL MODELO</text>
+      <rect x="0" y="16" width="260" height="260" rx="14" fill="#1d5a6e"/>
+      <text x="130" y="140" text-anchor="middle" fill="#EFE6D2" font-size="28" font-family="Archivo,sans-serif" font-weight="700">Red neuronal</text>
+      <text x="130" y="176" text-anchor="middle" fill="#B9AE96" font-size="17">aprendió de fotos</text><text x="130" y="200" text-anchor="middle" fill="#B9AE96" font-size="17">etiquetadas</text>
+    </g>
+    <path d="M1085 166 H1145" stroke="#F0B441" stroke-width="4"/><path d="M1143 156 L1165 166 L1143 176 Z" fill="#F0B441"/>
+    <g transform="translate(1180,20)">
+      <text x="0" y="0" fill="#B9AE96" font-size="18">4 · UN PUNTAJE</text>
+      <rect x="0" y="16" width="240" height="260" rx="14" fill="#F0B441"/>
+      <text x="120" y="160" text-anchor="middle" fill="#07161F" font-size="84" font-family="Archivo Black,sans-serif">87</text>
+      <text x="120" y="200" text-anchor="middle" fill="#07161F" font-size="17">«probable defecto»</text>
+    </g>
+  </svg>
+  <p class="lead" style="margin-top:6px">En la Clase 6 el modelo miraba <b>SST y clorofila</b> y daba una probabilidad. Acá mira <b>píxeles</b> y da un puntaje. <b>Lo que hacemos con ese número es igual de importante que el modelo.</b></p>
+  <aside class="nota"><h4>+0:04 · Puente (3 min)</h4>No repitas los fundamentos que acaban de dar: usá esta diapositiva solo como enganche. La idea fuerza: <b>la red neuronal termina en un número</b>, igual que el modelo de la Clase 6. Y todo lo que vimos de umbral, examen honesto y línea base vale igual.</aside>
+</section>
+
+<!-- ============ 4 · LA MESA DE LUZ ============ -->
+<section class="slide" data-sec="1 · El problema">
+  <div class="eyebrow">Parte 1 · <b>El problema</b> · cómo se inspecciona hoy</div>
+  <h2>La mesa de luz <em>se pierde casi todo</em></h2>
+  <div class="grid3" style="margin-top:14px">
+    <div class="dato"><div class="n">31 %</div><div class="t">de las larvas de anisákidos encontradas con la mesa de luz (<i>candling</i>) en filetes comerciales de varias especies</div><div class="c">Mercken et al. (2022) · Scientific Reports</div></div>
+    <div class="dato"><div class="n" style="color:var(--langostino)">7–10 %</div><div class="t">de las larvas detectadas en arenque, bacaladilla y caballa, peces grasos donde la luz atraviesa menos</div><div class="c">Levsen et al. (2005) · J. Food Protection</div></div>
+    <div class="dato"><div class="n" style="color:var(--marea)">20–30 %</div><div class="t">de errores es habitual en la inspección visual humana, de cualquier industria, y se omite más de lo que se rechaza de más</div><div class="c">See (2012) · Sandia National Laboratories</div></div>
+  </div>
+  <p class="lead" style="margin-top:34px">El operario no es el problema: <b>la tarea es difícil</b>, repetitiva, a velocidad de cinta y durante ocho horas. Ahí es donde la visión artificial tiene algo para aportar.</p>
+  <aside class="nota"><h4>+0:07 · La mesa de luz (6 min)</h4>💬 Preguntá: <b>"¿Quién trabajó o vio trabajar una mesa de luz?"</b> Dejá que cuenten (cansancio, velocidad, luz). Después mostrá los números. Cuidado con el tono: no es «el humano es malo», es <b>«la tarea es durísima»</b>. El 31 % es de un estudio multiespecie; en bacalao y rape los valores reportados son más altos (≈ 50 %), en peces grasos mucho más bajos.</aside>
+</section>
+
+<!-- ============ 5 · QUÉ VE HOY UNA CÁMARA ============ -->
+<section class="slide" data-sec="1 · El problema">
+  <div class="eyebrow">Parte 1 · <b>El estado del arte</b> · lo que ya existe</div>
+  <h2>Qué puede ver <em>hoy</em> una cámara</h2>
+  <div class="grid5" style="margin-top:14px">
+    <div class="regla" style="border-top-color:var(--marea)"><div class="n">EN PLANTA · EN USO</div><div class="t">Espinas</div><div class="e">Rayos X ubican las espinas del filete de pescado blanco con precisión de <b>0,2 mm</b>, y un chorro de agua corta.</div><div class="e" style="margin-top:10px;font-size:16px">Marel FleXicut</div></div>
+    <div class="regla" style="border-top-color:var(--marea)"><div class="n">EN PLANTA · EN USO</div><div class="t">Porcionado</div><div class="e">Un escáner 3D mide cada filete y decide los cortes para sacar <b>porciones de peso fijo</b>.</div><div class="e" style="margin-top:10px;font-size:16px">Marel FleXicut Tres</div></div>
+    <div class="regla" style="border-top-color:var(--boya)"><div class="n">EN PLANTA · DEFECTOS</div><div class="t">Lo visible</div><div class="e">Hematomas, manchas, restos de piel, <i>gaping</i>. Una cámara color con buena luz y fotos etiquetadas.</div><div class="e" style="margin-top:10px;font-size:16px">el simulador de hoy</div></div>
+    <div class="regla" style="border-top-color:var(--langostino)"><div class="n">EN DESARROLLO</div><div class="t">Parásitos</div><div class="e">Con imagen hiperespectral se detectó el <b>58 %</b> de los nematodos en filetes de bacalao (922 larvas), con falsas alarmas.</div><div class="e" style="margin-top:10px;font-size:16px">Sivertsen et al. (2011)</div></div>
+    <div class="regla" style="border-top-color:var(--transito)"><div class="n">A BORDO</div><div class="t">Descarte</div><div class="e">Cámaras en la cubierta de arrastreros y redes neuronales que <b>separan y clasifican</b> cada pez que se devuelve al mar.</div><div class="e" style="margin-top:10px;font-size:16px">French et al. (2020) · ICES JMS</div></div>
+  </div>
+  <aside class="nota"><h4>+0:13 · Estado del arte (6 min)</h4>Recorré de izquierda a derecha, <b>de lo más maduro a lo menos maduro</b>. Espinas y porcionado son productos comerciales que ya están en plantas. Parásitos sigue en desarrollo: 58 % es mejor que la mesa de luz en peces grasos, pero no la reemplaza. A bordo conecta con el monitoreo electrónico (Clase 4). No nombres precios: no tenemos una fuente verificable.</aside>
+</section>
+
+<!-- ============ 6 · EL CIRCUITO ============ -->
+<section class="slide" data-sec="2 · En la línea">
+  <div class="eyebrow">Parte 2 · <b>Cómo funciona en la línea</b></div>
+  <h2>La cámara mira. <em>La regla decide.</em></h2>
+  <svg width="1420" height="300" viewBox="0 0 1420 300" aria-label="Circuito: luz, cámara, modelo, regla de la planta, expulsor y registro, con una persona en la zona de duda">
+    <g font-family="Archivo,sans-serif" font-weight="700" font-size="24">
+      <g transform="translate(0,20)"><rect width="210" height="120" rx="14" fill="#164055"/><text x="105" y="56" text-anchor="middle" fill="#EFE6D2">Luz</text><text x="105" y="88" text-anchor="middle" fill="#B9AE96" font-size="16" font-family="IBM Plex Mono,monospace">cabina cerrada</text></g>
+      <g transform="translate(240,20)"><rect width="210" height="120" rx="14" fill="#1d5a6e"/><text x="105" y="56" text-anchor="middle" fill="#EFE6D2">Cámara</text><text x="105" y="88" text-anchor="middle" fill="#B9AE96" font-size="16" font-family="IBM Plex Mono,monospace">color · 3D · rayos X</text></g>
+      <g transform="translate(480,20)"><rect width="210" height="120" rx="14" fill="#2f7f7a"/><text x="105" y="56" text-anchor="middle" fill="#EFE6D2">Modelo</text><text x="105" y="88" text-anchor="middle" fill="#EFE6D2" font-size="16" font-family="IBM Plex Mono,monospace">da un puntaje</text></g>
+      <g transform="translate(720,20)"><rect width="210" height="120" rx="14" fill="#F0B441"/><text x="105" y="56" text-anchor="middle" fill="#07161F">Regla</text><text x="105" y="88" text-anchor="middle" fill="#07161F" font-size="16" font-family="IBM Plex Mono,monospace">umbrales de la planta</text></g>
+      <g transform="translate(960,20)"><rect width="210" height="120" rx="14" fill="#E8623A"/><text x="105" y="56" text-anchor="middle" fill="#fff">Actuador</text><text x="105" y="88" text-anchor="middle" fill="#fff" font-size="16" font-family="IBM Plex Mono,monospace">expulsor · corte</text></g>
+      <g transform="translate(1200,20)"><rect width="210" height="120" rx="14" fill="#0E2C3D" stroke="rgba(239,230,210,.28)"/><text x="105" y="56" text-anchor="middle" fill="#EFE6D2">Registro</text><text x="105" y="88" text-anchor="middle" fill="#B9AE96" font-size="16" font-family="IBM Plex Mono,monospace">la planilla diaria</text></g>
+      <g fill="#F0B441"><path d="M213 73 L236 80 L213 87 Z"/><path d="M453 73 L476 80 L453 87 Z"/><path d="M693 73 L716 80 L693 87 Z"/><path d="M933 73 L956 80 L933 87 Z"/><path d="M1173 73 L1196 80 L1173 87 Z"/></g>
+      <path d="M825 145 V200" stroke="#F0B441" stroke-width="4" stroke-dasharray="8 6"/>
+      <g transform="translate(660,205)"><rect width="330" height="80" rx="14" fill="#0E2C3D" stroke="#F0B441" stroke-width="2"/><text x="165" y="36" text-anchor="middle" fill="#F0B441">Persona en la mesa</text><text x="165" y="62" text-anchor="middle" fill="#B9AE96" font-size="16" font-family="IBM Plex Mono,monospace">solo la zona de duda</text></g>
+    </g>
+  </svg>
+  <div class="cita" style="margin-top:8px">La IA recomienda. La regla bloquea. La persona firma.<span>Ley de Pablo Di Filippo · Doctrina del Grupo · Clase 3</span></div>
+  <aside class="nota"><h4>+0:19 · El circuito (4 min)</h4>Recorré la cadena. Dos remarques: (1) <b>la luz es parte del sistema</b>, no un detalle: vuelve en el simulador. (2) El modelo no expulsa nada: da un número; la que decide es <b>la regla que fija la planta</b>. Conectá con la ley de Pablo: es exactamente esto, pero en la cinta.</aside>
+</section>
+
+<!-- ============ 7 · DEMO 1 · EL OJO Y LA IA ============ -->
+<section class="slide" data-sec="2 · En la línea">
+  <div class="eyebrow">🎛️ Simulador en vivo · <b>El ojo y la IA</b></div>
+  <h2>Primero, inspeccioná <em>vos</em></h2>
+  <div class="cols" style="margin-top:10px">
+    <div class="card col" style="flex:1.4"><div class="k">Qué hacemos</div>
+      <ul class="lista"><li>Clasificamos juntos <b>8 o 10 filetes</b>: Grado A, Grado B o Rechazo.</li><li>Después mira la IA y se arma la <b>matriz de confusión</b>.</li><li>Buscamos el casillero caro: <b>la mala que se aprobó</b>.</li></ul>
+    </div>
+    <div class="card col" style="border-left:6px solid var(--boya)"><div class="k">Abrir</div><p class="mono" style="font-size:19px;word-break:break-all">pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/planta_inspector.html</p><p style="margin-top:12px;color:var(--tenue)">También está en el aula, sección Clase 7.</p></div>
+  </div>
+  <svg width="1420" height="360" viewBox="0 0 1420 360" style="margin-top:26px" aria-label="Esquema de matriz de confusión con el casillero de la mala aprobada resaltado">
+    <text x="300" y="24" fill="#B9AE96" font-size="18">ESQUEMA · LA MATRIZ DE CONFUSIÓN</text>
+    <text x="640" y="62" text-anchor="middle" fill="#F0B441" font-size="18">LO QUE DIJO LA IA →</text>
+    <g font-size="20" fill="#EFE6D2" text-anchor="middle"><text x="460" y="96">Grado A</text><text x="640" y="96">Grado B</text><text x="820" y="96">Rechazo</text></g>
+    <g font-size="20" fill="#EFE6D2" text-anchor="end"><text x="360" y="150">Grado A</text><text x="360" y="230">Grado B</text><text x="360" y="310">Rechazo</text></g>
+    <text x="250" y="230" text-anchor="middle" fill="#F0B441" font-size="18" transform="rotate(-90 250 230)">LA VERDAD →</text>
+    <g>
+      <rect x="380" y="110" width="160" height="70" rx="8" fill="#48B39C"/><rect x="560" y="110" width="160" height="70" rx="8" fill="#164055"/><rect x="740" y="110" width="160" height="70" rx="8" fill="#164055"/>
+      <rect x="380" y="190" width="160" height="70" rx="8" fill="#164055"/><rect x="560" y="190" width="160" height="70" rx="8" fill="#48B39C"/><rect x="740" y="190" width="160" height="70" rx="8" fill="#164055"/>
+      <rect x="380" y="270" width="160" height="70" rx="8" fill="#E8623A"/><rect x="560" y="270" width="160" height="70" rx="8" fill="#164055"/><rect x="740" y="270" width="160" height="70" rx="8" fill="#48B39C"/>
+      <g fill="#07161F" font-size="17" text-anchor="middle"><text x="460" y="151">acierto</text><text x="640" y="231">acierto</text><text x="820" y="311">acierto</text></g>
+      <text x="460" y="311" text-anchor="middle" fill="#fff" font-size="17" font-weight="600">mala aprobada</text>
+    </g>
+    <text x="930" y="300" fill="#E8623A" font-size="24" font-family="Archivo,sans-serif" font-weight="700">← abajo a la izquierda: el error caro</text>
+    <text x="930" y="332" fill="#B9AE96" font-size="18">el filete malo que llega al cliente</text>
+  </svg>
+  <aside class="nota"><h4>+0:23 · Demo 1 (8 min)</h4>Compartí pantalla con el simulador. Pedí que voten en el chat el grado de cada filete antes de que clickees. Cuando aparezca la matriz, señalá: <b>diagonal = aciertos</b>; fuera de la diagonal, <b>¿cuál de los errores nos duele más?</b> Que lo digan ellos. Esa respuesta es la diapositiva siguiente.</aside>
+</section>
+
+<!-- ============ 8 · DOS ERRORES ============ -->
+<section class="slide" data-sec="2 · En la línea">
+  <div class="eyebrow">Parte 2 · <b>Los dos errores</b></div>
+  <h2>No cuestan <em>lo mismo</em></h2>
+  <div class="cols" style="margin-top:10px">
+    <div class="card col" style="border-top:6px solid var(--langostino)"><div class="k" style="color:var(--langostino)">El filete malo que pasa</div><h3 style="font-size:38px">Se escapa</h3><ul class="lista"><li>Reclamo o rechazo del cliente</li><li>Riesgo para la salud: un parásito vivo</li><li>Una auditoría, una alerta, la marca</li></ul></div>
+    <div class="card col" style="border-top:6px solid var(--boya)"><div class="k" style="color:var(--boya)">El filete bueno que se tira</div><h3 style="font-size:38px">Se pierde</h3><ul class="lista"><li>Kilos que bajan de categoría o van a harina</li><li>Menos rendimiento de la línea</li><li>Y si son muchos, la gente apaga la cámara</li></ul></div>
+  </div>
+  <p class="lead" style="margin-top:28px">Ninguna cámara saca los dos a cero. <b>Dónde poner el umbral es una decisión de la empresa</b>, como vimos en la Clase 6.</p>
+  <svg width="1420" height="150" viewBox="0 0 1420 150" style="margin-top:22px" aria-label="Barra de puntaje con umbral: a la izquierda se escapan más defectos, a la derecha se tiran más buenos">
+    <defs><linearGradient id="gUm" x1="0" x2="1"><stop offset="0" stop-color="#48B39C"/><stop offset="1" stop-color="#E8623A"/></linearGradient></defs>
+    <rect x="0" y="50" width="1420" height="34" rx="17" fill="url(#gUm)" opacity=".85"/>
+    <line x1="760" y1="30" x2="760" y2="104" stroke="#F0B441" stroke-width="6"/>
+    <text x="760" y="20" text-anchor="middle" fill="#F0B441" font-size="20">UMBRAL</text>
+    <text x="0" y="128" fill="#EFE6D2" font-size="20">← más a la izquierda: <tspan fill="#F0B441">se tiran más buenos</tspan></text>
+    <text x="1420" y="128" text-anchor="end" fill="#EFE6D2" font-size="20">más a la derecha: <tspan fill="#E8623A">se escapan más defectos</tspan> →</text>
+  </svg>
+  <aside class="nota"><h4>+0:31 · Dos errores (3 min)</h4>Volvé a la Clase 6: el umbral es una decisión económica. Agregá el dato humano: <b>si la cámara rechaza demasiado, el operario deja de creerle</b> (fatiga de alertas: lo nombró Ana Clara en el POTD de septiembre). Esto prepara el simulador nuevo.</aside>
+</section>
+
+<!-- ============ 9 · DEMO 2 · LA CÁMARA EN LA LÍNEA ============ -->
+<section class="slide" data-sec="3 · Decidir">
+  <div class="eyebrow">🎛️ Simulador en vivo · <b>nuevo</b> · La cámara en la línea</div>
+  <h2>Tres perillas <em>de planta</em></h2>
+  <div class="grid3" style="margin-top:12px">
+    <div class="card"><div class="k">Paso 1 · El puntaje</div><h3>Un umbral</h3><p>Las dos montañas se pisan: correr el umbral <b>cambia un error por otro</b>.</p></div>
+    <div class="card"><div class="k">Paso 2 · La zona de duda</div><h3>Dos umbrales y una mesa</h3><p>Lo dudoso va a una persona. ¿Cuánta gente hace falta a <b>300 filetes por minuto</b>?</p></div>
+    <div class="card" style="border:2px solid var(--langostino)"><div class="k" style="color:var(--langostino)">Paso 3 · Cambió la luz</div><h3>Nadie tocó el modelo</h3><p>Un tubo nuevo y la mesa pasa de <b>1 a 5 personas</b>. La planilla diaria lo avisa.</p></div>
+  </div>
+  <div class="card" style="margin-top:22px;border-left:6px solid var(--boya)"><div class="k">Abrir</div><p class="mono" style="font-size:19px">pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/c7_camara_linea.html</p></div>
+  <div class="fuente">Datos y modelo didácticos del simulador · 80 % de acierto humano: See (2012), Sandia</div>
+  <aside class="nota"><h4>+0:34 · Demo 2 (12 min)</h4><b>Paso 1 (3 min):</b> llevá el umbral a 30 y a 70 y leé los dos números en voz alta (con 30, 22.500 buenos tirados por turno; con 70, 3.924 defectos que se escapan). <b>Paso 2 (5 min):</b> con 40 y 60, 1 persona en la mesa (≈ 11 filetes/min); pedí a alguien del chat que proponga cómo abrir la zona y mirá cuántas personas hacen falta. Remarcá que la persona también se equivoca (80 %). <b>Paso 3 (4 min):</b> tocá «Cambiar el tubo de luz»: de 1 a 5 personas, de 691 a 10.267 buenos tirados por turno, y el salto en la planilla del día 10. Pregunta: <b>"¿quién en tu planta miraría esa curva todos los días?"</b></aside>
+</section>
+
+<!-- ============ 10 · LO QUE HACE FALLAR ============ -->
+<section class="slide" data-sec="3 · Decidir">
+  <div class="eyebrow">Parte 3 · <b>Lo que hace fallar a la cámara</b></div>
+  <h2>Casi nunca es el algoritmo</h2>
+  <div class="grid5" style="margin-top:12px">
+    <div class="regla"><div class="n">01</div><div class="t">La luz</div><div class="e">Un tubo distinto, una puerta abierta, el sol de la tarde.</div></div>
+    <div class="regla"><div class="n">02</div><div class="t">La lente</div><div class="e">Vapor, hielo, escamas, salpicaduras. <b>Limpiarla es un procedimiento.</b></div></div>
+    <div class="regla"><div class="n">03</div><div class="t">La temporada</div><div class="e">Otro tamaño, otro color, otra zona de pesca. Lo que aprendió en verano no es lo de invierno.</div></div>
+    <div class="regla"><div class="n">04</div><div class="t">Las etiquetas</div><div class="e">Si las fotos las etiquetó una sola persona, el modelo aprende <b>su criterio</b>, con sus errores.</div></div>
+    <div class="regla"><div class="n">05</div><div class="t">La velocidad</div><div class="e">Se acelera la cinta y las fotos salen movidas. El modelo nunca vio eso.</div></div>
+  </div>
+  <p class="lead" style="margin-top:26px">Todo esto tiene un nombre: <b>deriva de datos</b>. Lo que ve el modelo dejó de parecerse a lo que vio cuando aprendió.</p>
+  <aside class="nota"><h4>+0:46 · Fallas (4 min)</h4>💬 Preguntá: <b>"¿Cuál de estas cinco pasa seguro en tu planta o en tu barco?"</b> Casi siempre aparecen la lente (vapor, hielo) y la temporada. Conectá la temporada con la mención de Agustín en el desafío: la merluza no es la misma todo el año.</aside>
+</section>
+
+<!-- ============ 11 · QUÉ NECESITA UNA PLANTA ============ -->
+<section class="slide" data-sec="3 · Decidir">
+  <div class="eyebrow">Parte 3 · <b>Antes de comprar una cámara</b></div>
+  <h2>Seis preguntas <em>para empezar</em></h2>
+  <div class="grid3" style="margin-top:12px">
+    <div class="card"><div class="k">1 · El problema</div><h3>¿Qué defecto y cuánto cuesta?</h3><p>Uno solo, para empezar. Con el costo de cada error.</p></div>
+    <div class="card"><div class="k">2 · La línea base</div><h3>¿Cómo nos va hoy?</h3><p>Sin el número de la mesa de luz actual no hay nada que comparar. <i>(Claudio y Carla)</i></p></div>
+    <div class="card"><div class="k">3 · Las fotos</div><h3>¿Quién las etiqueta?</h3><p>Al menos dos personas que coincidan. Si no coinciden entre ellas, la máquina tampoco va a acertar.</p></div>
+    <div class="card"><div class="k">4 · La luz</div><h3>¿Está controlada?</h3><p>Cabina cerrada, luz fija y en el procedimiento, como la calibración de la balanza.</p></div>
+    <div class="card"><div class="k">5 · La persona</div><h3>¿Dónde va la mesa?</h3><p>Cuántos filetes dudosos por minuto puede revisar tu gente.</p></div>
+    <div class="card" style="border:2px solid var(--boya)"><div class="k" style="color:var(--boya)">6 · El registro</div><h3>¿Quién mira la planilla?</h3><p>Todos los días, la tasa de rechazo. Es la alarma más barata que existe.</p></div>
+  </div>
+  <aside class="nota"><h4>+0:50 · Seis preguntas (4 min)</h4>Es la versión «visión» de la lista de chequeo del simulador «Elegí bien» (Clase 6). Remarcá la 3: el acuerdo entre etiquetadores es <b>el techo</b> de lo que puede aprender el modelo. Y la 2 cita las dos leyes de la Doctrina sobre línea base.</aside>
+</section>
+
+<!-- ============ 12 · ACTIVIDAD ============ -->
+<section class="slide seccion" data-sec="Práctica">
+  <div class="eyebrow">Práctica · <b>4 minutos</b></div>
+  <h2 style="font-size:72px;margin-top:30px">Tu línea <em>en tres líneas</em></h2>
+  <div class="card" style="margin-top:30px;max-width:1200px">
+    <ul class="lista">
+      <li><b>¿Qué defecto</b> le pondrías primero a una cámara en tu planta o en tu barco?</li>
+      <li><b>¿Cuál es el error caro:</b> el malo que pasa o el bueno que se tira?</li>
+      <li><b>¿Quién estaría en la mesa</b> con lo dudoso, y quién miraría la planilla?</li>
+    </ul>
+  </div>
+  <p class="sub" style="margin-top:24px">En el chat, ahora. Y si querés desarrollarlo, en el foro de la Clase 7: <b style="color:var(--boya)">los mejores aportes entran a la Doctrina</b>.</p>
+  <div class="num">7</div>
+  <aside class="nota"><h4>+0:54 · Actividad (4 min)</h4>Leé dos o tres respuestas del chat en voz alta, con nombre. Buscá contrastes: alguien de planta y alguien de barco o de control. Si alguien trae experiencia de campo concreta (un defecto real, un costo), anotalo para la Doctrina.</aside>
+</section>
+
+<!-- ============ 13 · CIERRE ============ -->
+<section class="slide" data-sec="Cierre">
+  <div class="eyebrow">Cierre</div>
+  <h2>Lo que nos llevamos <em>hoy</em></h2>
+  <svg width="1420" height="170" viewBox="0 0 1420 170" aria-label="Síntesis: puntaje, umbral, zona de duda, luz, planilla">
+    <g font-family="Archivo,sans-serif" font-weight="700" font-size="26">
+    <g transform="translate(0,20)"><rect width="250" height="110" rx="14" fill="#164055"/><text x="125" y="64" text-anchor="middle" fill="#EFE6D2">Puntaje</text></g>
+    <g transform="translate(290,20)"><rect width="250" height="110" rx="14" fill="#1d5a6e"/><text x="125" y="64" text-anchor="middle" fill="#EFE6D2">Umbral</text></g>
+    <g transform="translate(580,20)"><rect width="250" height="110" rx="14" fill="#2f7f7a"/><text x="125" y="64" text-anchor="middle" fill="#EFE6D2">Zona de duda</text></g>
+    <g transform="translate(870,20)"><rect width="250" height="110" rx="14" fill="#48B39C"/><text x="125" y="64" text-anchor="middle" fill="#07161F">Luz</text></g>
+    <g transform="translate(1160,20)"><rect width="250" height="110" rx="14" fill="#F0B441"/><text x="125" y="64" text-anchor="middle" fill="#07161F">Planilla</text></g>
+    <g fill="#F0B441"><path d="M255 68 L284 75 L255 82 Z"/><path d="M545 68 L574 75 L545 82 Z"/><path d="M835 68 L864 75 L835 82 Z"/><path d="M1125 68 L1154 75 L1125 82 Z"/></g>
+    </g>
+  </svg>
+  <div class="cols">
+    <div class="card col"><div class="k">Esta semana</div><ul class="lista"><li>Los dos simuladores: <b>El ojo y la IA</b> y <b>La cámara en la línea</b></li><li>Notebook <b>clase07_vision_artificial_plantas</b> (Colab, sin GPU)</li><li>Tu línea en el foro de la Clase 7</li></ul></div>
+    <div class="card col" style="border-left:6px solid var(--boya)"><div class="k">Próxima estación</div><p style="font-size:24px"><b>Clase 8 · Optimización y agentes de IA:</b> de la predicción a la acción.</p><p style="font-size:24px;margin-top:10px">Hoy la cámara mira; en la 8, <b>el sistema actúa</b>.</p></div>
+  </div>
+  <aside class="nota"><h4>+0:58 · Cierre (2 min)</h4>Síntesis en una línea: <b>la cámara da un puntaje; la planta pone el umbral, decide qué ve la persona, cuida la luz y mira la planilla</b>. Devolvé la palabra a quien sigue (o abrí preguntas si cerrás vos).</aside>
+</section>
+
+<!-- ============ 14 · BIBLIOGRAFÍA ============ -->
+<section class="slide" data-sec="Cierre">
+  <div class="eyebrow">Fuentes de esta presentación</div>
+  <h2>Bibliografía</h2>
+  <ul class="biblio" style="margin-top:6px">
+    <li>French, G., Mackiewicz, M., Fisher, M. et al. (2020). Deep neural networks for analysis of fisheries surveillance video and automated monitoring of fish discards. <i>ICES Journal of Marine Science</i>, 77(4), 1340–1353.</li>
+    <li>Levsen, A., Lunestad, B. T. y Berland, B. (2005). Low detection efficiency of candling as a commonly recommended inspection method for nematode larvae in the flesh of pelagic fish. <i>Journal of Food Protection</i>, 68(4), 828–832.</li>
+    <li>Marel. FleXicut y FleXicut Tres: rayos X, escáner 3D y corte por chorro de agua para filetes de pescado blanco. marel.com (fichas de producto).</li>
+    <li>Mercken, E. et al. (2022). Sensitivity of candling as routine method for the detection and recovery of ascaridoids in commercial fish fillets. <i>Scientific Reports</i>, 12, 1358.</li>
+    <li>See, J. E. (2012). <i>Visual Inspection: A Review of the Literature</i>. Sandia National Laboratories, SAND2012-8590.</li>
+    <li>Sivertsen, A. H. et al. (2011). Automatic nematode detection in cod fillets (<i>Gadus morhua</i>) by transillumination hyperspectral imaging. <i>Journal of Food Science</i>, 76(1), S77–S83.</li>
+    <li>Simuladores del curso: <b>planta_inspector</b> y <b>c7_camara_linea</b> (datos didácticos generados para aprender, no son mediciones de planta).</li>
+  </ul>
+  <aside class="nota"><h4>Bibliografía</h4>No se proyecta salvo que pregunten; queda para quien descargue la presentación del aula.</aside>
+</section>
+
+<!-- ============ 15 · FINAL ============ -->
+<section class="slide seccion" data-sec="Cierre" data-sin-marca>
+  <div class="eyebrow">IA aplicada a la producción pesquera · Clase 7</div>
+  <p class="frase" style="font-size:78px;margin-top:120px">La cámara mira.<br><span style="color:var(--boya)">La planta decide.</span></p>
+  <p class="lead" style="margin-top:50px">Nos vemos en el aula y en la comunidad PesquerosEnIA.</p>
+  <div class="logos" style="margin-top:46px;transform:scale(.72);transform-origin:left top"><div class="logo"><img src="../../branding/utn_frch.png" alt="UTN Facultad Regional Chubut" style="max-height:56px"></div><div class="logo"><img src="../../branding/ing_pesquera.png" alt="Ingeniería Pesquera UTN FRCh" style="max-height:88px"></div><div class="logo"><img src="../../branding/cidapal.png" alt="CIDAPAL UTN" style="max-height:72px"></div><div class="logo"><img src="../../branding/cfp.png" alt="Consejo Federal Pesquero" style="max-height:56px"></div><div class="logo"><img src="../../branding/capip.png" alt="CAPIP" style="max-height:56px"></div><div class="logo"><img src="../../branding/senasa.png" alt="SENASA" style="max-height:56px"></div><div class="logo"><img src="../../branding/pesquerosenia.png" alt="PesquerosEnIA" style="max-height:88px"></div></div>
+  <div class="pie"><span>Ariel Giamportone · UTN FRCh</span><span>github.com/PesquerosEnIA</span></div>
+  <aside class="nota"><h4>+1:00 · Fin</h4>Dejala proyectada durante las preguntas o el traspaso.</aside>
+</section>
+
+</div></div>
+
+<div class="hud"><i id="barra"></i></div>
+<div class="contador" id="contador"></div>
+<div class="nav"><button type="button" id="bAnt" aria-label="Anterior">←</button><button type="button" id="bSig" aria-label="Siguiente">→</button><button type="button" id="bFull">F · pantalla completa</button><button type="button" id="bNotas">N · notas</button></div>
+<div class="notas" id="notas" aria-live="polite"></div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')], lienzo=document.getElementById('lienzo');
+slides.forEach(sl=>{ if(sl.dataset.sinMarca!==undefined) return; const m=document.createElement('div'); m.className='marca'; m.setAttribute('aria-hidden','true');
+  m.innerHTML='<span><img src="../../branding/utn_frch.png" alt=""></span><span><img src="../../branding/pesquerosenia.png" alt=""></span>'; sl.appendChild(m); });
+let i=0;
+function escalar(){ const s=Math.min(innerWidth/1600, innerHeight/900); lienzo.style.transform=`scale(${s})`; }
+function ir(n){
+  i=Math.max(0,Math.min(slides.length-1,n));
+  slides.forEach((s,k)=>s.classList.toggle('activa',k===i));
+  document.getElementById('barra').style.width=(100*(i+1)/slides.length)+'%';
+  document.getElementById('contador').textContent=`${slides[i].dataset.sec||''} · ${i+1} / ${slides.length}`;
+  const nota=slides[i].querySelector('aside.nota'); document.getElementById('notas').innerHTML=nota?nota.innerHTML:'';
+  if(location.hash!=='#'+(i+1)) history.replaceState(null,'','#'+(i+1));
+}
+function full(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); }
+function notas(){ document.getElementById('notas').classList.toggle('show'); }
+addEventListener('keydown',e=>{
+  if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();ir(i+1);}
+  else if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){e.preventDefault();ir(i-1);}
+  else if(e.key==='Home') ir(0); else if(e.key==='End') ir(slides.length-1);
+  else if(e.key==='f'||e.key==='F') full(); else if(e.key==='n'||e.key==='N') notas();
+});
+let x0=null; addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
+addEventListener('touchend',e=>{ if(x0===null) return; const d=e.changedTouches[0].clientX-x0; if(Math.abs(d)>50) ir(i+(d<0?1:-1)); x0=null; });
+document.getElementById('bAnt').onclick=()=>ir(i-1); document.getElementById('bSig').onclick=()=>ir(i+1);
+document.getElementById('bFull').onclick=full; document.getElementById('bNotas').onclick=notas;
+addEventListener('resize',escalar); escalar();
+ir((parseInt(location.hash.slice(1))||1)-1);
+</script>
+</body>
+</html>

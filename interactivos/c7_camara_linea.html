@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La cámara en la línea · Clase 7</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --rojo:#d9534f; --ambar:#e6a417;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:1040px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 14px;max-width:78ch}
+  .lead b{color:var(--tinta)}
+  .pasos{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;padding:0;list-style:none}
+  .pasos button{border:1px solid var(--linea);background:var(--panel);border-radius:999px;padding:6px 11px;
+    font-size:12.5px;font-weight:700;color:var(--gris);cursor:pointer;font-family:inherit}
+  .pasos button .n{display:inline-block;width:20px;height:20px;line-height:20px;border-radius:50%;background:var(--fondo);
+    text-align:center;margin-right:5px;font-size:11.5px}
+  .pasos button.hecho{color:var(--azul-osc)}
+  .pasos button.hecho .n{background:#d7ecf5}
+  .pasos button.activo{background:var(--azul);border-color:var(--azul);color:#fff}
+  .pasos button.activo .n{background:#fff;color:var(--azul)}
+  .grid{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+  .col-graf{flex:1 1 470px;min-width:0}
+  .col-txt{flex:1 1 360px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 6px;font-weight:800}
+  .panel h3{font-size:20px;line-height:1.25;margin:0 0 8px}
+  .panel p{font-size:14.5px;margin:0 0 10px}
+  svg{width:100%;height:auto;display:block}
+  .jerga{margin-top:12px;background:#eef6fa;border:1px dashed #9cc7dc;border-radius:10px;padding:9px 12px;font-size:13px;color:var(--azul-osc)}
+  .jerga b{font-weight:800}
+  .perilla{margin:12px 0 4px}
+  .perilla label{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;margin-bottom:2px}
+  .perilla label span{font-variant-numeric:tabular-nums}
+  .perilla input[type=range]{width:100%;accent-color:var(--azul)}
+  .perilla .ay{font-size:12px;color:var(--gris)}
+  .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0 4px}
+  .ley{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--tinta);margin:0 0 4px}
+  .ley i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+  .kpi{border:1px solid var(--linea);border-radius:10px;padding:8px 10px;background:var(--fondo)}
+  .kpi .v{font-size:22px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+  .kpi .t{font-size:12px;color:var(--gris)}
+  .kpi.r .v{color:var(--rojo)} .kpi.a .v{color:#a87400} .kpi.v .v{color:var(--verde)}
+  .btn{border:0;background:var(--azul);color:#fff;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit}
+  .btn.sec{background:var(--fondo);color:var(--azul-osc);border:1px solid var(--linea)}
+  .btn.on{background:var(--rojo)}
+  .nav{display:flex;justify-content:space-between;gap:8px;margin-top:14px}
+  .msg{border-radius:10px;padding:10px 13px;font-size:14px;margin:10px 0}
+  .msg.bien{background:#e3f4ec;color:#11633f} .msg.mal{background:#fbe6e5;color:#8f2a26} .msg.meh{background:#fdf6e3;color:#7a5600}
+  .msg b{font-weight:800}
+  .supuesto{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--gris);margin:8px 0}
+  .supuesto input{width:64px;padding:4px 6px;border:1px solid var(--linea);border-radius:6px;font:inherit;font-weight:700;color:var(--tinta)}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🎥 Clase 7 · Simulador interactivo · visión artificial en planta</div>
+  <h1>La cámara en la línea</h1>
+  <p class="lead">Una cámara mira cada filete de merluza que pasa por la cinta, <b>300 por minuto</b>, y le pone un
+  <b>puntaje de defecto</b> de 0 a 100. La cámara no decide: <b>la planta decide</b> qué hacer con ese puntaje.
+  En 3 pasos tocás las perillas que de verdad se discuten en una planta.</p>
+
+  <ol class="pasos" id="pasos"></ol>
+
+  <div class="grid">
+    <div class="col-graf">
+      <div class="panel">
+        <h2 id="grafTitulo"></h2>
+        <div id="graf"></div>
+        <div id="debajo"></div>
+      </div>
+    </div>
+    <div class="col-txt">
+      <div class="panel" id="txt"></div>
+    </div>
+  </div>
+
+  <footer>
+    <b>Datos y modelo didácticos</b>, generados para aprender: 4.000 filetes inventados, 6 % con algún defecto
+    (hematoma, parásito, espina, gaping), con puntajes que se superponen como en cualquier sistema real. Los resultados
+    se escalan a un turno de 8 horas a 300 filetes por minuto (144.000 filetes). La capacidad de la mesa de inspección es un
+    <b>supuesto editable</b>: ajustalo a tu planta. Que una persona acierte el 80 % de las veces sale de la revisión de
+    Sandia National Laboratories sobre inspección visual (See, 2012: errores del 20–30 % son comunes).
+    · Ariel Giamportone | PesquerosEnIA · UTN FRCh
+  </footer>
+</div>
+
+<script>
+(function(){
+  // ---------- datos didácticos (semilla fija: todos ven lo mismo) ----------
+  function azar(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
+    t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+  const r=azar(7);
+  const gauss=()=>{let u=0;while(u===0)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r())};
+  const lim=x=>Math.max(0,Math.min(99.9,x));
+  const N=4000, PREV=0.06, TURNO=8*60*300;
+  const filetes=[];
+  for(let i=0;i<N;i++){
+    const malo=r()<PREV;
+    const z=gauss();
+    // puntaje con luz de siempre y con el tubo nuevo (más blanco: los filetes buenos «parecen» más sospechosos)
+    const p=lim(malo?72+12*z:20+10*z);
+    const pLuz=lim(malo?75+12*z:34+12*z);
+    filetes.push({malo,p,pLuz});
+  }
+  const ACIERTO_PERSONA=0.80;
+
+  // ---------- estado ----------
+  const est={paso:0, visto:new Set([0]), u1:50, a:40, b:60, cap:20, luz:false};
+  const PASOS=['El puntaje','La zona de duda','Cambió la luz'];
+
+  function contar(clave,a,b){
+    // a: debajo se aprueba solo · b: arriba se rechaza solo · en el medio va a la mesa
+    let malasAprob=0, buenasRech=0, mesa=0, malasMesaEscapan=0, buenasMesaRech=0, rech=0;
+    for(const f of filetes){
+      const s=f[clave];
+      if(s<a){ if(f.malo) malasAprob++; }
+      else if(s>=b){ rech++; if(!f.malo) buenasRech++; }
+      else { mesa++; if(f.malo){ malasMesaEscapan+=1-ACIERTO_PERSONA; rech+=ACIERTO_PERSONA; } else { buenasMesaRech+=1-ACIERTO_PERSONA; rech+=1-ACIERTO_PERSONA; } }
+    }
+    const k=TURNO/N;
+    return {malasAprob:malasAprob*k, buenasRech:buenasRech*k, mesa:mesa*k, mesaMin:mesa/N*300,
+      escapan:(malasAprob+malasMesaEscapan)*k, tirados:(buenasRech+buenasMesaRech)*k, rechPct:rech/N};
+  }
+  const fmt=x=>Math.round(x).toLocaleString('es-AR');
+  const angosto=()=>document.documentElement.clientWidth<560;
+
+  // ---------- gráfico: dos montañas de puntajes ----------
+  function histograma(clave,zonas){
+    const W=angosto()?380:540, H=angosto()?270:290, iz=36, de=10, ar=24, ab=40;
+    const bins=25, ancho=100/bins;
+    const hb=new Array(bins).fill(0), hm=new Array(bins).fill(0);
+    for(const f of filetes){const k=Math.min(bins-1,Math.floor(f[clave]/ancho)); (f.malo?hm:hb)[k]++;}
+    // los malos son pocos: se dibujan ×5 para que se vean (se aclara en la leyenda)
+    const ESC=5, mx=Math.max(...hb, ...hm.map(v=>v*ESC));
+    const X=v=>iz+(W-iz-de)*v/100, Y=v=>ar+(H-ar-ab)*(1-v/mx);
+    let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Puntajes de defecto de filetes buenos y con defecto">`;
+    if(zonas){
+      const z=[[0,zonas[0],'#1f9d6b','aprueba solo'],[zonas[0],zonas[1],'#e6a417','mesa'],[zonas[1],100,'#d9534f','rechaza solo']];
+      for(const [a,b,c,t] of z){ if(b<=a) continue;
+        s+=`<rect x="${X(a)}" y="${ar}" width="${X(b)-X(a)}" height="${H-ar-ab}" fill="${c}" opacity=".10"/>`;
+        if(X(b)-X(a)>38) s+=`<text x="${(X(a)+X(b))/2}" y="${ar-8}" text-anchor="middle" font-size="11.5" font-weight="700" fill="${c}">${t}</text>`; }
+      for(const v of zonas) s+=`<line x1="${X(v)}" x2="${X(v)}" y1="${ar-2}" y2="${H-ab}" stroke="#0e2a38" stroke-width="2" stroke-dasharray="4 3"/>`;
+    }
+    for(let k=0;k<bins;k++){
+      const x=X(k*ancho)+1, w=X(ancho)-X(0)-2;
+      s+=`<rect x="${x}" y="${Y(hb[k])}" width="${w}" height="${Y(0)-Y(hb[k])}" fill="#0a7fb4" opacity=".55"/>`;
+      if(hm[k]) s+=`<rect x="${x}" y="${Y(hm[k]*ESC)}" width="${w}" height="${Y(0)-Y(hm[k]*ESC)}" fill="#d9534f" opacity=".75"/>`;
+    }
+    s+=`<line x1="${iz}" x2="${W-de}" y1="${Y(0)}" y2="${Y(0)}" stroke="#3f5a68"/>`;
+    for(const v of [0,25,50,75,100]) s+=`<text x="${X(v)}" y="${Y(0)+15}" text-anchor="middle" font-size="11" fill="#3f5a68">${v}</text>`;
+    s+=`<text x="${(iz+W-de)/2}" y="${Y(0)+30}" text-anchor="middle" font-size="11.5" fill="#3f5a68">puntaje de defecto que pone la cámara →</text>`;
+    const ley=`<div class="ley"><span><i style="background:#0a7fb4;opacity:.55"></i>filetes buenos</span><span><i style="background:#d9534f;opacity:.75"></i>con defecto (altura ×5 para que se vean)</span></div>`;
+    return ley+s+'</svg>';
+  }
+
+  function sparkRechazo(){
+    // 14 días: hasta el día 9 luz de siempre; desde el 10, tubo nuevo (mismos umbrales)
+    const W=angosto()?380:540, H=130, iz=36, de=10, ar=18, ab=26;
+    const viejo=contar('p',est.a,est.b).rechPct*100, nuevo=contar('pLuz',est.a,est.b).rechPct*100;
+    const rr=azar(3), dias=[];
+    for(let d=1;d<=14;d++) dias.push(Math.max(0,(d<10?viejo:nuevo)+(rr()-.5)*1.2));
+    const mx=Math.max(10,Math.ceil(Math.max(...dias)/5)*5);
+    const X=d=>iz+(W-iz-de)*(d-1)/13, Y=v=>ar+(H-ar-ab)*(1-v/mx);
+    let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Porcentaje de filetes rechazados por día">`;
+    s+=`<rect x="${X(9.5)}" y="${ar}" width="${X(14)-X(9.5)+4}" height="${H-ar-ab}" fill="#d9534f" opacity=".08"/>`;
+    s+=`<text x="${X(14)}" y="${H-ab-6}" text-anchor="end" font-size="11" fill="#8f2a26" font-weight="700">tubo nuevo</text>`;
+    for(const v of [0,mx/2,mx]) s+=`<line x1="${iz}" x2="${W-de}" y1="${Y(v)}" y2="${Y(v)}" stroke="#d9e4e9"/><text x="${iz-5}" y="${Y(v)+4}" text-anchor="end" font-size="10.5" fill="#3f5a68">${v} %</text>`;
+    s+=`<path d="${dias.map((v,k)=>(k?'L':'M')+X(k+1).toFixed(1)+' '+Y(v).toFixed(1)).join(' ')}" fill="none" stroke="#0e2a38" stroke-width="2"/>`;
+    dias.forEach((v,k)=>{s+=`<circle cx="${X(k+1)}" cy="${Y(v)}" r="3.5" fill="${k>=9?'#d9534f':'#0a7fb4'}"/>`});
+    for(const d of [1,5,10,14]) s+=`<text x="${X(d)}" y="${H-8}" text-anchor="${d===14?'end':(d===1?'start':'middle')}" font-size="10.5" fill="#3f5a68">día ${d}</text>`;
+    return s+'</svg>';
+  }
+
+  // ---------- pasos ----------
+  const $=id=>document.getElementById(id);
+  function pintarPasos(){
+    $('pasos').innerHTML=PASOS.map((t,k)=>`<li><button type="button" data-k="${k}" class="${k===est.paso?'activo':(est.visto.has(k)?'hecho':'')}"><span class="n">${k+1}</span>${t}</button></li>`).join('');
+    $('pasos').querySelectorAll('button').forEach(b=>b.onclick=()=>ir(+b.dataset.k));
+  }
+  function nav(){
+    return `<div class="nav">${est.paso>0?'<button type="button" class="btn sec" id="ant">← Anterior</button>':'<span></span>'}${est.paso<PASOS.length-1?'<button type="button" class="btn" id="sig">Siguiente →</button>':'<span></span>'}</div>`;
+  }
+  function engancharNav(){ if($('ant')) $('ant').onclick=()=>ir(est.paso-1); if($('sig')) $('sig').onclick=()=>ir(est.paso+1); }
+
+  function paso0(){
+    $('grafTitulo').textContent='Paso 1 · Los puntajes de un turno';
+    const c=contar('p',est.u1,est.u1);
+    $('graf').innerHTML=histograma('p',[est.u1,est.u1]);
+    $('debajo').innerHTML=`<div class="perilla"><label for="u1">Umbral de rechazo <span>${est.u1}</span></label>
+      <input type="range" id="u1" min="5" max="95" step="1" value="${est.u1}"><div class="ay">Debajo del umbral el filete sigue; arriba, se expulsa de la cinta.</div></div>
+      <div class="kpis"><div class="kpi r"><div class="v">${fmt(c.malasAprob)}</div><div class="t">filetes con defecto que <b>se escapan</b> al cliente, por turno</div></div>
+      <div class="kpi a"><div class="v">${fmt(c.buenasRech)}</div><div class="t">filetes buenos <b>rechazados</b> por error, por turno</div></div></div>`;
+    $('u1').oninput=e=>{est.u1=+e.target.value; paso0();};
+    if(!$('txt').dataset.p0){ $('txt').dataset.p0=1;
+      $('txt').innerHTML=`<h2>Paso 1 de 3</h2><h3>Las dos montañas</h3>
+      <p>Cada barra cuenta filetes según el puntaje que les puso la cámara. Los <b style="color:#0a7fb4">buenos</b> se juntan a la izquierda; los <b style="color:#d9534f">que tienen defecto</b>, a la derecha.</p>
+      <p>El problema está en el medio: <b>las dos montañas se pisan</b>. Hay filetes buenos con hematomas que no son hematomas, y defectos chicos que la cámara casi no ve.</p>
+      <p><b>Mové el umbral.</b> Probá llevarlo bien a la izquierda y bien a la derecha. ¿Hay algún lugar donde los dos números lleguen a cero?</p>
+      <div class="msg meh">No lo hay. <b>Correr el umbral cambia un error por otro.</b> Elegir dónde ponerlo no es una pregunta técnica: es cuánto cuesta cada error. Es lo mismo que vimos en la Clase 6 con el umbral de salir a pescar.</div>
+      <div class="jerga">En la jerga: el puntaje es la <b>probabilidad</b> o <b>score</b> del modelo; el filete malo que pasa es un <b>falso negativo</b>, y el bueno que se tira, un <b>falso positivo</b>.</div>`+nav(); engancharNav(); }
+  }
+
+  function paso1(){
+    $('grafTitulo').textContent='Paso 2 · Dos umbrales y una mesa en el medio';
+    if(est.a>est.b) est.b=est.a;
+    const c=contar('p',est.a,est.b);
+    const personas=Math.ceil(c.mesaMin/Math.max(1,est.cap));
+    $('graf').innerHTML=histograma('p',[est.a,est.b]);
+    $('debajo').innerHTML=`<div class="perilla"><label for="ua">Aprueba sola debajo de <span>${est.a}</span></label><input type="range" id="ua" min="0" max="95" step="1" value="${est.a}"></div>
+      <div class="perilla"><label for="ub">Rechaza sola arriba de <span>${est.b}</span></label><input type="range" id="ub" min="5" max="100" step="1" value="${est.b}"></div>
+      <div class="supuesto">Una persona revisa <input type="number" id="cap" min="5" max="60" value="${est.cap}"> filetes por minuto en la mesa <i>(supuesto: ajustalo a tu planta)</i></div>
+      <div class="kpis">
+        <div class="kpi a"><div class="v">${c.mesaMin.toFixed(1).replace('.',',')}</div><div class="t">filetes por minuto van a la mesa</div></div>
+        <div class="kpi ${personas>3?'r':'v'}"><div class="v">${personas}</div><div class="t">personas necesarias en la mesa</div></div>
+        <div class="kpi r"><div class="v">${fmt(c.escapan)}</div><div class="t">defectos que <b>se escapan</b> por turno</div></div>
+        <div class="kpi a"><div class="v">${fmt(c.tirados)}</div><div class="t">buenos <b>rechazados</b> por turno</div></div></div>`;
+    $('ua').oninput=e=>{est.a=+e.target.value; if(est.b<est.a) est.b=est.a; paso1();};
+    $('ub').oninput=e=>{est.b=+e.target.value; if(est.a>est.b) est.a=est.b; paso1();};
+    $('cap').onchange=e=>{est.cap=Math.max(5,Math.min(60,+e.target.value||20)); paso1();};
+    if(!$('txt').dataset.p1){ $('txt').dataset.p1=1;
+      $('txt').innerHTML=`<h2>Paso 2 de 3</h2><h3>La zona de duda</h3>
+      <p>Así trabajan las plantas que ya usan visión: la cámara resuelve <b>lo fácil</b> (lo claramente bueno y lo claramente malo) y <b>lo dudoso va a una persona</b>.</p>
+      <p><b>Abrí y cerrá la zona amarilla.</b> Mirá dos cosas a la vez: cuántos defectos se escapan y cuántas personas hacen falta en la mesa.</p>
+      <ul style="font-size:14px;margin:0 0 10px;padding-left:18px">
+        <li>Zona muy angosta: casi no hace falta gente, pero se escapan más defectos.</li>
+        <li>Zona muy ancha: la mesa se satura. Con 300 filetes por minuto, la gente no da abasto.</li>
+      </ul>
+      <div class="msg meh">La persona tampoco es perfecta: acá acierta el <b>80 %</b>, que es lo habitual en inspección visual (Sandia, 2012). Y cansada, menos. La pregunta no es «máquina o persona», sino <b>qué mira cada una</b>.</div>
+      <div class="jerga">En la jerga: <b>humano en el bucle</b> (<i>human in the loop</i>). Y la zona del medio se llama <b>zona de abstención</b>: el modelo «se abstiene» y le pasa el caso a alguien.</div>`+nav(); engancharNav(); }
+  }
+
+  function paso2(){
+    $('grafTitulo').textContent=est.luz?'Paso 3 · Con el tubo nuevo (mismos umbrales)':'Paso 3 · Con la luz de siempre';
+    const clave=est.luz?'pLuz':'p';
+    const c=contar(clave,est.a,est.b), c0=contar('p',est.a,est.b);
+    const personas=Math.ceil(c.mesaMin/Math.max(1,est.cap)), p0=Math.ceil(c0.mesaMin/Math.max(1,est.cap));
+    $('graf').innerHTML=histograma(clave,[est.a,est.b])+`<div style="margin-top:10px;font-size:13px;font-weight:800;color:#075d86;text-transform:uppercase;letter-spacing:.05em">Filetes rechazados por día, por la cámara y en la mesa (la planilla de calidad)</div>`+sparkRechazo();
+    $('debajo').innerHTML=`<div style="margin-top:10px"><button type="button" class="btn ${est.luz?'on':''}" id="bLuz">${est.luz?'💡 Volver a la luz de siempre':'💡 Cambiar el tubo de luz'}</button></div>
+      <div class="kpis">
+        <div class="kpi ${personas>p0?'r':'v'}"><div class="v">${personas}</div><div class="t">personas en la mesa (antes: ${p0})</div></div>
+        <div class="kpi a"><div class="v">${fmt(c.tirados)}</div><div class="t">buenos rechazados por turno (antes: ${fmt(c0.tirados)})</div></div>
+        <div class="kpi r"><div class="v">${fmt(c.escapan)}</div><div class="t">defectos que se escapan (antes: ${fmt(c0.escapan)})</div></div></div>`;
+    $('bLuz').onclick=()=>{est.luz=!est.luz; paso2(); pintarTxt2();};
+    pintarTxt2();
+  }
+  function pintarTxt2(){
+    $('txt').innerHTML=`<h2>Paso 3 de 3</h2><h3>Nadie tocó el modelo. Cambió la luz.</h3>
+      <p>Mantenimiento cambió un tubo de la cabina de la cámara por uno más blanco. El modelo es el mismo, los umbrales son los mismos (los que dejaste en el paso 2).</p>
+      ${est.luz?`<div class="msg mal">Con la luz nueva, los filetes buenos <b>se ven más sospechosos</b>: la montaña azul se corrió a la derecha. Mirá cuánto creció la mesa y cuántos buenos se tiran. Y en la planilla de abajo, el salto del día 10.</div>
+      <p><b>La buena noticia:</b> el salto se ve en la planilla de rechazos <b>antes</b> de que llegue un reclamo. Por eso, en una planta con visión, alguien mira esa curva todos los días.</p>
+      <p><b>Qué se hace:</b> se vuelve a fotografiar y etiquetar una muestra con la luz nueva, se reajustan los umbrales, y la luz pasa a ser parte del procedimiento (como la calibración de la balanza).</p>`
+      :`<p><b>Tocá «Cambiar el tubo de luz»</b> y mirá qué pasa con las dos montañas, con la mesa y con la planilla de rechazos por día.</p>`}
+      <div class="jerga">En la jerga: <b>deriva de datos</b> (<i>data drift</i>): lo que ve el modelo en producción dejó de parecerse a lo que vio cuando aprendió. Pasa con la luz, con la temporada, con otra especie, con una lente empañada.</div>`+nav();
+    engancharNav();
+  }
+
+  function ir(k){
+    est.paso=Math.max(0,Math.min(PASOS.length-1,k)); est.visto.add(est.paso);
+    delete $('txt').dataset.p0; delete $('txt').dataset.p1;
+    pintarPasos(); [paso0,paso1,paso2][est.paso]();
+    if(location.hash!=='#paso'+(est.paso+1)) history.replaceState(null,'','#paso'+(est.paso+1));
+  }
+  let angPrevio=angosto();
+  addEventListener('resize',()=>{ if(angosto()!==angPrevio){ angPrevio=angosto(); const t=$('txt').innerHTML; [paso0,paso1,paso2][est.paso](); } });
+  const h=/#paso(\d)/.exec(location.hash);
+  ir(h?(+h[1]-1):0);
+  window.__c7=()=>({base:contar('p',50,50), z:contar('p',40,60), luz:contar('pLuz',40,60), u30:contar('p',30,30), u70:contar('p',70,70)});
+})();
+</script>
+</body>
+</html>

@@ -30,7 +30,7 @@ Que los participantes comprendan qué es la visión artificial y cómo se aplica
 ```
 clase_07_vision_artificial/
 ├── notebooks/   → clase07_vision_artificial_plantas.ipynb
-└── (slides / guía → a coordinar con Damian)
+└── slides/      → presentacion_clase07.html (caso aplicado, Ariel) + versión offline
 ```
 
 ---
@@ -46,6 +46,13 @@ clase_07_vision_artificial/
 
 ---
 
+## Caso aplicado: «La cámara en la línea» (Ariel Giamportone)
+
+- **Presentación:** [`slides/presentacion_clase07.html`](https://pesquerosenia.github.io/curso-ia-produccion-pesquera/clase_07_vision_artificial/slides/presentacion_clase07.html) (versión [offline](https://pesquerosenia.github.io/curso-ia-produccion-pesquera/clase_07_vision_artificial/slides/presentacion_clase07_offline.html)): inspección actual con mesa de luz, qué ya puede ver una cámara en la industria, el circuito en la línea, los dos errores, la zona de duda con una persona en la mesa, la deriva de datos y seis preguntas para empezar.
+- **Simuladores:** [La cámara en la línea](https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/c7_camara_linea.html) (umbral, zona de duda, cambio de luz) y [El ojo y la IA](https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/planta_inspector.html) (matriz de confusión). Datos didácticos.
+
+---
+
 ## Recursos a reutilizar
 
 - [`ML_DL_FisheriesEngineers`](https://github.com/PesquerosEnIA/ML_DL_FisheriesEngineers) — base educativa ML/DL para ingenieros pesqueros
@@ -55,5 +62,6 @@ clase_07_vision_artificial/
 ## Estado
 
 - [x] Notebook: `clase07_vision_artificial_plantas.ipynb`
-- [ ] Slides / guía (coordinar con Damian)
+- [x] Presentación del caso aplicado (Ariel) + simulador «La cámara en la línea»
+- [ ] Slides / guía de fundamentos (Damian)
 - [ ] Revisión con Damian
