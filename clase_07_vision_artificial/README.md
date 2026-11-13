@@ -29,7 +29,7 @@ Que los participantes comprendan qué es la visión artificial y cómo se aplica
 
 ```
 clase_07_vision_artificial/
-├── notebooks/   → clase07_vision_artificial_plantas.ipynb
+├── notebooks/   → clase07_vision_artificial_plantas.ipynb + clase07_cnn_en_vivo_opencv.ipynb
 └── slides/      → presentacion_clase07.html (caso aplicado, Ariel) + versión offline
 ```
 
@@ -43,6 +43,17 @@ clase_07_vision_artificial/
 - Explicación conceptual de CNN y del pipeline de inferencia
 - Simulación de línea industrial (200-400 piezas/minuto)
 - Contexto real: proveedores operando en Argentina (Marel, Baader, TriVision)
+
+---
+
+## Notebook: una CNN en vivo sobre un video real
+
+**`clase07_cnn_en_vivo_opencv.ipynb`** — [abrir en Colab](https://colab.research.google.com/github/PesquerosEnIA/curso-ia-produccion-pesquera/blob/master/clase_07_vision_artificial/notebooks/clase07_cnn_en_vivo_opencv.ipynb) (activar GPU T4)
+- Video real de la sala de clasificación del N/O *Thalassa* (Ifremer, CC BY 4.0, Wikimedia Commons)
+- Convolución a mano con OpenCV (desenfoque, bordes, realce) y qué ve ResNet18 capa por capa
+- Un detector general (YOLO11, COCO) no reconoce peces: el punto de partida honesto
+- Transfer learning con fotos abiertas de peces (*fish market*, Roboflow 100, CC BY 4.0)
+- Detección cuadro por cuadro sobre el video, umbral de confianza y lo que el modelo todavía no sabe
 
 ---
 
@@ -62,6 +73,7 @@ clase_07_vision_artificial/
 ## Estado
 
 - [x] Notebook: `clase07_vision_artificial_plantas.ipynb`
+- [x] Notebook: `clase07_cnn_en_vivo_opencv.ipynb` (CNN en vivo sobre video real)
 - [x] Presentación del caso aplicado (Ariel) + simulador «La cámara en la línea»
 - [ ] Slides / guía de fundamentos (Damian)
 - [ ] Revisión con Damian
