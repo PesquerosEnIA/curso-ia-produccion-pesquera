@@ -19,6 +19,7 @@ Cada archivo es 100% autocontenido (HTML+CSS+JS inline): se puede abrir con dobl
 | `c8_velocidad_optima.html` | 8 | Velocidad óptima de crucero (ley cúbica: combustible vs. tiempo → costo mínimo) |
 | `c6_sobreajuste.html` | 6 | Sobreajuste (overfitting): grado del polinomio → error train vs. test (escala log) |
 | `dt09_concentracion_renta.html` | Caso DT-009 | Concentración de renta: reparto de cuota → Lorenz + Gini + HHI (datos CFP 4/2024) |
+| `dt10_cba_centolla.html` | Caso DT-010 | Centolla Área Sur: CBA vs. supuesto de reclutamiento (modelo sombra INIDEP 029/26) + cuota CITC por zona (Res. CFP 16/2026) |
 | `dt11_ais_esfuerzo.html` | Caso DT-011 | Rastro AIS: clasificación por velocidad + apagón de transpondedor (PSMA) |
 | `c10_sos_el_capitan.html` | 10 (síntesis) | Juego de decisiones: 1 marea, 4 decisiones (zona/velocidad/umbral/ética AIS) → tablero |
 

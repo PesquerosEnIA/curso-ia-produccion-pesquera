@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · ¿Cuánta centolla se puede pescar? — Caso DT-010</title>
+<style>
+  :root{
+    --azul:#0a7fb4; --azul-osc:#00527e; --azul-txt:#075d86; --tinta:#0e2a38;
+    --gris:#3f5a68; --linea:#d9e4e9; --fondo:#f4f8fa; --panel:#ffffff;
+    --verde:#1f9d6b; --naranja:#e0752d; --rojo:#c5283d; --oro:#d9a330; --gris2:#8aa0ab; --teal:#2c7a7b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;padding:16px}
+  .wrap{max-width:1040px;margin:0 auto}
+  .eyebrow{font-size:12.5px;font-weight:800;color:var(--azul-txt);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.2;margin:0 0 6px}
+  .lead{font-size:14.5px;color:var(--gris);margin:0 0 14px;max-width:80ch}
+  .lead b{color:var(--tinta)}
+  .levels{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+  .lvl{border:1px solid var(--linea);background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer;color:var(--gris)}
+  .lvl.on{background:var(--tinta);color:#fff;border-color:var(--tinta)}
+  .grid{display:flex;flex-wrap:wrap;gap:16px}
+  .col{flex:1 1 380px;min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(14,42,56,.04)}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--azul-txt);margin:0 0 12px;font-weight:800}
+  label.field{display:block;font-size:13.5px;font-weight:700;margin:14px 0 4px}
+  label.field:first-of-type{margin-top:0}
+  .fieldval{font-weight:800;color:var(--azul)}
+  input[type=range]{width:100%;accent-color:var(--azul);height:26px}
+  .hint{font-size:12px;color:var(--gris);margin:2px 0 0}
+  .seg{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+  .seg button{flex:1 1 auto;border:1px solid var(--linea);background:#fff;border-radius:8px;padding:7px 10px;font-size:13px;font-weight:700;cursor:pointer;color:var(--gris)}
+  .seg button.on{background:var(--azul);border-color:var(--azul);color:#fff}
+  .big{margin:0 0 2px;display:flex;align-items:baseline;justify-content:space-between}
+  .big .k{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--gris)}
+  .big .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+  .rows .r{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--linea);font-size:13.5px;gap:10px}
+  .rows .r:last-child{border-bottom:0}
+  .rows .r .k{color:var(--gris)}
+  .rows .r .v{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .total{margin-top:10px;border-radius:10px;padding:11px 14px;display:flex;justify-content:space-between;align-items:baseline;color:#fff}
+  .total .k{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;opacity:.9}
+  .total .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+  .ok{background:var(--verde)} .warn{background:var(--naranja)} .bad{background:var(--rojo)}
+  .opt{margin-top:10px;font-size:13px;background:#eef6f7;border:1px solid #cfe3e4;border-radius:10px;padding:9px 12px}
+  .opt b{color:var(--teal)}
+  .btn{margin-top:10px;border:0;border-radius:10px;background:var(--azul);color:#fff;font-weight:800;font-size:13.5px;padding:10px 14px;cursor:pointer}
+  .btn:hover{background:var(--azul-osc)}
+  .btn.sec{background:#fff;color:var(--azul-txt);border:1px solid var(--linea)}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap}
+  canvas{width:100%;height:auto;display:block;margin-top:6px}
+  .leg{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--gris);margin-top:8px}
+  .leg span{display:flex;align-items:center}
+  .dotc{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .tag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.04em;padding:1px 6px;border-radius:5px;vertical-align:middle}
+  .tag.c{background:#e4f3ee;color:var(--verde)} .tag.e{background:#fbf1dc;color:#9a6b00} .tag.h{background:#f9e3e6;color:var(--rojo)}
+  .hide{display:none}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+  th,td{text-align:right;padding:6px 6px;border-bottom:1px solid var(--linea);font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{text-align:left}
+  th{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--gris)}
+  .note{font-size:12.5px;color:var(--gris);margin-top:8px}
+  footer{margin-top:18px;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">🎛️ Caso DT-010 · Simulador interactivo</div>
+  <h1>¿Cuánta centolla se puede pescar? La CBA del Área Sur bajo distintos supuestos</h1>
+  <p class="lead">INIDEP recomendó <b>1.295 t</b> para 2026-27 con un modelo cuya curva de riesgo (Tabla 2) sitúa la CBA al 50% en <b>1.222 t</b>.
+  Este simulador reconstruye un <b>modelo sombra</b> de machos por edad con los parámetros publicados y te deja cambiar lo que el informe no muestra:
+  ¿el reclutamiento responde a la biomasa o es constante? ¿qué pasa si la mortalidad natural es menor, si los descartes mueren, si los últimos años flojos siguen?
+  Movelo y mirá cuánto cambia el riesgo. Y en el nivel avanzado, mirá qué significa la cuotificación del 5/11/2026 (Res. CFP 16/2026) para la zona S-II.</p>
+
+  <div class="levels">
+    <button class="lvl on" data-l="1">🟢 Novato · elegí la CBA</button>
+    <button class="lvl" data-l="2">🟡 Intermedio · cambiá los supuestos</button>
+    <button class="lvl" data-l="3">🔴 Avanzado · descarte, subáreas, exportar</button>
+  </div>
+
+  <div class="grid">
+    <div class="col">
+      <div class="panel">
+        <h2>Controles</h2>
+        <label class="field">CBA constante: <span class="fieldval" id="cbaVal"></span> t/año</label>
+        <input type="range" id="cba" min="0" max="2000" step="5" value="1295">
+        <div class="btnrow">
+          <button class="btn sec" data-preset="1222">INIDEP: CBA del modelo (1.222)</button>
+          <button class="btn sec" data-preset="1295">INIDEP: recomendada (1.295)</button>
+        </div>
+
+        <label class="field">Reclutamiento proyectado</label>
+        <div class="seg" id="recmode">
+          <button data-v="const" class="on">Constante (R₀) — reproduce la Tabla 2</button>
+          <button data-v="bh">Beverton-Holt — lo que el informe declara</button>
+        </div>
+        <p class="hint">Con <b>h = 0,6</b>, la biomasa de equilibrio bajo F<sub>40%</sub> es 28% de B₀, no 40%.</p>
+
+        <div class="l2 hide">
+          <label class="field">Steepness h (Beverton-Holt): <span class="fieldval" id="hVal"></span></label>
+          <input type="range" id="h" min="0.4" max="0.95" step="0.05" value="0.6">
+          <p class="hint">Informe: 0,6 <span class="tag c">CONFIRMADO</span>. Sólo actúa con reclutamiento Beverton-Holt.</p>
+
+          <label class="field">Mortalidad natural M: <span class="fieldval" id="mVal"></span> año⁻¹</label>
+          <input type="range" id="m" min="0.15" max="0.40" step="0.01" value="0.31">
+          <p class="hint">Informe: 0,31 <span class="tag c">CONFIRMADO</span>. King crab de Alaska: 0,18 <span class="tag e">REFERENCIAL</span>. Cambiarla reconstruye la historia con el mismo B₀ y las mismas capturas.</p>
+
+          <label class="field">Régimen reciente de reclutamiento: <span class="fieldval" id="regVal"></span> años</label>
+          <input type="range" id="reg" min="0" max="20" step="1" value="0">
+          <p class="hint">Mantiene la anomalía media 2021-25 (−0,31 log) durante esos años, con autocorrelación 0,5 (sin régimen, las anomalías son independientes, como en el informe).</p>
+        </div>
+
+        <div class="l3 hide">
+          <label class="field">Mortalidad por manipulación de sublegales devueltos: <span class="fieldval" id="dmVal"></span> %</label>
+          <input type="range" id="dm" min="0" max="40" step="5" value="0">
+          <p class="hint">El informe no la incluye <span class="tag h">HUECO</span>. Afecta a machos vulnerables &lt; 110 mm.</p>
+
+          <label class="field">Incertidumbre inicial (CV): <span class="fieldval" id="cvVal"></span> %</label>
+          <input type="range" id="cv" min="5" max="30" step="1" value="12">
+
+          <label class="field">Variabilidad del reclutamiento σ<sub>R</sub>: <span class="fieldval" id="srVal"></span></label>
+          <input type="range" id="sr" min="0.1" max="0.8" step="0.05" value="0.35">
+
+          <label class="field">Simulaciones: <span class="fieldval" id="nsVal"></span></label>
+          <input type="range" id="ns" min="300" max="5000" step="100" value="1500">
+          <div class="btnrow">
+            <button class="btn sec" id="csvBtn">⬇️ Exportar trayectoria (CSV)</button>
+            <button class="btn sec" id="resetBtn">↺ Volver al informe</button>
+          </div>
+          <textarea id="csvBox" class="hide" style="width:100%;height:120px;margin-top:8px;font:11px/1.3 monospace;border:1px solid var(--linea);border-radius:8px;padding:6px" readonly></textarea>
+          <p class="hint" id="csvHint"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="panel">
+        <h2>Resultado para esta CBA</h2>
+        <div class="big"><span class="k">Riesgo a largo plazo (30 años) de B &lt; 40% B₀</span><span class="v" id="oLP"></span></div>
+        <div class="big"><span class="k">Riesgo a corto plazo (2 años) de B &lt; 40% B₀</span><span class="v" id="oCP"></span></div>
+        <div class="rows" style="margin-top:10px">
+          <div class="r"><span class="k">Riesgo de cruzar el límite (20% B₀) a 30 años</span><span class="v" id="oLim"></span></div>
+          <div class="r"><span class="k">Biomasa mediana a 10 años</span><span class="v" id="oB10"></span></div>
+          <div class="r"><span class="k">Biomasa mediana a 30 años</span><span class="v" id="oB30"></span></div>
+          <div class="r"><span class="k">Corridas en que la CBA deja de alcanzarse (año 30)</span><span class="v" id="oShort"></span></div>
+          <div class="r"><span class="k">RMS de equilibrio con estos supuestos</span><span class="v" id="oMSY"></span></div>
+          <div class="r"><span class="k">CBA al 50% de riesgo con estos supuestos</span><span class="v" id="oCBA50"></span></div>
+        </div>
+        <div class="total" id="verdict"><span class="k">Veredicto</span><span class="v" id="oVer"></span></div>
+        <div class="opt" id="optBox"></div>
+        <div class="l2 hide">
+          <div class="rows" style="margin-top:10px">
+            <div class="r"><span class="k">F<sub>40%</sub> (SPR)</span><span class="v" id="oF40"></span></div>
+            <div class="r"><span class="k">B<sub>2025</sub> reconstruida / B₀ · informe: 55%</span><span class="v" id="oB25"></span></div>
+            <div class="r"><span class="k">F<sub>2025</sub> / F<sub>40%</sub> · informe: 0,75</span><span class="v" id="oF25"></span></div>
+            <div class="r"><span class="k">Biomasa de equilibrio bajo F<sub>40%</sub> (B-H)</span><span class="v" id="oBeq"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <h2>Trayectoria de la biomasa reproductiva (mediana y banda 10-90%)</h2>
+    <canvas id="cvTraj" width="1000" height="320" aria-label="Trayectoria de la biomasa"></canvas>
+    <div class="leg">
+      <span><span class="dotc" style="background:var(--tinta)"></span>Reconstrucción 2013-2025</span>
+      <span><span class="dotc" style="background:var(--azul)"></span>Proyección con esta CBA</span>
+      <span><span class="dotc" style="background:var(--gris2)"></span>Objetivo 40% B₀</span>
+      <span><span class="dotc" style="background:var(--rojo)"></span>Límite 20% B₀</span>
+      <span><span class="dotc" style="background:#fff;border:2px solid var(--tinta);width:8px;height:8px"></span>INIDEP Fig. 12 (lectura aprox.)</span>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <h2>Curva de riesgo: probabilidad de B &lt; 40% B₀ a 30 años según la CBA</h2>
+    <canvas id="cvRisk" width="1000" height="300" aria-label="Curva de riesgo"></canvas>
+    <div class="leg">
+      <span><span class="dotc" style="background:var(--azul)"></span>Modelo sombra con tus supuestos</span>
+      <span><span class="dotc" style="background:var(--tinta)"></span>INIDEP, Tabla 2 <span class="tag c" style="margin-left:6px">CONFIRMADO</span></span>
+      <span><span class="dotc" style="background:var(--oro)"></span>Tu CBA</span>
+    </div>
+  </div>
+
+  <div class="l2 hide">
+    <div class="panel" style="margin-top:16px">
+      <h2>Captura de equilibrio según F: ¿de dónde sale 1.222 t?</h2>
+      <canvas id="cvEq" width="1000" height="280" aria-label="Curva de equilibrio"></canvas>
+      <div class="leg">
+        <span><span class="dotc" style="background:var(--oro)"></span>Reclutamiento constante R₀</span>
+        <span><span class="dotc" style="background:var(--teal)"></span>Beverton-Holt con tu h</span>
+        <span><span class="dotc" style="background:var(--gris2)"></span>F<sub>40%</sub></span>
+        <span><span class="dotc" style="background:var(--rojo)"></span>1.222 t</span>
+      </div>
+      <p class="note">La curva de reclutamiento constante pasa por ~1.200 t justo en F<sub>40%</sub>: eso es lo que la Tabla 2 del informe reproduce. La curva Beverton-Holt tiene su máximo (RMS) más abajo.</p>
+    </div>
+  </div>
+
+  <div class="l3 hide">
+    <div class="panel" style="margin-top:16px">
+      <h2>Reparto por subárea: ¿a qué tasa se explota el sur de 52°S?</h2>
+      <div class="seg" id="shareMode">
+        <button data-v="media" class="on">Participación media 2021-25 (la del informe)</button>
+        <button data-v="2025">Participación de la campaña 2025</button>
+      </div>
+      <table id="subTab"></table>
+      <p class="note">Participaciones <span class="tag c">CONFIRMADO</span> (Tabla 3 del informe); B<sub>2025</sub> = 4.854 t <span class="tag c">CONFIRMADO</span>; tasas <span class="tag e">ESTIMADO</span>. La participación mide distribución, no depleción local. Tasa de explotación a F<sub>40%</sub> ≈ <span id="hr40"></span>%.</p>
+    </div>
+  </div>
+
+  <div class="l3 hide">
+    <div class="panel" style="margin-top:16px">
+      <h2>Después de la CBA, la cuota: Res. CFP 16/2026 (5/11/2026)</h2>
+      <p class="note" style="margin-top:0">El CFP cuotificó la centolla por 15 temporadas (2026/27–2040/41) con historia de captura al 80% del puntaje. Asignación: <b>75,95%</b> de la zona S-II y <b>75,94%</b> de S-IV para el Chiyo Maru N°3 <span class="tag c">CONFIRMADO</span> (Tabla LII, Anexo I del Acta CFP 30/2026). Tope del art. 4: 45% “por cada zona”; la memoria técnica lo verificó con el promedio de zonas, y con la regla del articulado un grupo lo supera en seis de las siete zonas. Probá cuánto vale ese porcentaje.</p>
+      <label class="field">CMP de la zona S-II (t/temporada): <span class="fieldval" id="cmpVal"></span></label>
+      <input type="range" id="cmp" min="50" max="300" step="1" value="171">
+      <p class="hint">2026-27: 171 t <span class="tag c">CONFIRMADO</span> (Acta CFP 27/2026). La CITC es un porcentaje: la CMP de cada temporada decide las toneladas.</p>
+      <label class="field">Participación CITC del buque en S-II: <span class="fieldval" id="citcVal"></span> %</label>
+      <input type="range" id="citc" min="0" max="100" step="0.05" value="75.95">
+      <div class="rows" style="margin-top:10px">
+        <div class="r"><span class="k">Toneladas por temporada</span><span class="v" id="cT"></span></div>
+        <div class="r"><span class="k">Acumulado en 15 temporadas (CMP constante)</span><span class="v" id="cT15"></span></div>
+        <div class="r"><span class="k">Valor bruto por temporada a USD 19.365/t</span><span class="v" id="cUSD"></span></div>
+        <div class="r"><span class="k">Derecho Único de Extracción que capta el Estado (2,5%)</span><span class="v" id="cDUE"></span></div>
+        <div class="r"><span class="k">Exceso sobre el tope del 45% por zona</span><span class="v" id="cCap"></span></div>
+      </div>
+      <p class="note">Precio de referencia <span class="tag c">CONFIRMADO</span> (INIDEP 029/26, Informe de Coyuntura marzo 2026); valores <span class="tag e">ESTIMADO</span>. Historia computada 2018/19–2025/26: incluye las temporadas de pesca experimental del buque en S-II desde 2017.</p>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <h2>Qué no afirma este simulador</h2>
+    <p class="note" style="margin-top:0">No predice un colapso: una captura constante durante 30 años es un ejercicio de riesgo, no un pronóstico; el CFP revisa la CBA cada año.
+    No es el modelo de INIDEP (Canales et al.): es una reconstrucción calibrada a sus salidas publicadas (B₀, B<sub>2025</sub>, F<sub>2025</sub>/F<sub>40%</sub>, Tabla 2, Figs. 12-13), con crecimiento von Bertalanffy ajustado para que la talla legal se alcance a los 5 años.
+    Los desembarques anuales y las anomalías de reclutamiento son lecturas de figuras <span class="tag e">ESTIMADO</span>. Dónde desembarca el buque que opera al sur de 52°S es un <span class="tag h">HUECO</span>. El texto oficial de la Res. CFP 16/2026 y el Anexo I no estaban publicados al 11/11/2026: las cifras de la cuotificación son de prensa que los reproduce.</p>
+  </div>
+
+  <footer>
+    Modelo y datos del paquete <b>modelo_sombra</b> (DT-ALGP-2026-010, serie DT-ALGP). Parámetros <b>CONFIRMADO</b> del Inf. Téc. Of. INIDEP 029/26:
+    M = 0,31; h = 0,6; L∞ = 152 mm; k = 0,15; reclutamiento a trampas a 3 años; longevidad 15; talla legal 110 mm; B₀ = 8.898 t; B<sub>2025</sub> = 4.854 t; PBRO 40% B₀; PBRL 20% B₀.
+    Dinámica anual con Baranov; proyección Monte Carlo con semilla fija. Curso <b>IA Aplicada a la Producción Pesquera</b> · UTN&nbsp;FRCh · PesquerosEnIA · 2026.
+    Autor: Ing. Ariel Luján Giamportone, con asistencia de Claude (Anthropic).
+  </footer>
+</div>
+
+<script>
+// ============================================================ MODELO
+const B0=8898, LINF=152, K=0.15, T0=-3.0, AMIN=3, AMAX=15, LEGAL=110, SELSL=2, VULL50=85, VULSL=6, AW=4.5e-7, BW=3.15, RECLAG=3;
+const AGES=[];for(let a=AMIN;a<=AMAX;a++)AGES.push(a);
+const NA=AGES.length;
+const LEN=AGES.map(a=>LINF*(1-Math.exp(-K*(a-T0))));
+const W=LEN.map(L=>AW*Math.pow(L,BW));
+const RET=LEN.map(L=>1/(1+Math.exp(-(L-LEGAL)/SELSL)));
+const VUL=LEN.map(L=>1/(1+Math.exp(-(L-VULL50)/VULSL)));
+// Desembarques (t) ESTIMADO salvo totales; anomalías Fig.13 ESTIMADO
+const CATCH={2013:0,2014:0,2015:0,2016:650,2017:950,2018:1030,2019:1090,2020:1170,2021:1230,2022:1150,2023:1210,2024:1286,2025:1337};
+const ANOM={2013:-0.15,2014:-0.20,2015:0.10,2016:0.60,2017:0.30,2018:0.40,2019:0.15,2020:-0.05,2021:-0.25,2022:-0.30,2023:-0.35,2024:-0.45,2025:-0.20};
+const ANOMSCALE=0.8, ANOM_RECENT=-0.31;
+const TABLA2=[[0,0,4.6],[707,10,19.7],[884,20,26.9],[1013,30,33.2],[1118,40,39.4],[1222,50,45.8],[1324,60,52.6],[1435,70,60.2],[1563,80,68.9],[1735,90,79.8],[1991,100,92.1]];
+const FIG12={2017:8900,2018:8500,2019:8000,2020:8000,2021:8000,2022:7500,2023:6500,2024:5700,2025:4854};
+
+function selEff(dm){return RET.map((r,i)=>r+VUL[i]*(1-r)*dm);}
+function perRecruit(F,M,dm){
+  const se=selEff(dm); const N=new Array(NA).fill(1);
+  for(let i=1;i<NA;i++)N[i]=N[i-1]*Math.exp(-(M+F*se[i-1]));
+  N[NA-1]/=(1-Math.exp(-(M+F*se[NA-1])));
+  let ssb=0,y=0;
+  for(let i=0;i<NA;i++){const Z=M+F*se[i];ssb+=N[i]*W[i]*RET[i];y+=N[i]*W[i]*(F*RET[i])/Z*(1-Math.exp(-Z));}
+  return [ssb,y];
+}
+function Fspr(M,dm,target=0.4){const s0=perRecruit(0,M,dm)[0];let lo=1e-5,hi=10;for(let it=0;it<60;it++){const mid=(lo+hi)/2;(perRecruit(mid,M,dm)[0]/s0>target)?lo=mid:hi=mid;}return (lo+hi)/2;}
+function R0(M,dm){return B0/perRecruit(0,M,dm)[0];}
+function bh(ssb,h,r0){const a=4*h*r0/(5*h-1),b=B0*(1-h)/(5*h-1);return a*ssb/(b+ssb);}
+function eqCurve(M,h,dm,Fmax=1.6,n=120){
+  const s0=perRecruit(0,M,dm)[0],r0=R0(M,dm),out=[];
+  for(let i=0;i<=n;i++){const F=Fmax*i/n;const [s,y]=perRecruit(F,M,dm);const rel=s/s0;
+    let R=r0*(4*h*rel-(1-h))/((5*h-1)*rel);if(R<0)R=0;out.push({F,B:R*s,Y:R*y,Yc:r0*y});}
+  return out;
+}
+function solveF(N,catch_t,M,dm){
+  if(catch_t<=0)return 0;const se=selEff(dm);
+  const f=F=>{let c=0;for(let i=0;i<NA;i++){const Z=M+F*se[i];c+=N[i]*W[i]*(F*RET[i])/Z*(1-Math.exp(-Z));}return c-catch_t;};
+  if(f(5)<0)return 5;let lo=0,hi=5;for(let it=0;it<34;it++){const mid=(lo+hi)/2;(f(mid)<0)?lo=mid:hi=mid;}return (lo+hi)/2;
+}
+function step(N,F,rec,M,dm){
+  const se=selEff(dm),Nn=new Array(NA).fill(0);let ssb=0,c=0;
+  for(let i=0;i<NA;i++){const Z=M+F*se[i];ssb+=N[i]*W[i]*RET[i];c+=N[i]*W[i]*(F*RET[i])/Z*(1-Math.exp(-Z));}
+  for(let i=1;i<NA;i++)Nn[i]=N[i-1]*Math.exp(-(M+F*se[i-1]));
+  Nn[NA-1]+=N[NA-1]*Math.exp(-(M+F*se[NA-1]));Nn[0]=rec;return [Nn,c,ssb];
+}
+function reconstruct(M,h,dm){
+  const r0=R0(M,dm);let N=new Array(NA);N[0]=r0;for(let i=1;i<NA;i++)N[i]=N[i-1]*Math.exp(-M);N[NA-1]/=(1-Math.exp(-M));
+  const ssbH={};for(let y=2007;y<=2012;y++)ssbH[y]=B0;const hist=[];
+  for(let y=2013;y<=2025;y++){const base=bh(ssbH[y-RECLAG],h,r0);const rec=base*Math.exp(ANOMSCALE*ANOM[y]);
+    const F=solveF(N,CATCH[y],M,dm);const [Nn,c,ssb]=step(N,F,rec,M,dm);ssbH[y]=ssb;hist.push({y,ssb,F});N=Nn;}
+  return {hist,N26:N,ssbH};
+}
+// RNG
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+function normal(rng){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function project(N26,ssbH,cba,P,nsim,nyears=30,seed=42){
+  const {M,h,dm,recmode,reg,rho,cv,sr}=P;const rng=mulberry32(seed);const r0=R0(M,dm),se=selEff(dm);
+  const ssb=[],catches=[];const wret=W.map((w,i)=>w*RET[i]);
+  for(let s=0;s<nsim;s++){
+    const sc=Math.exp(normal(rng)*cv-cv*cv/2);let N=N26.map(x=>x*sc);
+    const row=[N.reduce((a,x,i)=>a+x*wret[i],0)];const crow=[];
+    const lag=[ssbH[2023],ssbH[2024],ssbH[2025]];let eps=0;
+    for(let t=0;t<nyears;t++){
+      const F=solveF(N,cba,M,dm);const base=recmode==='bh'?bh(lag[0],h,r0):r0;
+      eps=rho*eps+Math.sqrt(1-rho*rho)*normal(rng)*sr;const regv=t<reg?ANOM_RECENT:0;
+      const rec=base*Math.exp(eps-sr*sr/2+regv);
+      const [Nn,c,_]=step(N,F,rec,M,dm);N=Nn;const b=N.reduce((a,x,i)=>a+x*wret[i],0);
+      row.push(b);crow.push(c);lag.shift();lag.push(b);}
+    ssb.push(row);catches.push(crow);}
+  return {ssb,catches};
+}
+function quant(arr,q){const a=arr.slice().sort((x,y)=>x-y);const i=(a.length-1)*q,lo=Math.floor(i),hi=Math.ceil(i);return a[lo]+(a[hi]-a[lo])*(i-lo);}
+function riskSummary(res,cba){
+  const n=res.ssb.length,T=res.ssb[0].length-1;const col=j=>res.ssb.map(r=>r[j]);
+  const p=(arr,th)=>100*arr.filter(x=>x<th).length/arr.length;
+  const lp=col(T),cp=col(1);
+  return {lp40:p(lp,.4*B0),cp40:p(cp,.4*B0),lp20:p(lp,.2*B0),b10:quant(col(10),.5)/B0*100,b30:quant(lp,.5)/B0*100,
+    short:100*res.catches.filter(r=>r[T-1]<0.95*cba).length/n};
+}
+
+// ============================================================ UI
+const $=id=>document.getElementById(id);
+const state={cba:1295,recmode:'const',h:0.6,M:0.31,reg:0,rho:0,dm:0,cv:0.12,sr:0.35,ns:1500,share:'media',level:1};
+let cache={};
+function getRecon(){const key=state.M+'|'+state.h+'|'+state.dm;if(!cache[key])cache[key]=reconstruct(state.M,state.h,state.dm);return cache[key];}
+function fmtPct(x){return (x<0.05?'<0,1':x.toFixed(x<10?1:0)).replace('.',',')+'%';}
+function fmtT(x){return Math.round(x).toLocaleString('es-AR')+' t';}
+let timer=null;
+function schedule(){clearTimeout(timer);timer=setTimeout(render,60);}
+
+function render(){
+  $('cbaVal').textContent=state.cba.toLocaleString('es-AR');$('hVal').textContent=state.h.toFixed(2).replace('.',',');
+  $('mVal').textContent=state.M.toFixed(2).replace('.',',');$('regVal').textContent=state.reg;$('dmVal').textContent=Math.round(state.dm*100);
+  $('cvVal').textContent=Math.round(state.cv*100);$('srVal').textContent=state.sr.toFixed(2).replace('.',',');$('nsVal').textContent=state.ns;
+  const rc=getRecon();const P={...state,rho:state.reg>0?0.5:0};
+  const res=project(rc.N26,rc.ssbH,state.cba,P,state.ns);const r=riskSummary(res,state.cba);
+  $('oLP').textContent=fmtPct(r.lp40);$('oCP').textContent=fmtPct(r.cp40);$('oLim').textContent=fmtPct(r.lp20);
+  $('oB10').textContent=r.b10.toFixed(0)+'% B₀';$('oB30').textContent=r.b30.toFixed(0)+'% B₀';$('oShort').textContent=fmtPct(r.short);
+  const eq=eqCurve(state.M,state.h,state.dm);const msy=eq.reduce((a,b)=>b.Y>a.Y?b:a);
+  const F40=Fspr(state.M,state.dm);const [s40,y40]=perRecruit(F40,state.M,state.dm);const s0=perRecruit(0,state.M,state.dm)[0];
+  const rel=s40/s0,Req=R0(state.M,state.dm)*(4*state.h*rel-(1-state.h))/((5*state.h-1)*rel);
+  $('oMSY').textContent=state.recmode==='bh'?fmtT(msy.Y)+' (B'+'ᴿᴹˢ '+(msy.B/B0*100).toFixed(0)+'% B₀)':fmtT(R0(state.M,state.dm)*y40)+' a F₄₀ (R constante)';
+  $('oF40').textContent=F40.toFixed(2).replace('.',',');const last=rc.hist[rc.hist.length-1];
+  $('oB25').textContent=(last.ssb/B0*100).toFixed(0)+'%';$('oF25').textContent=(last.F/F40).toFixed(2).replace('.',',');
+  $('oBeq').textContent=(Math.max(0,Req*s40)/B0*100).toFixed(0)+'% B₀';
+  // curva de riesgo (menos simulaciones por punto)
+  const levels=[0,300,500,700,850,1000,1100,1200,1300,1400,1550,1750,2000];
+  const nsmall=Math.max(200,Math.min(600,Math.round(state.ns/3)));
+  const ckey=[state.M,state.h,state.dm,state.recmode,state.reg,state.cv,state.sr,state.ns].join('|');
+  if(!cache['curve'+ckey])cache['curve'+ckey]=levels.map(c=>{const rr=project(rc.N26,rc.ssbH,c,P,nsmall,30,7);return {c,lp:riskSummary(rr,c).lp40};});
+  const curve=cache['curve'+ckey];
+  // CBA al 50%
+  let cba50=null;for(let i=1;i<curve.length;i++){if(curve[i-1].lp<50&&curve[i].lp>=50){cba50=curve[i-1].c+(50-curve[i-1].lp)/(curve[i].lp-curve[i-1].lp)*(curve[i].c-curve[i-1].c);break;}}
+  $('oCBA50').textContent=cba50?fmtT(cba50):(curve[0].lp>=50?'< 0 t (ya bajo el objetivo)':'> 2.000 t');
+  // veredicto
+  const v=$('verdict');v.className='total '+(r.lp40<=30?'ok':r.lp40<=50?'warn':'bad');
+  $('oVer').textContent=r.lp40<=30?'Precautorio':r.lp40<=50?'En el límite del estándar':'Más probable caer que mantenerse';
+  const modeTxt=state.recmode==='bh'?'con Beverton-Holt (h = '+state.h.toFixed(2).replace('.',',')+')':'con reclutamiento constante';
+  let msg='Con <b>'+state.cba.toLocaleString('es-AR')+' t</b> '+modeTxt+', la probabilidad de quedar bajo el objetivo a 30 años es <b>'+fmtPct(r.lp40)+'</b>. ';
+  if(state.cba===1222&&state.recmode==='const')msg+='Así se reproduce la Tabla 2 del informe (50%): el modelo sombra da '+fmtPct(r.lp40)+'.';
+  else if(state.cba===1295&&state.recmode==='const')msg+='Interpolando la Tabla 2 del informe serían ~57%. Las 73 t extra sobre la CBA del modelo suben el riesgo.';
+  else if(state.recmode==='bh'&&r.short>50)msg+='En más de la mitad de las corridas la captura deja de alcanzarse: con estos supuestos la CBA supera el RMS ('+fmtT(msy.Y)+').';
+  else if(cba50)msg+='La CBA al 50% con estos supuestos sería <b>'+fmtT(cba50)+'</b>.';
+  $('optBox').innerHTML=msg;
+  drawTraj(res,rc);drawRisk(curve);if(state.level>=2)drawEq(eq,F40);if(state.level>=3)drawSub(F40);
+  window._lastRes={res,rc};
+}
+
+// ============================================================ GRÁFICOS
+function setup(cv,h){const dpr=window.devicePixelRatio||1;const w=cv.clientWidth||cv.parentElement.clientWidth;cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);return [ctx,w,h];}
+function axes(ctx,mL,mT,pw,ph,xl,yl){ctx.strokeStyle='#d9e4e9';ctx.strokeRect(mL,mT,pw,ph);ctx.fillStyle='#3f5a68';ctx.font='11px Segoe UI,Arial';ctx.textAlign='center';ctx.fillText(xl,mL+pw/2,mT+ph+26);ctx.save();ctx.translate(14,mT+ph/2);ctx.rotate(-Math.PI/2);ctx.fillText(yl,0,0);ctx.restore();}
+function drawTraj(res,rc){
+  const cv=$('cvTraj'),[ctx,w,h]=setup(cv,320);const mL=48,mR=14,mT=12,mB=34,pw=w-mL-mR,ph=h-mT-mB;
+  const y0=2013,y1=2056;const X=y=>mL+(y-y0)/(y1-y0)*pw,Y=p=>mT+ph-(p/110)*ph;
+  axes(ctx,mL,mT,pw,ph,'año','% de B₀');ctx.fillStyle='#8aa0ab';ctx.textAlign='center';
+  for(let y=2015;y<=2055;y+=5){ctx.fillText(y,X(y),mT+ph+14);ctx.strokeStyle='#f0f5f7';ctx.beginPath();ctx.moveTo(X(y),mT);ctx.lineTo(X(y),mT+ph);ctx.stroke();}
+  ctx.textAlign='right';for(let p=0;p<=100;p+=20){ctx.fillStyle='#8aa0ab';ctx.fillText(p,mL-6,Y(p)+3);ctx.strokeStyle='#eef3f5';ctx.beginPath();ctx.moveTo(mL,Y(p));ctx.lineTo(mL+pw,Y(p));ctx.stroke();}
+  // referencias
+  ctx.setLineDash([5,4]);ctx.strokeStyle='#8aa0ab';ctx.beginPath();ctx.moveTo(mL,Y(40));ctx.lineTo(mL+pw,Y(40));ctx.stroke();
+  ctx.strokeStyle='#c5283d';ctx.beginPath();ctx.moveTo(mL,Y(20));ctx.lineTo(mL+pw,Y(20));ctx.stroke();ctx.setLineDash([]);
+  // banda
+  const T=res.ssb[0].length;const q10=[],q50=[],q90=[];for(let j=0;j<T;j++){const col=res.ssb.map(r=>r[j]/B0*100);q10.push(quant(col,.1));q50.push(quant(col,.5));q90.push(quant(col,.9));}
+  ctx.fillStyle='rgba(10,127,180,.14)';ctx.beginPath();for(let j=0;j<T;j++){const x=X(2026+j);j?ctx.lineTo(x,Y(q90[j])):ctx.moveTo(x,Y(q90[j]));}
+  for(let j=T-1;j>=0;j--)ctx.lineTo(X(2026+j),Y(q10[j]));ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#0a7fb4';ctx.lineWidth=2.4;ctx.beginPath();for(let j=0;j<T;j++){const x=X(2026+j);j?ctx.lineTo(x,Y(q50[j])):ctx.moveTo(x,Y(q50[j]));}ctx.stroke();
+  // historia
+  ctx.strokeStyle='#0e2a38';ctx.lineWidth=2.2;ctx.beginPath();rc.hist.forEach((hh,i)=>{const x=X(hh.y),y=Y(hh.ssb/B0*100);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+  ctx.lineTo(X(2026),Y(q50[0]));ctx.stroke();
+  for(const y in FIG12){ctx.fillStyle='#fff';ctx.strokeStyle='#0e2a38';ctx.lineWidth=1.5;ctx.beginPath();ctx.rect(X(+y)-3,Y(FIG12[y]/B0*100)-3,6,6);ctx.fill();ctx.stroke();}
+  ctx.fillStyle='#3f5a68';ctx.font='11px Segoe UI,Arial';ctx.textAlign='left';ctx.fillText('Objetivo 40% B₀',mL+6,Y(40)-4);ctx.fillStyle='#c5283d';ctx.fillText('Límite 20% B₀',mL+6,Y(20)-4);
+}
+function drawRisk(curve){
+  const cv=$('cvRisk'),[ctx,w,h]=setup(cv,300);const mL=48,mR=14,mT=12,mB=34,pw=w-mL-mR,ph=h-mT-mB;
+  const X=c=>mL+c/2000*pw,Y=p=>mT+ph-(p/100)*ph;axes(ctx,mL,mT,pw,ph,'CBA constante (t/año)','probabilidad (%)');
+  ctx.fillStyle='#8aa0ab';ctx.textAlign='center';for(let c=0;c<=2000;c+=250){ctx.fillText(c.toLocaleString('es-AR'),X(c),mT+ph+14);ctx.strokeStyle='#f0f5f7';ctx.beginPath();ctx.moveTo(X(c),mT);ctx.lineTo(X(c),mT+ph);ctx.stroke();}
+  ctx.textAlign='right';for(let p=0;p<=100;p+=25){ctx.fillStyle='#8aa0ab';ctx.fillText(p,mL-6,Y(p)+3);ctx.strokeStyle='#eef3f5';ctx.beginPath();ctx.moveTo(mL,Y(p));ctx.lineTo(mL+pw,Y(p));ctx.stroke();}
+  ctx.setLineDash([5,4]);ctx.strokeStyle='#8aa0ab';ctx.beginPath();ctx.moveTo(mL,Y(50));ctx.lineTo(mL+pw,Y(50));ctx.stroke();ctx.setLineDash([]);
+  // INIDEP
+  ctx.strokeStyle='#0e2a38';ctx.lineWidth=1.6;ctx.beginPath();TABLA2.forEach((t,i)=>{i?ctx.lineTo(X(t[0]),Y(t[1])):ctx.moveTo(X(t[0]),Y(t[1]));});ctx.stroke();
+  TABLA2.forEach(t=>{ctx.fillStyle='#0e2a38';ctx.beginPath();ctx.rect(X(t[0])-3,Y(t[1])-3,6,6);ctx.fill();});
+  // sombra
+  ctx.strokeStyle='#0a7fb4';ctx.lineWidth=2.6;ctx.beginPath();curve.forEach((p,i)=>{i?ctx.lineTo(X(p.c),Y(p.lp)):ctx.moveTo(X(p.c),Y(p.lp));});ctx.stroke();
+  curve.forEach(p=>{ctx.fillStyle='#0a7fb4';ctx.beginPath();ctx.arc(X(p.c),Y(p.lp),3.5,0,7);ctx.fill();});
+  // tu CBA
+  ctx.strokeStyle='#d9a330';ctx.setLineDash([4,3]);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(X(state.cba),mT);ctx.lineTo(X(state.cba),mT+ph);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#d9a330';ctx.font='bold 11px Segoe UI,Arial';ctx.textAlign='center';ctx.fillText(state.cba.toLocaleString('es-AR')+' t',X(state.cba),mT+10);
+}
+function drawEq(eq,F40){
+  const cv=$('cvEq'),[ctx,w,h]=setup(cv,280);const mL=56,mR=14,mT=12,mB=34,pw=w-mL-mR,ph=h-mT-mB;
+  const ymax=1600;const X=f=>mL+f/1.6*pw,Y=y=>mT+ph-(Math.min(y,ymax)/ymax)*ph;axes(ctx,mL,mT,pw,ph,'mortalidad por pesca F (año⁻¹)','captura de equilibrio (t)');
+  ctx.fillStyle='#8aa0ab';ctx.textAlign='center';for(let f=0;f<=1.6;f+=0.2){ctx.fillText(f.toFixed(1).replace('.',','),X(f),mT+ph+14);}
+  ctx.textAlign='right';for(let y=0;y<=ymax;y+=400){ctx.fillStyle='#8aa0ab';ctx.fillText(y.toLocaleString('es-AR'),mL-6,Y(y)+3);ctx.strokeStyle='#eef3f5';ctx.beginPath();ctx.moveTo(mL,Y(y));ctx.lineTo(mL+pw,Y(y));ctx.stroke();}
+  ctx.setLineDash([5,4]);ctx.strokeStyle='#c5283d';ctx.beginPath();ctx.moveTo(mL,Y(1222));ctx.lineTo(mL+pw,Y(1222));ctx.stroke();
+  ctx.strokeStyle='#8aa0ab';ctx.beginPath();ctx.moveTo(X(F40),mT);ctx.lineTo(X(F40),mT+ph);ctx.stroke();ctx.setLineDash([]);
+  const line=(key,color)=>{ctx.strokeStyle=color;ctx.lineWidth=2.4;ctx.beginPath();eq.forEach((p,i)=>{i?ctx.lineTo(X(p.F),Y(p[key])):ctx.moveTo(X(p.F),Y(p[key]));});ctx.stroke();};
+  line('Yc','#d9a330');line('Y','#2c7a7b');
+  const msy=eq.reduce((a,b)=>b.Y>a.Y?b:a);ctx.fillStyle='#2c7a7b';ctx.beginPath();ctx.arc(X(msy.F),Y(msy.Y),5,0,7);ctx.fill();
+  ctx.font='bold 11px Segoe UI,Arial';ctx.textAlign='left';ctx.fillText('RMS ≈ '+Math.round(msy.Y).toLocaleString('es-AR')+' t',X(msy.F)+8,Y(msy.Y)+14);
+  ctx.fillStyle='#3f5a68';ctx.fillText('F₄₀%',X(F40)+4,mT+12);ctx.fillStyle='#c5283d';ctx.fillText('1.222 t (CBA del modelo)',mL+6,Y(1222)-5);
+}
+function drawSub(F40){
+  const hr40=(1-Math.exp(-F40))*100;$('hr40').textContent=hr40.toFixed(0);
+  const B25=4854;const sh=state.share==='media'?{n:0.84,s:0.16}:{n:0.93,s:0.07};
+  const rows=[['Recomendada (1.100 / 195 t)',1100,195],['CBA del modelo con participación media (1.027 / 195 t)',1027,195],['CBA del modelo con participación 2025 (1.136 / 85 t)',1136,85]];
+  let html='<tr><th>Asignación</th><th>Norte: tasa</th><th>Norte: F/F₄₀</th><th>Sur: tasa</th><th>Sur: F/F₄₀</th></tr>';
+  rows.forEach(r=>{const hn=r[1]/(B25*sh.n),hs=r[2]/(B25*sh.s);const fn=-Math.log(1-Math.min(hn,.99)),fs=-Math.log(1-Math.min(hs,.99));
+    const col=x=>x>1?'style="color:var(--rojo);font-weight:800"':'';
+    html+=`<tr><td>${r[0]}</td><td>${(hn*100).toFixed(0)}%</td><td ${col(fn/F40)}>${(fn/F40).toFixed(2).replace('.',',')}</td><td>${(hs*100).toFixed(0)}%</td><td ${col(fs/F40)}>${(fs/F40).toFixed(2).replace('.',',')}</td></tr>`;});
+  $('subTab').innerHTML=html;
+}
+
+// ============================================================ EVENTOS
+$('cba').addEventListener('input',e=>{state.cba=+e.target.value;schedule();});
+$('h').addEventListener('input',e=>{state.h=+e.target.value;schedule();});
+$('m').addEventListener('input',e=>{state.M=+e.target.value;schedule();});
+$('reg').addEventListener('input',e=>{state.reg=+e.target.value;schedule();});
+$('dm').addEventListener('input',e=>{state.dm=+e.target.value/100;schedule();});
+$('cv').addEventListener('input',e=>{state.cv=+e.target.value/100;schedule();});
+$('sr').addEventListener('input',e=>{state.sr=+e.target.value;schedule();});
+$('ns').addEventListener('input',e=>{state.ns=+e.target.value;schedule();});
+document.querySelectorAll('#recmode button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#recmode button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.recmode=b.dataset.v;render();}));
+document.querySelectorAll('#shareMode button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#shareMode button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.share=b.dataset.v;render();}));
+document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>{state.cba=+b.dataset.preset;$('cba').value=state.cba;render();}));
+document.querySelectorAll('.lvl').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.lvl').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.level=+b.dataset.l;
+  document.querySelectorAll('.l2').forEach(el=>el.classList.toggle('hide',state.level<2));document.querySelectorAll('.l3').forEach(el=>el.classList.toggle('hide',state.level<3));render();}));
+$('resetBtn').addEventListener('click',()=>{Object.assign(state,{cba:1295,recmode:'const',h:0.6,M:0.31,reg:0,dm:0,cv:0.12,sr:0.35,ns:1500});
+  $('cba').value=1295;$('h').value=0.6;$('m').value=0.31;$('reg').value=0;$('dm').value=0;$('cv').value=12;$('sr').value=0.35;$('ns').value=1500;
+  document.querySelectorAll('#recmode button').forEach(x=>x.classList.toggle('on',x.dataset.v==='const'));render();});
+$('csvBtn').addEventListener('click',()=>{const {res,rc}=window._lastRes;let csv='anio,p10_pctB0,p50_pctB0,p90_pctB0\n';
+  rc.hist.forEach(h=>{csv+=`${h.y},,${(h.ssb/B0*100).toFixed(1)},\n`;});
+  const T=res.ssb[0].length;for(let j=0;j<T;j++){const col=res.ssb.map(r=>r[j]/B0*100);csv+=`${2026+j},${quant(col,.1).toFixed(1)},${quant(col,.5).toFixed(1)},${quant(col,.9).toFixed(1)}\n`;}
+  const box=$('csvBox');box.value=csv;box.classList.remove('hide');box.select();
+  let copied=false;try{navigator.clipboard.writeText(csv).then(()=>{$('csvHint').textContent='CSV copiado al portapapeles (también podés seleccionarlo del cuadro).';}).catch(()=>{});}catch(e){}
+  $('csvHint').textContent='CSV listo: seleccioná el cuadro y copiá (Ctrl+C), o guardalo como .csv.';
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`dt10_trayectoria_cba${state.cba}_${state.recmode}.csv`;a.click();}catch(e){}});
+
+function drawCitc(){const cmp=+$('cmp').value,pc=+$('citc').value;$('cmpVal').textContent=cmp;$('citcVal').textContent=pc.toFixed(2).replace('.',',');
+  const t=cmp*pc/100;$('cT').textContent=t.toFixed(1).replace('.',',')+' t';$('cT15').textContent=Math.round(t*15).toLocaleString('es-AR')+' t';
+  $('cUSD').textContent='USD '+Math.round(t*19365).toLocaleString('es-AR');$('cDUE').textContent='USD '+Math.round(t*19365*0.025).toLocaleString('es-AR');
+  const ex=pc-45;$('cCap').textContent=ex>0?'+'+ex.toFixed(2).replace('.',',')+' puntos':'dentro del tope';$('cCap').style.color=ex>0?'var(--rojo)':'var(--verde)';}
+$('cmp').addEventListener('input',drawCitc);$('citc').addEventListener('input',drawCitc);drawCitc();
+window.addEventListener('resize',schedule);
+render();
+</script>
+</body>
+</html>
