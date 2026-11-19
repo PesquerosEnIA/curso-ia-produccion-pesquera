@@ -455,72 +455,63 @@ fieldset{border:0}
        serie:  min, max, unidad, puntos[{ x, y, etx, examen, falta }], bandas[{ desde, hasta, et, color }]
    ============================================================ */
 const DESAFIO = {
-  id: "d03_modelo94",
-  titulo: "El modelo que <em>acertaba el 94 %</em>",
-  bajada: "Un proveedor le vendió a la planta un modelo predictivo brillante en la demo e inútil en producción. Hacé la autopsia: es todo lo que vimos en las Clases 5 y 6, en un solo caso. Cierra el lunes 09/11 a las 21:00; el ganador se anuncia en la Clase 7.",
+  id: "d04_camara",
+  titulo: "La cámara que <em>funcionaba en cualquier planta</em>",
+  bajada: "Un proveedor instaló una cámara con IA en la línea de filetes: brillante en su planta piloto, un problema en la nuestra. Hacé la autopsia: es todo lo que vimos en la Clase 7, en un solo caso. Cierra el lunes 23/11 a las 21:00; el ganador se anuncia en la Clase 8.",
   caso: {
-    tag: "Planta Giro01 · caso didáctico",
-    ilustracion: { template: "ilus-d03", pie: "Ilustración. La sala de reuniones de la planta, el día de la demo. Mirá con lupa: varios objetos son pistas." },
+    tag: "Planta Giro02 · caso didáctico",
     graficos: [
-      { pos: "chat", tipo: "barras", titulo: "Lo que más pesa en el modelo", sub: "Según el informe del proveedor: cuánto usa el modelo cada variable para decidir.", unidad: " %", max: 100,
-        filas: [
-          { et: "merma en planta", v: 71, color: "alerta" },
-          { et: "embarcación", v: 12 },
-          { et: "talla media", v: 8 },
-          { et: "días de marea", v: 5 },
-          { et: "temp. de bodega", v: 4 }
-        ], fuente: "Datos didácticos del caso, generados para el desafío." },
-      { pos: "chat", tipo: "serie", titulo: "Los datos con los que se entrenó", sub: "Temperatura media de bodega por semana, como la recibió el modelo.", min: 0, max: 4, paso: 1, unidad: "°",
-        puntos: [{y: 2.6, etx: "dic"}, {y: 2.9}, {y: 2.4, examen: true}, {y: 2.7}, {y: 0, falta: true, etx: "ene"}, {y: 2.8}, {y: 3.1, examen: true}, {y: 2.5}, {y: 2.9, etx: "feb"}, {y: 2.6, examen: true}, {y: 0, falta: true}, {y: 2.7}, {y: 3.0, examen: true, etx: "mar"}, {y: 0, falta: true}, {y: 2.8}, {y: 2.6, examen: true}, {y: 2.9}, {etx: "abr"}, {}, {}, {}, {etx: "may"}, {}],
-        bandas: [ { desde: 0, hasta: 16, et: "entrenamiento y examen", color: "tenue" }, { desde: 19, hasta: 22, et: "producción", color: "alerta" } ],
-        leyenda: [ { et: "semana en el examen", color: "alerta" }, { et: "sensor caído → 0", color: "aviso" } ],
+      { pos: "final", tipo: "serie", titulo: "Filetes rechazados por día", sub: "La planilla de calidad de la línea: porcentaje de filetes que la cámara expulsó de la cinta.", min: 0, max: 20, paso: 5, unidad: " %",
+        puntos: [{y: 3.1, etx: "día 1"}, {y: 2.8}, {y: 3.3}, {y: 2.9}, {y: 3.0, etx: "día 5"}, {y: 3.2}, {y: 2.7}, {y: 3.1}, {y: 2.9}, {y: 15.4, examen: true, etx: "día 10"}, {y: 16.1, examen: true}, {y: 1.9, falta: true}, {y: 2.1, falta: true, etx: "día 13"}, {y: 1.8, falta: true}],
+        bandas: [ { desde: 0, hasta: 8, et: "luz de siempre", color: "tenue" }, { desde: 9, hasta: 13, et: "tubos nuevos", color: "alerta" } ],
+        leyenda: [ { et: "tubos nuevos", color: "alerta" }, { et: "umbral en 0,8", color: "aviso" } ],
         fuente: "Datos didácticos del caso, generados para el desafío." },
-      { pos: "final", tipo: "barras", titulo: "Lo que mostró la auditoría", sub: "Porcentaje de lotes bien clasificados.", unidad: " %", max: 100,
+      { pos: "final", tipo: "barras", titulo: "Lo que mostró la auditoría", sub: "Porcentaje de filetes bien clasificados, revisando a mano una muestra de 500.", unidad: " %", max: 100,
         filas: [
-          { et: "«todos normales»", v: 85, color: "tenue", nota: "regla sin modelo: decir siempre «normal»" },
-          { et: "modelo en la demo", v: 94, color: "aviso" },
-          { et: "modelo en mayo", v: 83, color: "alerta", nota: "80 lotes · 0 de 11 lotes malos anticipados" }
+          { et: "planta piloto", v: 98, color: "aviso", nota: "la cámara, según el proveedor" },
+          { et: "«aprobar todo»", v: 94, color: "tenue", nota: "6 de cada 100 filetes con defecto" },
+          { et: "nuestra línea", v: 86, color: "alerta", nota: "la cámara con tubos nuevos y umbral 0,8" }
         ], fuente: "Datos didácticos del caso, generados para el desafío." }
     ],
-    escena: "<strong>Mayo.</strong> La planta compró un modelo que avisa, al recibir cada lote de merluza, si va a dar <strong>bajo rendimiento de fileteado</strong>. Así lo presentó el proveedor en la reunión de compra:",
+    escena: "<strong>Octubre.</strong> La planta compró una cámara con IA para detectar defectos en los filetes de merluza (hematomas, parásitos, restos de espinas) en la cinta, a <strong>300 filetes por minuto</strong>. Así la presentó el proveedor:",
     mensajes: [
-      { tipo: "sistema", quien: "Diapositiva del proveedor", texto: "MODELO PREDICTIVO DE RENDIMIENTO · 94 % DE ACIERTO. Entrenado con 2.400 lotes de diciembre a marzo. Variables: talla media, días de marea, temperatura de bodega, embarcación, merma registrada en planta. Examen: 20 % de los lotes elegidos al azar. Datos faltantes de sensores completados automáticamente con 0." },
-      { tipo: "usuario", quien: "Jefe de planta", texto: "¿Y por qué el modelo marca un lote como malo? Si me avisa, necesito saber qué revisar." },
-      { tipo: "asistente", quien: "Proveedor", texto: "Es un modelo avanzado, no se puede explicar por dentro. Lo importante es que acierta 94 de cada 100. La temperatura de cámara no la usamos porque ustedes la tienen en una planilla aparte, pero no hace falta." },
-      { tipo: "usuario", quien: "Jefe de planta", texto: "¿Y cómo vamos a saber si sigue acertando?" },
-      { tipo: "asistente", quien: "Proveedor", texto: "Funciona solo. Cuando avisa, avisa. No hay que guardar nada." }
+      { tipo: "sistema", quien: "Diapositiva del proveedor", texto: "VISIÓN DE CALIDAD · 98 % DE ACIERTO. Red convolucional entrenada con 12.000 fotos de filetes de nuestra planta piloto (luz LED controlada, cinta azul). Umbral de rechazo fijo: 0,5. Todo filete que lo supera se expulsa de la cinta. Sin personal de inspección: ahorro de 6 puestos. Las imágenes no se guardan, para ahorrar disco." },
+      { tipo: "usuario", quien: "Jefa de calidad", texto: "Nuestra cinta es blanca y la cabina tiene tubos fluorescentes. ¿Lo probaron con nuestros filetes?" },
+      { tipo: "asistente", quien: "Proveedor", texto: "No hace falta. Una red convolucional aprende sola qué mirar: funciona en cualquier planta." },
+      { tipo: "usuario", quien: "Jefa de calidad", texto: "¿Y los filetes dudosos? Hoy los mira una inspectora." },
+      { tipo: "asistente", quien: "Proveedor", texto: "El modelo decide, para eso está. Si algún día rechaza mucho, subimos el umbral y listo." }
     ],
-    desenlace: "<strong>Tres semanas después:</strong> entraron 80 lotes; 11 dieron bajo rendimiento y el modelo no anticipó ninguno. En la auditoría alguien hace la cuenta: <strong>el 85 % de los lotes son normales</strong>. Y el proveedor ya mandó su respuesta: <strong>«Falla porque les faltan datos. Compren nuestro módulo Big Data.»</strong>"
+    desenlace: "<strong>Noviembre:</strong> mantenimiento cambia los tubos de la cabina y los rechazos saltan del 3 % al 15 % de un día para otro. El proveedor sube el umbral a 0,8 por teléfono y los rechazos bajan. Dos semanas después, <strong>un cliente devuelve un pallet con parásitos</strong>. Nadie puede revisar qué vio la cámara: no hay imágenes. Y el operario de la cinta tiene una queja más: <strong>cada vez que pasa la mano con el guante azul, la cámara expulsa un filete.</strong>"
   },
   links: [
-    { label: "Simulador «Elegí bien» — variables, trampas y elección de modelo", url: "https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/c6_elegir_modelo.html" },
-    { label: "Simulador «Entrená tu primer modelo» — el examen y el memorión", url: "https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/c6_entrenar_modelo.html" },
-    { label: "Simulador «Abrí la caja» — SHAP y LIME", url: "https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/c6_explicar_modelo.html" },
-    { label: "Grabación de la Clase 5 — arquitectura de datos (Damián)", url: "https://youtu.be/0moGrfPWD3E" },
+    { label: "Simulador «La cámara en la línea» — umbral, zona de duda y cambio de luz", url: "https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/c7_camara_linea.html" },
+    { label: "Simulador «El ojo y la IA» — la matriz de confusión", url: "https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/planta_inspector.html" },
+    { label: "Video «Una red convolucional en vivo» (3 min)", url: "https://youtu.be/PDA-bSp6eOs" },
+    { label: "Notebook en Colab — la CNN sobre el video del barco", url: "https://colab.research.google.com/github/PesquerosEnIA/curso-ia-produccion-pesquera/blob/master/clase_07_vision_artificial/notebooks/clase07_cnn_en_vivo_opencv.ipynb" },
     { label: "La Doctrina del Grupo", url: "https://pesquerosenia.github.io/curso-ia-produccion-pesquera/interactivos/doctrina.html" }
   ],
-  premio: "La mejor autopsia se gana una ley propia en la Doctrina del Grupo (Clases 5–6), con nombre y apellido, para todo el curso.",
+  premio: "La mejor autopsia se gana una ley propia en la Doctrina del Grupo (Clase 7), con nombre y apellido, para todo el curso.",
   preguntas: [
     {
       id: "p1", tipo: "opcion",
-      enunciado: "Antes de firmar, podés pedirle UNA sola cosa al proveedor. ¿Cuál elegís?",
+      enunciado: "Antes de firmar, podés exigir UNA sola condición al proveedor. ¿Cuál elegís?",
       ayuda: "Todas ayudan. Elegí la que más te protege, y si querés contá por qué en la pregunta 2.",
       opciones: [
-        "Que le tome examen con lotes de semanas posteriores, que el modelo nunca vio",
-        "Que compare su 94 % contra la regla «todos los lotes son normales»",
-        "Que saque la variable «merma registrada en planta»",
-        "Que explique cada predicción con SHAP o LIME"
+        "Dos semanas de prueba en nuestra línea, con nuestra luz, comparando contra lo que deciden las inspectoras",
+        "Que compare su 98 % contra la regla «aprobar todo»",
+        "Una zona de duda: los filetes dudosos van a una persona en la mesa",
+        "Que se guarden las imágenes de todo lo que la cámara rechaza y deja pasar"
       ]
     },
     {
       id: "p2", tipo: "texto", obligatorio: true,
-      enunciado: "Hacé la autopsia: encontrá todas las fallas que puedas. Nombrá cada una con un concepto de las clases (los datos de la Clase 5, los modelos de la Clase 6) y decí cómo la evitarías.",
-      ayuda: "Hay más de cinco. Leé con lupa la diapositiva: cada línea esconde algo."
+      enunciado: "Hacé la autopsia: encontrá todas las fallas que puedas. Nombrá cada una con un concepto de la Clase 7 y decí cómo la evitarías.",
+      ayuda: "Hay más de cinco. Leé con lupa la diapositiva, la charla, el desenlace y los dos gráficos."
     },
     {
-      id: "p3", tipo: "texto",
-      enunciado: "El proveedor dice: «Falla porque les faltan datos. Compren nuestro módulo Big Data.» Tenés dos minutos. ¿Qué le contestás?",
-      ayuda: "¿Faltan datos, o faltan los datos correctos y bien cuidados? Acá juega la Clase 5."
+      id: "p3", tipo: "texto", obligatorio: true,
+      enunciado: "Abrí el simulador «La cámara en la línea». En el paso 2 dejá la zona de duda como viene (40 y 60) y la mesa en 20 filetes por minuto. En el paso 3, tocá «Cambiar el tubo de luz». ¿Cuántas personas hacen falta en la mesa y cuántos filetes buenos se rechazan por turno, antes y después? Con esos números, contestale al proveedor que dice «si rechaza mucho, subimos el umbral».",
+      ayuda: "Los números los ve todo el curso igual: el simulador usa siempre los mismos datos."
     }
   ]
 };
