@@ -282,6 +282,13 @@ const LEYES = [
     fundamento:"En el desafío de las Clases 5–6, decir siempre «normal» acertaba el <strong>85 %</strong>; el modelo vendido con <strong>94 %</strong> dio <strong>83 %</strong> en producción. No es solo un caso de aula: Makridakis y colegas (<strong>PLoS ONE, 2018</strong>) compararon métodos de machine learning con métodos estadísticos simples en <strong>1.045 series</strong> de la competencia M3, y los simples ganaron. Es la versión técnica de la ley de Claudio (Clase 1): <em>sin línea de base no hay nada que demostrar</em>.",
     textual:"Tampoco se comparó contra una línea base simple: decir siempre “normal” daba 85 % de aciertos, mientras que en mayo el modelo obtuvo 83 % y no detectó ninguno de los 11 lotes de bajo rendimiento.",
     canal:"Desafío del curso"
+  },
+  {
+    clase:7, autor:"Nicolás Córdoba", tipo:"Ley",
+    enunciado:"Mover el umbral no arregla lo que la cámara ve mal: solo elige qué error esconder.",
+    fundamento:"En el desafío de la Clase 7, después de cambiar los tubos de luz, la mesa de duda pasó de <strong>1 a 5 personas</strong> y los filetes buenos rechazados, de <strong>691 a 10.267</strong> por turno (simulador «La cámara en la línea»). Subir el umbral bajaba los rechazos, pero dejaba pasar el pallet con parásitos. El nombre técnico es <strong>dataset shift</strong> (Quiñonero-Candela y colegas, <strong>MIT Press, 2009</strong>): si cambian los datos que entran, el puntaje del modelo ya no significa lo mismo, y ningún corte lo corrige. <em>Se recalibra con datos nuevos; no se arregla por teléfono.</em>",
+    textual:"Subir el umbral a ciegas no corrige la falla del modelo; solo oculta el síntoma destruyendo la calidad o la rentabilidad de la planta.",
+    canal:"Desafío del curso"
   }
 ];
 

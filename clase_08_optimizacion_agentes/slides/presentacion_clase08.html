@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clase 8 · Del modelo al agente</title>
+<meta name="description" content="Presentación de la Clase 8 (bloque de Ariel Giamportone) del curso IA Aplicada a la Producción Pesquera (UTN FRCh · PesquerosEnIA): de predecir a actuar, optimización como herramienta, qué es un agente de IA, flujo fijo o agente, patrones multiagente, casos reales con métricas (agro, acuicultura, puerto, vigilancia pesquera, compras) y dónde se rompe un agente.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --abismo:#07161F; --sonda:#0E2C3D; --plataforma:#164055; --carta:#EFE6D2; --tenue:#B9AE96;
+  --langostino:#E8623A; --marea:#48B39C; --boya:#F0B441; --transito:#6FA8DC; --frio:#2b5fa8;
+  --linea:rgba(239,230,210,.14); --linea2:rgba(239,230,210,.28);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#03090d;overflow:hidden}
+body{font-family:'Archivo',system-ui,sans-serif;color:var(--carta)}
+.escenario{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.lienzo{width:1600px;height:900px;position:relative;transform-origin:center center;flex:none}
+.slide{position:absolute;inset:0;background:var(--abismo);padding:70px 90px 80px;display:none;overflow:hidden}
+.slide.activa{display:block;animation:entra .35s ease}
+@keyframes entra{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide.activa{animation:none}}
+.slide::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(900px 500px at 110% -10%,rgba(72,179,156,.10),transparent 60%),
+  radial-gradient(700px 500px at -10% 120%,rgba(232,98,58,.08),transparent 60%);pointer-events:none}
+.slide>*{position:relative}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:20px;letter-spacing:.2em;text-transform:uppercase;color:var(--tenue);margin-bottom:14px}
+.eyebrow b{color:var(--boya);font-weight:600}
+h1{font-family:'Archivo Black',sans-serif;font-size:92px;line-height:.98;letter-spacing:-.02em;text-transform:uppercase}
+h2{font-family:'Archivo Black',sans-serif;font-size:56px;line-height:1.02;letter-spacing:-.015em;margin-bottom:22px}
+h1 em,h2 em{font-style:normal;color:var(--langostino)}
+h2 .v{color:var(--marea)} h2 .a{color:var(--boya)}
+p.lead{font-size:30px;line-height:1.35;color:var(--carta);max-width:1250px}
+p.lead b{color:var(--boya)}
+.sub{font-size:24px;color:var(--tenue);line-height:1.4}
+.mono{font-family:'IBM Plex Mono',monospace}
+.cols{display:flex;gap:34px}
+.col{flex:1;min-width:0}
+.card{background:var(--sonda);border:1px solid var(--linea);border-radius:18px;padding:24px 26px}
+.card h3{font-size:28px;margin-bottom:8px}
+.card p,.card li{font-size:22px;line-height:1.4;color:var(--carta)}
+.card .k{font-family:'IBM Plex Mono',monospace;font-size:16px;letter-spacing:.14em;text-transform:uppercase;color:var(--tenue);margin-bottom:6px}
+ul.lista{list-style:none}
+ul.lista li{padding-left:30px;position:relative;margin:10px 0;font-size:25px;line-height:1.35}
+ul.lista li::before{content:"";position:absolute;left:4px;top:13px;width:12px;height:12px;border-radius:3px;background:var(--marea)}
+.frase{font-family:'Archivo Black',sans-serif;font-size:44px;line-height:1.12}
+.cita{border-left:6px solid var(--boya);padding:10px 0 10px 26px;font-size:30px;line-height:1.35;font-style:italic}
+.cita span{display:block;font-style:normal;font-size:20px;color:var(--tenue);margin-top:8px;font-family:'IBM Plex Mono',monospace}
+.tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:17px;padding:5px 12px;border-radius:99px;border:1px solid var(--linea2);color:var(--carta);margin:0 8px 8px 0}
+.tag.v{border-color:var(--marea);color:var(--marea)} .tag.a{border-color:var(--boya);color:var(--boya)} .tag.r{border-color:var(--langostino);color:var(--langostino)}
+.pie{position:absolute;left:90px;right:90px;bottom:26px;display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:15px;color:#6b7c84;letter-spacing:.08em}
+svg text{font-family:'IBM Plex Mono',monospace}
+.fuente{position:absolute;right:90px;bottom:52px;font-family:'IBM Plex Mono',monospace;font-size:15px;color:#6b7c84;text-align:right;max-width:900px}
+.seccion{background:linear-gradient(135deg,#0E2C3D,#07161F 60%)}
+.seccion .num{font-family:'Archivo Black',sans-serif;font-size:260px;line-height:.8;color:rgba(240,180,65,.14);position:absolute;right:80px;bottom:40px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.regla{background:var(--sonda);border:1px solid var(--linea);border-top:6px solid var(--boya);border-radius:14px;padding:20px 20px}
+.regla .n{font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--tenue);letter-spacing:.12em}
+.regla .t{font-family:'Archivo Black',sans-serif;font-size:30px;line-height:1.1;margin:10px 0 14px}
+.regla .e{font-size:21px;line-height:1.4;color:var(--tenue)}
+.regla{min-height:380px}
+.regla .e b{color:var(--carta)}
+
+/* barra, notas, ayuda */
+.hud{position:fixed;left:0;right:0;bottom:0;height:5px;background:rgba(239,230,210,.08);z-index:5}
+.hud i{display:block;height:100%;background:var(--boya);width:0;transition:width .3s}
+.contador{position:fixed;right:14px;bottom:12px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6b7c84;z-index:5}
+.nav{position:fixed;left:14px;bottom:10px;display:flex;gap:6px;z-index:5;opacity:.25;transition:opacity .2s}
+.nav:hover{opacity:1}
+.nav button{font-family:'IBM Plex Mono',monospace;background:#0E2C3D;color:#EFE6D2;border:1px solid rgba(239,230,210,.25);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:13px}
+.notas{position:fixed;left:0;right:0;bottom:0;max-height:42vh;overflow:auto;background:rgba(3,9,13,.96);border-top:2px solid var(--boya);padding:16px 22px 34px;z-index:6;display:none;font-size:16px;line-height:1.5}
+.notas.show{display:block}
+.notas h4{font-family:'IBM Plex Mono',monospace;color:var(--boya);font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.notas b{color:var(--boya)}
+.notas ul{margin:6px 0 0 18px}
+aside.nota{display:none}
+.marca{position:absolute;top:16px;right:22px;display:flex;gap:8px;z-index:3}
+.marca span{background:#fff;border-radius:8px;height:40px;padding:4px 8px;display:flex;align-items:center}
+.marca img{height:30px;display:block}
+.logos{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.logo{background:#fff;border-radius:14px;height:96px;padding:12px 20px;display:flex;align-items:center;justify-content:center}
+.logo img{display:block;max-width:230px}
+.foto{padding:0}
+.foto figure{position:absolute;inset:0;margin:0;background:#0E2C3D}
+.foto figure img{width:100%;height:100%;object-fit:cover;display:block}
+.foto .falta-box{display:none}
+.foto figure.falta img{display:none}
+.foto figure.falta .falta-box{display:flex;flex-direction:column;justify-content:center;align-items:center;position:absolute;top:60px;bottom:60px;right:60px;left:52%;border:3px dashed rgba(239,230,210,.3);border-radius:24px;color:#B9AE96;font-family:'IBM Plex Mono',monospace;font-size:22px;text-align:center;gap:10px;padding:40px}
+.foto .velo{position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,22,31,.92) 0%,rgba(7,22,31,.55) 42%,rgba(7,22,31,0) 70%)}
+.foto .texto{position:absolute;left:90px;top:0;bottom:0;width:640px;display:flex;flex-direction:column;justify-content:center}
+.foto.contain figure{left:48%;background:#07161F}
+.foto.contain figure img{object-fit:contain}
+.foto.contain .velo{display:none}
+.foto.contain .texto{width:620px}
+.foto .credito{position:absolute;right:24px;bottom:18px;font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(239,230,210,.7);background:rgba(7,22,31,.6);padding:4px 10px;border-radius:6px}
+.dato{background:var(--sonda);border:1px solid var(--linea);border-radius:18px;padding:22px 24px}
+.dato .n{font-family:'Archivo Black',sans-serif;font-size:74px;line-height:1;color:var(--boya)}
+.dato .t{font-size:23px;line-height:1.35;margin-top:8px}
+.dato .c{font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--tenue);margin-top:10px}
+.biblio li{font-size:19px;line-height:1.45;margin:0 0 12px 0;list-style:none;padding-left:26px;position:relative;color:var(--carta)}
+.biblio li::before{content:"›";position:absolute;left:4px;color:var(--boya)}
+.biblio i{color:var(--tenue)}
+
+.video{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--linea2);background:#000 center/cover no-repeat;cursor:pointer}
+.video::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,22,31,0) 55%,rgba(7,22,31,.85))}
+.video .play{position:absolute;left:50%;top:50%;width:110px;height:76px;margin:-38px 0 0 -55px;border-radius:18px;background:rgba(232,98,58,.92);z-index:1}
+.video .play::before{content:"";position:absolute;left:44px;top:22px;border-left:30px solid #fff;border-top:16px solid transparent;border-bottom:16px solid transparent}
+.video .rot{position:absolute;left:18px;right:18px;bottom:14px;z-index:1;font-family:'IBM Plex Mono',monospace;font-size:15px;color:#EFE6D2}
+.video .rot a{color:var(--boya)}
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0;z-index:2}
+.biblio li{font-size:16px;margin-bottom:9px;break-inside:avoid}
+</style>
+</head>
+<body>
+<div class="escenario"><div class="lienzo" id="lienzo">
+
+<!-- ============ 1 · PORTADA ============ -->
+<section class="slide" data-sec="Inicio">
+  <div class="eyebrow">IA aplicada a la producción pesquera · <b>Clase 8</b> · Optimización y agentes</div>
+  <h1 style="margin-top:40px">Del modelo<br>al <em>agente</em></h1>
+  <p class="lead" style="margin-top:34px">Hasta ahora la IA miraba y predecía. Hoy <b>actúa</b>.</p>
+  <svg width="1420" height="250" viewBox="0 0 1420 250" style="position:absolute;left:90px;bottom:80px" aria-label="Ilustración: bucle percibe, decide, actúa">
+    <g font-family="Archivo,sans-serif" font-weight="700" font-size="30">
+      <rect x="0" y="60" width="330" height="110" rx="16" fill="#0E2C3D" stroke="#6FA8DC" stroke-width="3"/><text x="165" y="112" text-anchor="middle" fill="#6FA8DC">Percibe</text>
+      <rect x="545" y="60" width="330" height="110" rx="16" fill="#164055" stroke="#F0B441" stroke-width="3"/><text x="710" y="112" text-anchor="middle" fill="#F0B441">Decide</text>
+      <rect x="1090" y="60" width="330" height="110" rx="16" fill="#0E2C3D" stroke="#E8623A" stroke-width="3"/><text x="1255" y="112" text-anchor="middle" fill="#E8623A">Actúa</text>
+    </g>
+    <g font-size="17" fill="#B9AE96" text-anchor="middle"><text x="165" y="146">cámaras · AIS · mensajes</text><text x="710" y="146">reglas · modelos · un LLM</text><text x="1255" y="146">avisa · ajusta · reprograma</text></g>
+    <g stroke="#F0B441" stroke-width="3" fill="none"><path d="M335 115 H535"/><path d="M880 115 H1080"/><path d="M1255 175 C1255 215 165 215 165 180"/></g>
+    <g fill="#F0B441"><path d="M533 107 L547 115 L533 123 Z"/><path d="M1078 107 L1092 115 L1078 123 Z"/><path d="M157 184 L165 170 L173 184 Z"/></g>
+    <text x="710" y="244" text-anchor="middle" fill="#B9AE96" font-size="16">Y VUELVE A EMPEZAR: EL MUNDO CAMBIÓ POR LO QUE HIZO</text>
+  </svg>
+  <div class="pie"><span>Ariel Giamportone · Damián Giacone</span><span>martes 24/11/2026 · 18:00</span></div>
+  <aside class="nota"><h4>+0:00 · Apertura (1 min)</h4>Presentá la dinámica: <i>"Primero les cuento qué es un agente y dónde se rompe; después Damián lo arma en vivo con un caso de puerto y planta, y lo compara con Claude."</i> El dibujo es el bucle que vamos a ver toda la clase.<br>Teclas: <b>→</b> avanzar · <b>F</b> pantalla completa · <b>N</b> notas.</aside>
+</section>
+
+<!-- ============ 2 · DESAFÍO D04 ============ -->
+<section class="slide" data-sec="Inicio">
+  <div class="eyebrow">Desafío de la semana · <b>d04 · La cámara que funcionaba en cualquier planta</b></div>
+  <h2>Una ley nueva <em>en la Doctrina</em></h2>
+  <div class="cols" style="margin-top:10px">
+    <div class="card col" style="flex:1.5;border-left:6px solid var(--boya)" id="d04Ganador">
+      <div class="k">🏆 Nicolás Córdoba · Ley de la Clase 7</div>
+      <p class="frase" style="font-size:46px;margin:10px 0 18px">Mover el umbral no arregla lo que la cámara ve mal: <span style="color:var(--boya)">solo elige qué error esconder.</span></p>
+      <p style="color:var(--tenue)">Con el simulador: con la luz nueva, la mesa de duda pasa de <b style="color:var(--carta)">1 a 5 personas</b> y los filetes buenos rechazados, de <b style="color:var(--carta)">691 a 10.267</b> por turno. «Subir el umbral a ciegas solo oculta el síntoma.»</p>
+    </div>
+    <div class="col">
+      <div class="card" style="margin-bottom:18px"><div class="k">Menciones</div><h3>Carla Campos</h3><p>La única que vio la falla de abajo.</p><h3 style="margin-top:12px">Ana Clara Arcuri</h3><p>Un umbral no se cambia «sin registro, sin autorización, sin validación y sin responsable».</p></div>
+      <div class="card"><div class="k">Lo que casi nadie vio</div><p>La cámara acertaba <b>86 %</b> en nuestra línea; aprobar todo, sin cámara, daba <b>94 %</b>. <b>Era peor que no tener cámara.</b></p></div>
+    </div>
+  </div>
+  <p class="sub" style="margin-top:24px">El hilo con hoy: una cámara que <b style="color:var(--carta)">decidía sola</b>, sin zona de duda ni registro. Un agente es eso mismo, pero con más poder.</p>
+  <aside class="nota"><h4>+0:01 · Desafío (4 min)</h4>Anunciá al ganador y leé la ley. Nombrá las menciones y agradecé a Pablo Di Filippo (participó otra vez). Cuatro respuestas. Contá en una frase la falla que casi nadie encontró. <b>Puente:</b> «el proveedor vendía una cámara que decidía sola, sin persona en el bucle y sin guardar imágenes: hoy vamos a ver sistemas que deciden <i>y actúan</i>, así que esas lecciones valen el doble».</aside>
+</section>
+
+<!-- ============ 3 · AGENDA ============ -->
+<section class="slide" data-sec="Inicio">
+  <div class="eyebrow">Hoy</div>
+  <h2>Dos partes, <em>un mismo caso</em></h2>
+  <div class="grid3" style="margin-top:20px">
+    <div class="card" style="border-top:6px solid var(--boya)"><div class="k">18:10 · Ariel</div><h3>Qué es un agente</h3><ul class="lista"><li>De predecir a actuar</li><li>Las piezas de un agente</li><li>¿Flujo fijo o agente?</li><li>Dónde se rompe</li></ul></div>
+    <div class="card" style="border-top:6px solid var(--marea)"><div class="k">19:00 · Damián</div><h3>El caso en vivo</h3><ul class="lista"><li>Una planta simulada: flota, muelle, calidad y ventas</li><li>Un orquestador y sus especialistas en n8n</li><li>Ustedes cargan descargas y pedidos desde el celular</li><li>El mismo caso, en Claude</li></ul></div>
+    <div class="card" style="border-top:6px solid var(--transito)"><div class="k">19:50</div><h3>Cierre</h3><ul class="lista"><li>¿Qué entorno para qué problema?</li><li>Desafío de la semana</li><li>Próxima clase</li></ul></div>
+  </div>
+  <aside class="nota"><h4>+0:05 · Agenda (1 min)</h4>Remarcá que la primera parte les da <b>los lentes para mirar la demo</b>: al final les dejo cinco preguntas para hacerle al flujo de Damián.</aside>
+</section>
+
+<!-- ============ 4 · ESCALERA ============ -->
+<section class="slide" data-sec="1 · De predecir a actuar">
+  <div class="eyebrow">Parte 1 · <b>Dónde estamos</b></div>
+  <h2>Cada clase, <em>un escalón más</em></h2>
+  <svg width="1420" height="470" viewBox="0 0 1420 470" aria-label="Escalera: describir, predecir, ver, recomendar, actuar">
+    <g font-family="Archivo,sans-serif" font-weight="700">
+      <rect x="0"    y="360" width="270" height="100" rx="12" fill="#164055"/>
+      <rect x="285"  y="280" width="270" height="180" rx="12" fill="#1d5a6e"/>
+      <rect x="570"  y="200" width="270" height="260" rx="12" fill="#2f7f7a"/>
+      <rect x="855"  y="120" width="270" height="340" rx="12" fill="#48B39C"/>
+      <rect x="1140" y="40"  width="280" height="420" rx="12" fill="#F0B441"/>
+      <g font-size="30" text-anchor="middle"><text x="135" y="402" fill="#EFE6D2">Describir</text><text x="420" y="322" fill="#EFE6D2">Predecir</text><text x="705" y="242" fill="#EFE6D2">Ver</text><text x="990" y="162" fill="#07161F">Recomendar</text><text x="1280" y="82" fill="#07161F">Actuar</text></g>
+    </g>
+    <g font-size="18" text-anchor="middle"><text x="135" y="436" fill="#B9AE96">el tablero · C4–C5</text><text x="420" y="356" fill="#B9AE96">el modelo · C6</text><text x="705" y="276" fill="#B9AE96">la cámara · C7</text><text x="990" y="196" fill="#07161F">optimizar · hoy</text><text x="1280" y="116" fill="#07161F">el agente · hoy</text></g>
+    <g font-size="17" text-anchor="middle" fill="#EFE6D2"><text x="420" y="410">¿cuánto va a consumir?</text><text x="705" y="330">¿este filete sirve?</text><text x="990" y="250" fill="#07161F">¿a qué velocidad voy?</text><text x="1280" y="170" fill="#07161F">aviso, reprogramo,</text><text x="1280" y="194" fill="#07161F">pido el OK</text></g>
+  </svg>
+  <aside class="nota"><h4>+0:06 · Escalera (2 min)</h4>Recorré los escalones con las clases anteriores. La idea fuerza: <b>en los primeros cuatro, la decisión la sigue tomando una persona</b>. En el quinto, el sistema hace algo en el mundo: manda un mensaje, cambia un turno, abre una orden. Por eso cambian los riesgos.</aside>
+</section>
+
+<!-- ============ 5 · OPTIMIZAR ============ -->
+<section class="slide" data-sec="1 · De predecir a actuar">
+  <div class="eyebrow">Parte 1 · <b>Recomendar: optimizar</b></div>
+  <h2>Ni muy rápido <em>ni muy lento</em></h2>
+  <div class="cols" style="align-items:center">
+    <div class="col" style="flex:1.2">
+      <svg width="760" height="470" viewBox="0 0 760 470" aria-label="Curvas de costo por viaje en función de la velocidad: combustible sube, días de marea bajan, el total tiene un mínimo">
+        <line x1="70" y1="410" x2="740" y2="410" stroke="#6b7c84" stroke-width="2"/><line x1="70" y1="30" x2="70" y2="410" stroke="#6b7c84" stroke-width="2"/>
+        <text x="740" y="444" text-anchor="end" fill="#B9AE96" font-size="17">velocidad (nudos) →</text>
+        <text x="20" y="220" fill="#B9AE96" font-size="17" transform="rotate(-90 20 220)" text-anchor="middle">costo por viaje →</text>
+        <path id="cComb" d="" fill="none" stroke="#E8623A" stroke-width="4"/>
+        <path id="cDias" d="" fill="none" stroke="#6FA8DC" stroke-width="4"/>
+        <path id="cTot" d="" fill="none" stroke="#F0B441" stroke-width="6"/>
+        <line id="cOpt" x1="0" y1="40" x2="0" y2="410" stroke="#F0B441" stroke-width="2" stroke-dasharray="6 6"/>
+        <text id="cOptT" x="0" y="30" text-anchor="middle" fill="#F0B441" font-size="18">mínimo</text>
+        <g font-size="18"><text x="560" y="70" fill="#E8623A">combustible</text><text x="560" y="355" fill="#6FA8DC">días de marea</text><text x="180" y="270" fill="#F0B441">costo total</text></g>
+      </svg>
+    </div>
+    <div class="col">
+      <ul class="lista"><li>El consumo por hora crece aproximadamente con el <b>cubo</b> de la velocidad.</li><li>Ir lento alarga la marea: más días de tripulación, de víveres, de barco parado.</li><li>El <b>mínimo</b> se mueve con el precio del gasoil.</li></ul>
+      <p class="sub" style="margin-top:20px">Un modelo de optimización <b style="color:var(--boya)">recomienda</b>. Para un agente, es <b style="color:var(--boya)">una herramienta</b> que puede consultar.</p>
+      <p class="tag a" style="margin-top:18px">🎛️ simulador c8_velocidad_optima</p>
+    </div>
+  </div>
+  <div class="fuente">Curvas ilustrativas, sin escala: forma de la aproximación cúbica del consumo. Valores con datos en el simulador y en los notebooks de la Clase 8.</div>
+  <aside class="nota"><h4>+0:08 · Optimizar (3 min)</h4>Una sola idea técnica: <b>el costo total tiene un mínimo</b>, y moverse del mínimo cuesta en las dos direcciones. Si hay tiempo, abrí el simulador <b>c8_velocidad_optima</b> y subí el precio del gasoil: el mínimo se corre a la izquierda.<br>Puente: <i>"Esto es una recomendación. ¿Y si un sistema, además de calcularla, la manda al puente y reprograma la descarga? Eso es un agente."</i></aside>
+</section>
+
+<!-- ============ 6 · QUÉ ES UN AGENTE ============ -->
+<section class="slide" data-sec="1 · De predecir a actuar">
+  <div class="eyebrow">Parte 1 · <b>La definición</b></div>
+  <h2>Un agente <em>percibe, decide y actúa</em></h2>
+  <div class="cols" style="align-items:center">
+    <div class="col" style="flex:1.1">
+      <svg width="700" height="470" viewBox="0 0 700 470" aria-label="Bucle: el ambiente se percibe, el agente decide, actúa y el ambiente cambia">
+        <rect x="200" y="20" width="300" height="120" rx="18" fill="#164055" stroke="#F0B441" stroke-width="3"/>
+        <text x="350" y="72" text-anchor="middle" fill="#F0B441" font-size="28" font-family="Archivo,sans-serif" font-weight="700">AGENTE</text>
+        <text x="350" y="106" text-anchor="middle" fill="#EFE6D2" font-size="18">objetivo + reglas o modelo</text>
+        <rect x="120" y="330" width="460" height="120" rx="18" fill="#0E2C3D" stroke="#48B39C" stroke-width="3"/>
+        <text x="350" y="382" text-anchor="middle" fill="#48B39C" font-size="28" font-family="Archivo,sans-serif" font-weight="700">AMBIENTE</text>
+        <text x="350" y="416" text-anchor="middle" fill="#EFE6D2" font-size="18">el puerto, la planta, la flota</text>
+        <path d="M130 330 C40 280 40 160 190 100" stroke="#6FA8DC" stroke-width="4" fill="none"/><path d="M182 90 L200 98 L186 112 Z" fill="#6FA8DC"/>
+        <text x="105" y="226" fill="#6FA8DC" font-size="22">percibe</text><text x="105" y="252" fill="#B9AE96" font-size="16">sensores, mensajes,</text><text x="105" y="274" fill="#B9AE96" font-size="16">formularios</text>
+        <path d="M510 100 C660 160 660 280 570 330" stroke="#E8623A" stroke-width="4" fill="none"/><path d="M582 336 L566 342 L566 322 Z" fill="#E8623A"/>
+        <text x="595" y="226" text-anchor="end" fill="#E8623A" font-size="22">actúa</text><text x="595" y="252" text-anchor="end" fill="#B9AE96" font-size="16">avisa, asigna,</text><text x="595" y="274" text-anchor="end" fill="#B9AE96" font-size="16">reprograma</text>
+      </svg>
+    </div>
+    <div class="col">
+      <div class="cita">Un agente es cualquier cosa que percibe su ambiente mediante sensores y actúa sobre ese ambiente mediante actuadores.<span>Russell y Norvig, 2021 · traducción propia</span></div>
+      <div class="grid2" style="margin-top:28px">
+        <div class="card"><div class="k">Agente simple</div><p>El termostato de la cámara de frío: mide, compara, prende el compresor.</p></div>
+        <div class="card"><div class="k">Agente complejo</div><p>El jefe de operaciones: lee el parte del buque, mira la planta y reparte la tarea.</p></div>
+      </div>
+    </div>
+  </div>
+  <aside class="nota"><h4>+0:11 · Definición (3 min)</h4>Insistí en que <b>«agente» no es sinónimo de ChatGPT</b>: la definición clásica incluye un termostato. Lo que cambió en los últimos dos años es que ahora el «decide» puede ser un modelo de lenguaje, que entiende texto libre y elige qué herramienta usar. Preguntá al chat: <i>¿qué agente simple ya tienen en su barco o planta?</i> (piloto automático, alarma de nivel de bodega, control de túnel).</aside>
+</section>
+
+<!-- ============ 7 · LAS PIEZAS ============ -->
+<section class="slide" data-sec="1 · De predecir a actuar">
+  <div class="eyebrow">Parte 1 · <b>Un agente con modelo de lenguaje</b></div>
+  <h2>Cuatro piezas <em>y un bucle</em></h2>
+  <div class="grid4" style="margin-top:14px">
+    <div class="regla"><div class="n">01 · EL CEREBRO</div><div class="t">Modelo de lenguaje</div><div class="e">Lee el pedido, <b>razona</b> qué hace falta y elige el próximo paso. Claude, GPT, Gemini.</div></div>
+    <div class="regla" style="border-top-color:var(--marea)"><div class="n">02 · LAS MANOS</div><div class="t">Herramientas</div><div class="e">Lo que puede <b>consultar o hacer</b>: la planilla de cámaras, el pronóstico, el modelo de velocidad, mandar un WhatsApp.</div></div>
+    <div class="regla" style="border-top-color:var(--transito)"><div class="n">03 · EL CUADERNO</div><div class="t">Memoria</div><div class="e">Lo que ya pasó: los arribos de la semana, qué se decidió, <b>qué salió mal</b>.</div></div>
+    <div class="regla" style="border-top-color:var(--langostino)"><div class="n">04 · EL MANUAL</div><div class="t">Instrucciones</div><div class="e">El objetivo y los límites: <b>qué puede hacer solo</b> y qué tiene que consultar.</div></div>
+  </div>
+  <p class="lead" style="margin-top:30px">El bucle: <b>pensar → usar una herramienta → mirar el resultado → volver a pensar</b>, hasta terminar o pedir ayuda.</p>
+  <div class="fuente">Bucle razonar–actuar: Yao et al., 2023 (ReAct).</div>
+  <aside class="nota"><h4>+0:14 · Las piezas (3 min)</h4>Las cuatro metáforas ayudan al perfil operativo: <b>cerebro, manos, cuaderno, manual</b>. Remarcá que la pieza más subestimada es el manual: <b>el agente hace lo que las instrucciones le permiten</b>, y lo que no está escrito lo improvisa.<br>En n8n vas a ver estas piezas como nodos: el modelo, las herramientas conectadas y la memoria.</aside>
+</section>
+
+<!-- ============ 8 · UNA VUELTA DEL BUCLE ============ -->
+<section class="slide" data-sec="1 · De predecir a actuar">
+  <div class="eyebrow">Parte 1 · <b>Una vuelta del bucle</b> · ejemplo ilustrativo</div>
+  <h2>Sube el gasoil. <em>¿Qué hace el agente?</em></h2>
+  <div class="card mono" style="font-size:21px;line-height:1.55;padding:26px 30px;margin-top:6px">
+    <div><span style="color:#6FA8DC">ENTRA</span> &nbsp;Aviso: el gasoil sube 15 % desde mañana · Buque A en marea, 2 días de navegación a puerto</div>
+    <div style="margin-top:10px"><span style="color:#F0B441">PIENSA</span> ¿Conviene cambiar la velocidad de regreso?</div>
+    <div><span style="color:#48B39C">USA</span> &nbsp;&nbsp;velocidad_optima(precio_gasoil, dias_tripulacion) → <span style="color:#EFE6D2">bajar de 11 a 10 nudos</span></div>
+    <div style="margin-top:10px"><span style="color:#F0B441">PIENSA</span> Llegaría 5 horas más tarde. ¿Hay lugar en el muelle?</div>
+    <div><span style="color:#48B39C">USA</span> &nbsp;&nbsp;consultar_turnos_muelle("jueves") → <span style="color:#EFE6D2">libre hasta las 14:00</span></div>
+    <div style="margin-top:10px"><span style="color:#F0B441">PIENSA</span> Entra en el turno. Ahorra gasoil sin perder la descarga.</div>
+    <div><span style="color:#E8623A">PROPONE</span> al capitán: 10 nudos, arribo jueves 11:00 · <b style="color:#F0B441">el capitán decide</b></div>
+  </div>
+  <div class="fuente">Ejemplo inventado para explicar el bucle: buque, precios, velocidades y turnos no son datos reales.</div>
+  <aside class="nota"><h4>+0:17 · Una vuelta (3 min)</h4>Leelo como si fuera el pensamiento en voz alta del agente. Tres cosas para marcar:<ul><li>Nadie le programó «si baja la velocidad, mirá el muelle»: <b>eligió el orden de las herramientas</b>.</li><li>Su primera herramienta es el modelo de velocidad óptima de la diapositiva anterior: <b>los modelos de las clases 5 a 7 son las manos del agente</b>.</li><li>Cada dato viene de una herramienta, no de su imaginación. Sin <i>consultar_turnos_muelle</i> podría <b>inventar</b> que hay lugar.</li><li>La última línea es una decisión de diseño: <b>propone y decide el capitán</b>. Volvemos a eso en la Parte 3.</li></ul></aside>
+</section>
+
+<!-- ============ 9 · FLUJO O AGENTE ============ -->
+<section class="slide" data-sec="1 · De predecir a actuar">
+  <div class="eyebrow">Parte 1 · <b>La distinción que más sirve</b></div>
+  <h2>¿Flujo fijo <em>o agente?</em></h2>
+  <div class="cols" style="margin-top:6px">
+    <div class="card col" style="border-top:6px solid var(--marea)"><div class="k" style="color:var(--marea)">Flujo de trabajo</div><h3 style="font-size:34px">El camino lo dibujás vos</h3><ul class="lista"><li>Pasos fijos, en un orden fijo</li><li>Puede usar un modelo de lenguaje en algún paso</li><li><b>Predecible</b>, barato, fácil de auditar</li></ul></div>
+    <div class="card col" style="border-top:6px solid var(--boya)"><div class="k" style="color:var(--boya)">Agente</div><h3 style="font-size:34px">El camino lo elige el modelo</h3><ul class="lista"><li>Decide qué herramienta usar y cuándo parar</li><li>Sirve cuando no sabés de antemano los pasos</li><li><b>Flexible</b>, pero más caro y más difícil de controlar</li></ul></div>
+  </div>
+  <svg width="1420" height="110" viewBox="0 0 1420 110" style="margin-top:22px" aria-label="Espectro desde regla simple hasta agente autónomo">
+    <defs><linearGradient id="gEsp" x1="0" x2="1"><stop offset="0" stop-color="#48B39C"/><stop offset="1" stop-color="#F0B441"/></linearGradient></defs>
+    <rect x="0" y="34" width="1420" height="24" rx="12" fill="url(#gEsp)" opacity=".85"/>
+    <g font-size="19" fill="#EFE6D2"><text x="0" y="96">regla «si pasa X, avisá»</text><text x="430" y="96">flujo con un paso de IA</text><text x="860" y="96">flujo con enrutamiento</text><text x="1420" y="96" text-anchor="end">agente autónomo</text></g>
+    <text x="0" y="20" fill="#B9AE96" font-size="17">EMPEZÁ POR ACÁ →</text>
+  </svg>
+  <div class="fuente">Distinción y consejo: Anthropic, 2024, «Building effective agents».</div>
+  <aside class="nota"><h4>+0:20 · Flujo o agente (3 min)</h4>El consejo práctico de la fuente: <b>buscá la solución más simple que funcione</b> y sumá autonomía solo cuando el problema la pida. Muchos «agentes» que se venden son flujos fijos con un paso de IA, y está bien que lo sean.<br>Avisá que en la segunda mitad van a ver las dos cosas combinadas: un flujo visible donde algunos pasos son agentes.</aside>
+</section>
+
+<!-- ============ 10 · VOTACIÓN ============ -->
+<section class="slide" data-sec="1 · De predecir a actuar">
+  <div class="eyebrow">💬 En el chat · <b>votá con el número y una letra</b></div>
+  <h2>¿Regla, flujo <em>o agente?</em></h2>
+  <div class="card" style="margin-top:8px">
+    <ul class="lista" style="margin:0">
+      <li><b>1.</b> Avisar al jefe de planta si una cámara de frío pasa de −18 °C.</li>
+      <li><b>2.</b> Armar cada mañana el parte de descarga del día y mandarlo por mail.</li>
+      <li><b>3.</b> Leer los mails de clientes y derivar cada uno a ventas, calidad o logística.</li>
+      <li><b>4.</b> Reprogramar la descarga de cuatro buques cuando cambia el pronóstico y una línea está parada.</li>
+      <li><b>5.</b> Responder dudas del personal sobre el procedimiento de calidad, con el manual de la planta.</li>
+    </ul>
+  </div>
+  <div style="margin-top:22px"><span class="tag v">R · regla</span><span class="tag">F · flujo</span><span class="tag a">A · agente</span></div>
+  <aside class="nota"><h4>+0:23 · Votación (3 min · si vas corto, saltala)</h4>Dales un minuto y leé votos con nombre. Respuestas defendibles:<ul><li><b>1 → R.</b> Ni siquiera hace falta IA. Si le ponés un agente, agregás riesgo y costo.</li><li><b>2 → F.</b> Siempre los mismos pasos; un modelo de lenguaje puede redactar el resumen.</li><li><b>3 → F con enrutamiento.</b> La IA clasifica, el camino después es fijo.</li><li><b>4 → A.</b> No sabés de antemano qué combinación sirve: hay que probar, consultar y proponer.</li><li><b>5 → A sencillo</b> (o flujo de búsqueda + respuesta), siempre citando el manual.</li></ul>Lo importante no es acertar: es que la 1 <b>no</b> lleva agente.</aside>
+</section>
+
+<!-- ============ 11 · PATRONES ============ -->
+<section class="slide" data-sec="1 · De predecir a actuar">
+  <div class="eyebrow">Parte 1 · <b>Cómo se combinan</b></div>
+  <h2>Cinco formas <em>de armar el equipo</em></h2>
+  <div class="grid5" style="margin-top:14px">
+    <div class="regla" style="min-height:330px"><div class="n">01</div><div class="t" style="font-size:26px">Encadenar</div><div class="e">Un paso alimenta al siguiente: parte del buque → resumen → mail.</div></div>
+    <div class="regla" style="min-height:330px"><div class="n">02</div><div class="t" style="font-size:26px">Enrutar</div><div class="e">Clasifica y deriva: reclamo a calidad, pedido a ventas.</div></div>
+    <div class="regla" style="min-height:330px"><div class="n">03</div><div class="t" style="font-size:26px">Paralelizar</div><div class="e">Varias tareas a la vez, se juntan al final.</div></div>
+    <div class="regla" style="min-height:330px;border-top-color:var(--langostino);background:#164055"><div class="n" style="color:var(--langostino)">04 · LO VAN A VER HOY</div><div class="t" style="font-size:26px">Orquestador y especialistas</div><div class="e">Uno <b>reparte</b> según el caso; cada especialista hace su parte.</div></div>
+    <div class="regla" style="min-height:330px"><div class="n">05</div><div class="t" style="font-size:26px">Evaluador</div><div class="e">Uno propone, otro <b>revisa</b> y devuelve hasta que cumple.</div></div>
+  </div>
+  <div class="fuente">Patrones descritos en Anthropic, 2024, «Building effective agents». Ejemplos pesqueros: propios.</div>
+  <aside class="nota"><h4>+0:26 · Patrones (2 min)</h4>En la demo de Damián, cuando entra una descarga, logística, calidad y producción la analizan <b>a la vez</b>: eso es el <b>03</b>. No hace falta explicar los cinco en detalle. Señalá el <b>04</b> sin desarrollarlo: «guárdenlo, lo van a ver funcionando en un rato». Y el <b>05</b>, que es una buena defensa: un segundo agente que revisa antes de actuar.</aside>
+</section>
+
+
+<!-- ============ CASOS · SECCIÓN ============ -->
+<section class="slide seccion" data-sec="2 · Dónde ya se usa">
+  <div class="eyebrow">Parte 2</div>
+  <h1 style="margin-top:120px">Dónde<br>ya se <em>usa</em></h1>
+  <p class="lead" style="margin-top:34px">Cinco casos reales, del campo al puerto. Con números y con letra chica.</p>
+  <div class="num">2</div>
+  <aside class="nota"><h4>+0:28 · Parte 2</h4>Aclaralo de entrada: <b>la mayoría de las cifras las publicó la propia empresa</b>. Son útiles para dimensionar, pero no son auditorías independientes. Mirar quién mide es parte de lo que aprendimos en el d03 y el d04.</aside>
+</section>
+
+<!-- ============ CASOS · MAPA ============ -->
+<section class="slide" data-sec="2 · Dónde ya se usa">
+  <div class="eyebrow">Parte 2 · <b>El mapa</b></div>
+  <h2>De automatizar una tarea <em>a cerrar un trato</em></h2>
+  <svg width="1420" height="540" viewBox="0 0 1420 540" aria-label="Casos ubicados según cuánta autonomía tienen">
+    <defs><linearGradient id="gMapa" x1="0" x2="1"><stop offset="0" stop-color="#48B39C"/><stop offset="1" stop-color="#F0B441"/></linearGradient></defs>
+    <rect x="0" y="470" width="1420" height="18" rx="9" fill="url(#gMapa)" opacity=".85"/>
+    <text x="0" y="524" fill="#B9AE96" font-size="18">percibe y ejecuta una tarea</text>
+    <text x="1420" y="524" text-anchor="end" fill="#B9AE96" font-size="18">conversa, usa herramientas y cierra →</text>
+    <g font-family="Archivo,sans-serif">
+      <g transform="translate(0,300)"><rect width="250" height="140" rx="14" fill="#0E2C3D" stroke="#48B39C" stroke-width="2"/><text x="20" y="40" fill="#48B39C" font-size="16" font-family="IBM Plex Mono,monospace">AGRO · VISIÓN</text><text x="20" y="78" fill="#EFE6D2" font-size="21" font-weight="700">Pulverizar</text><text x="20" y="108" fill="#EFE6D2" font-size="21" font-weight="700">solo la maleza</text></g>
+      <g transform="translate(290,210)"><rect width="250" height="140" rx="14" fill="#0E2C3D" stroke="#48B39C" stroke-width="2"/><text x="20" y="40" fill="#48B39C" font-size="16" font-family="IBM Plex Mono,monospace">ACUICULTURA</text><text x="20" y="78" fill="#EFE6D2" font-size="21" font-weight="700">Alimentar</text><text x="20" y="108" fill="#EFE6D2" font-size="21" font-weight="700">desde una sala</text></g>
+      <g transform="translate(580,140)"><rect width="250" height="140" rx="14" fill="#0E2C3D" stroke="#6FA8DC" stroke-width="2"/><text x="20" y="40" fill="#6FA8DC" font-size="16" font-family="IBM Plex Mono,monospace">PUERTO</text><text x="20" y="78" fill="#EFE6D2" font-size="21" font-weight="700">Predecir arribos</text><text x="20" y="108" fill="#EFE6D2" font-size="21" font-weight="700">y coordinar</text></g>
+      <g transform="translate(870,70)"><rect width="250" height="140" rx="14" fill="#0E2C3D" stroke="#F0B441" stroke-width="2"/><text x="20" y="40" fill="#F0B441" font-size="16" font-family="IBM Plex Mono,monospace">VIGILANCIA · LLM</text><text x="20" y="78" fill="#EFE6D2" font-size="21" font-weight="700">Responder sobre</text><text x="20" y="108" fill="#EFE6D2" font-size="21" font-weight="700">buques sospechosos</text></g>
+      <g transform="translate(1160,0)"><rect width="260" height="140" rx="14" fill="#0E2C3D" stroke="#F0B441" stroke-width="2"/><text x="20" y="40" fill="#F0B441" font-size="16" font-family="IBM Plex Mono,monospace">COMPRAS · LLM</text><text x="20" y="78" fill="#EFE6D2" font-size="21" font-weight="700">Negociar con</text><text x="20" y="108" fill="#EFE6D2" font-size="21" font-weight="700">proveedores</text></g>
+    </g>
+    <g stroke="#6b7c84" stroke-dasharray="4 6" stroke-width="2"><line x1="125" y1="440" x2="125" y2="470"/><line x1="415" y1="350" x2="415" y2="470"/><line x1="705" y1="280" x2="705" y2="470"/><line x1="995" y1="210" x2="995" y2="470"/><line x1="1290" y1="140" x2="1290" y2="470"/></g>
+  </svg>
+  <aside class="nota"><h4>+0:28 · Mapa (1 min)</h4>Los cinco casos que siguen, ordenados por autonomía. Los dos de la izquierda no usan modelos de lenguaje: <b>perciben y actúan</b> en un bucle cerrado. Los dos de la derecha sí: conversan, consultan datos y proponen o cierran. Todos tienen algo en común que vamos a ver al final.</aside>
+</section>
+
+<!-- ============ CASO 1 · SEE & SPRAY ============ -->
+<section class="slide" data-sec="2 · Dónde ya se usa">
+  <div class="eyebrow">Caso 1 · <b>Agro</b> · John Deere See &amp; Spray</div>
+  <h2>La cámara de la Clase 7, <em>con manos</em></h2>
+  <div class="cols" style="align-items:flex-start">
+    <div class="col" style="flex:.9">
+      <p class="sub" style="color:var(--carta)">Cámaras en el botalón detectan la maleza en movimiento y abren <b style="color:var(--boya)">solo la boquilla</b> que está encima. Percibe, decide y actúa en fracciones de segundo, sin nadie en el medio.</p>
+      <div class="grid2" style="margin-top:22px">
+        <div class="dato"><div class="n">59 %</div><div class="t">menos herbicida, en promedio</div><div class="c">temporada 2024</div></div>
+        <div class="dato"><div class="n">+1 M</div><div class="t">de acres aplicados</div><div class="c">≈ 400.000 ha</div></div>
+      </div>
+      <p class="sub" style="margin-top:18px;font-size:20px">Comparado con pulverizar todo el lote. En 2025 la empresa informó cerca de 50 %: <b style="color:var(--carta)">el número cambia con la temporada y el lote</b>.</p>
+    </div>
+    <div class="col" style="flex:1.1"><div class="video" data-yt="ytJELX6rKV4" data-t="0" title="See &amp; Spray Ultimate · Theory of Operation (John Deere)"></div></div>
+  </div>
+  <div class="fuente">Cifras de John Deere (comunicados del 18/09/2024 y 04/11/2025), no auditadas. Video: canal oficial de John Deere.</div>
+  <aside class="nota"><h4>+0:29 · Caso 1 (3 min)</h4>Pasá 40 segundos del video (está en inglés; el dibujo se entiende solo). Es la cámara de la Clase 7 conectada a un actuador: <b>un agente simple, sin modelo de lenguaje</b>. Pregunta al chat: <i>¿qué sería la «boquilla» en una planta de filetes?</i> (el expulsor de la cinta). 1 acre ≈ 0,405 ha.</aside>
+</section>
+
+<!-- ============ CASO 2 · ACUICULTURA ============ -->
+<section class="slide" data-sec="2 · Dónde ya se usa">
+  <div class="eyebrow">Caso 2 · <b>Acuicultura</b> · alimentación remota del salmón</div>
+  <h2>Una sala que alimenta <em>18 centros</em></h2>
+  <div class="cols" style="align-items:flex-start">
+    <div class="col" style="flex:.95">
+      <p class="sub" style="color:var(--carta)"><b style="color:var(--boya)">Mowi Escocia</b> alimenta sus jaulas desde un centro remoto en Fort William. Cámaras submarinas y un software con IA reconocen el pellet que cae sin comer; <b style="color:var(--boya)">la persona decide</b> cuándo cortar.</p>
+      <div class="grid3" style="margin-top:20px;gap:14px">
+        <div class="dato" style="padding:16px"><div class="n" style="font-size:52px">18</div><div class="t" style="font-size:19px">centros desde una sala</div></div>
+        <div class="dato" style="padding:16px"><div class="n" style="font-size:52px">12</div><div class="t" style="font-size:19px">personas, en 2 turnos</div></div>
+        <div class="dato" style="padding:16px"><div class="n" style="font-size:52px">0,98</div><div class="t" style="font-size:19px">conversión de alimento, récord de un centro en 2025</div></div>
+      </div>
+      <p class="sub" style="margin-top:16px;font-size:20px">En el video, Umitron (Japón) va un paso más: el alimentador mide el apetito y <b style="color:var(--carta)">ajusta solo</b>. El fabricante informa 20 % menos alimento en besugo.</p>
+    </div>
+    <div class="col" style="flex:1.05"><div class="video" data-yt="dAXPzmH3_Ic" data-t="0" title="UMITRON CELL (Umitron, canal oficial)"></div></div>
+  </div>
+  <div class="fuente">Mowi Scotland (12/02/2026), «Remote Operations Centre returns excellent results»; Umitron vía The Fish Site. Cifras de las empresas.</div>
+  <aside class="nota"><h4>+0:32 · Caso 2 (3 min)</h4>Dos niveles de autonomía en el mismo problema: Mowi <b>asiste a la persona</b> (la IA marca el pellet que sobra, el operador corta), Umitron <b>ajusta solo</b>. Mowi lo dice explícitamente: la tecnología <i>no reemplaza a sus empleados, los asiste</i>.<br>La conversión 0,98 (bFCR) es el mejor resultado de un centro (Gorsten); no es el promedio. Si sale la pregunta: FCR = kg de alimento por kg de pescado producido.</aside>
+</section>
+
+<!-- ============ CASO 3 · PUERTO ============ -->
+<section class="slide" data-sec="2 · Dónde ya se usa">
+  <div class="eyebrow">Caso 3 · <b>Puerto</b> · Rotterdam</div>
+  <h2>Saber cuándo llega <em>cambia todo el muelle</em></h2>
+  <div class="cols" style="align-items:flex-start">
+    <div class="col" style="flex:.95">
+      <p class="sub" style="color:var(--carta)">Un modelo entrenado con el historial de escalas predice cuándo llega cada buque al muelle. Con ese dato, <b style="color:var(--boya)">prácticos, remolcadores, amarradores y terminal</b> se organizan sobre un mismo plan.</p>
+      <div class="grid2" style="margin-top:22px">
+        <div class="dato"><div class="n">20 %</div><div class="t">menos tiempo de espera</div><div class="c">según la autoridad portuaria</div></div>
+        <div class="dato"><div class="n">20 min</div><div class="t">de precisión al predecir el arribo al muelle</div></div>
+      </div>
+      <p class="sub" style="margin-top:18px;font-size:20px">Si el barco sabe que lo esperan a una hora, <b style="color:var(--carta)">baja la velocidad</b> y gasta menos gasoil: la curva del principio.</p>
+    </div>
+    <div class="col" style="flex:1.05"><div class="video" data-yt="bTEqVdt5VuM" data-t="0" title="Port Call Optimization · Pronto, Port of Rotterdam"></div></div>
+  </div>
+  <div class="fuente">Port of Rotterdam vía MarineLink y Seatrade Maritime (cifras del puerto, no auditadas). Video: Port Technology International.</div>
+  <aside class="nota"><h4>+0:35 · Caso 3 (2 min)</h4>No hace falta poner el video: alcanza con la imagen. La idea a sembrar, sin adelantar el caso de Damián: <b>un aviso de arribo bien hecho ordena a muchos actores a la vez</b>. Preguntá: <i>en Madryn, Deseado o Mar del Plata, ¿quién se entera hoy de que llega un buque, y cómo?</i> Guardá las respuestas: Damián las va a retomar.</aside>
+</section>
+
+<!-- ============ CASO 4 · SHIPPY ============ -->
+<section class="slide" data-sec="2 · Dónde ya se usa">
+  <div class="eyebrow">Caso 4 · <b>Vigilancia pesquera</b> · un agente con modelo de lenguaje</div>
+  <h2>«¿Qué buques se apagaron <em>cerca de la reserva?</em>»</h2>
+  <div class="cols" style="align-items:flex-start">
+    <div class="col" style="flex:.95">
+      <p class="sub" style="color:var(--carta)"><b style="color:var(--boya)">Shippy</b>, de Skylight (Ai2), responde preguntas en lenguaje común usando datos de AIS y satélites: buques que apagan el transpondedor, encuentros en el mar para transbordar captura.</p>
+      <ul class="lista" style="margin-top:14px"><li>Cada respuesta <b>enlaza los registros</b> de donde salió.</li><li>Si los datos no alcanzan, <b>se detiene en vez de adivinar</b>.</li><li>Adónde mandar la patrulla lo deciden <b>las personas</b>.</li></ul>
+      <div class="dato" style="margin-top:16px;padding:16px 20px;display:flex;gap:18px;align-items:baseline"><div class="n" style="font-size:52px">+300</div><div class="t" style="font-size:20px">organizaciones de unos 70 países usan Skylight</div></div>
+    </div>
+    <div class="col" style="flex:1.05"><div class="video" data-yt="NnGbwPauS5U" data-t="0" title="Meet Shippy (Skylight, canal oficial)"></div></div>
+  </div>
+  <div class="fuente">GeekWire (08/06/2026); Global Fishing Watch y Ai2 (2026). Video: canal oficial de Skylight.</div>
+  <aside class="nota"><h4>+0:37 · Caso 4 (3 min)</h4>Poné el video entero: dura <b>26 segundos</b>. Es el ejemplo más claro de las cuatro piezas: <b>cerebro</b> (modelo de lenguaje), <b>manos</b> (consultas a los datos de buques), <b>manual</b> (no da opiniones legales, se detiene si no sabe). Y los límites de autonomía están escritos.<br>Puente a la demo: en un rato van a ver barcos <b>simulados</b> moviéndose hacia puerto; en la vida real esas posiciones llegan por AIS o VMS, los mismos datos que usa Shippy.<br>Global Fishing Watch anunció en 2026 una alianza con Ai2 para usar estos agentes; su equipo prueba agentes que vigilan buques cerca de áreas protegidas.</aside>
+</section>
+
+<!-- ============ CASO 5 · NEGOCIAR ============ -->
+<section class="slide" data-sec="2 · Dónde ya se usa">
+  <div class="eyebrow">Caso 5 · <b>Compras</b> · Walmart y Pactum</div>
+  <h2>Un agente que <em>negocia</em></h2>
+  <div class="cols" style="align-items:flex-start;margin-top:6px">
+    <div class="col">
+      <p class="lead" style="font-size:27px">Walmart usó un agente conversacional para negociar plazos y precios con <b>proveedores chicos</b> de equipamiento, que ningún comprador humano llegaba a atender.</p>
+      <div class="card" style="margin-top:22px;border-left:6px solid var(--boya)"><div class="k">El límite que lo hizo posible</div><p>El agente negocia <b>dentro de márgenes que fija la empresa</b>, y solo en contratos chicos. No compra lo que se vende en las góndolas.</p></div>
+    </div>
+    <div class="col">
+      <div class="grid2">
+        <div class="dato"><div class="n">64 %</div><div class="t">de los 100 proveedores del piloto cerró acuerdo</div><div class="c">la meta era 20 %</div></div>
+        <div class="dato"><div class="n">11</div><div class="t">días promedio por negociación</div></div>
+        <div class="dato" style="grid-column:span 2"><div class="n">3 de 4</div><div class="t">proveedores prefirieron negociar con el agente antes que con una persona</div><div class="c">según Walmart, 2023</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="fuente">Van Hoek, DeWitt, Lacity et al. (2022), «How Walmart Automated Supplier Negotiations», Harvard Business Review; Bloomberg (26/04/2023).</div>
+  <aside class="nota"><h4>+0:40 · Caso 5 (2 min)</h4>Es el extremo derecho del mapa: <b>el agente cierra tratos</b>. Lo que lo hace aceptable es el alcance: contratos chicos, márgenes fijados por personas. Preguntá: <i>¿qué compra repetida y chica de una pesquera dejarían negociar a un agente?</i> (insumos de envase, hielo, guantes…). ¿Y cuál nunca?</aside>
+</section>
+
+<!-- ============ CASOS · LO COMÚN ============ -->
+<section class="slide" data-sec="2 · Dónde ya se usa">
+  <div class="eyebrow">Parte 2 · <b>Lo que se repite en los cinco</b></div>
+  <h2>Ninguno <em>arrancó por el agente</em></h2>
+  <div class="grid4" style="margin-top:14px">
+    <div class="regla" style="min-height:300px"><div class="n">01</div><div class="t" style="font-size:28px">Un dato que llega solo</div><div class="e">Cámaras, AIS, historial de escalas. <b>Sin dato confiable no hay agente.</b></div></div>
+    <div class="regla" style="min-height:300px;border-top-color:var(--marea)"><div class="n">02</div><div class="t" style="font-size:28px">Una tarea acotada</div><div class="e">Una boquilla, una jaula, un contrato chico. <b>No «toda la operación».</b></div></div>
+    <div class="regla" style="min-height:300px;border-top-color:var(--transito)"><div class="n">03</div><div class="t" style="font-size:28px">Un número para medir</div><div class="e">Litros, conversión, minutos de espera, acuerdos cerrados.</div></div>
+    <div class="regla" style="min-height:300px;border-top-color:var(--langostino)"><div class="n">04</div><div class="t" style="font-size:28px">Una persona en el lugar justo</div><div class="e">En la sala, en la patrulla, fijando los márgenes.</div></div>
+  </div>
+  <p class="lead" style="margin-top:28px">Para pensar en tu empresa: <b>¿qué aviso llega todos los días, lo leen cinco personas distintas y cada una hace algo?</b> Ahí hay un candidato.</p>
+  <aside class="nota"><h4>+0:42 · Lo común (1 min)</h4>Esta pregunta final es la que encausa hacia el caso de Damián sin nombrarlo: un aviso que dispara tareas en varias áreas. Dejala picando, no la respondas.</aside>
+</section>
+
+<!-- ============ 12 · SECCIÓN 2 ============ -->
+<section class="slide seccion" data-sec="3 · Dónde se rompe">
+  <div class="eyebrow">Parte 3</div>
+  <h1 style="margin-top:120px">Dónde<br>se <em>rompe</em></h1>
+  <p class="lead" style="margin-top:34px">Un agente que se equivoca no solo da un mal número: <b>hace algo</b>.</p>
+  <div class="num">3</div>
+  <aside class="nota"><h4>+0:43 · Parte 3</h4>Volvé al d04: la cámara que decidía sola tiró filetes buenos y dejó pasar un pallet con parásitos. Un agente con permisos para mandar cuadrillas o reprogramar túneles puede hacer daños parecidos, más rápido.</aside>
+</section>
+
+
+<!-- ============ ROMPE · KLARNA ============ -->
+<section class="slide" data-sec="3 · Dónde se rompe">
+  <div class="eyebrow">Parte 3 · <b>Un caso para aprender</b> · Klarna</div>
+  <h2>El asistente que hacía <em>el trabajo de 700</em></h2>
+  <div class="cols" style="margin-top:6px">
+    <div class="card col" style="border-top:6px solid var(--marea)"><div class="k" style="color:var(--marea)">Febrero 2024 · lo que anunció</div>
+      <div class="grid2" style="margin-top:10px;gap:14px">
+        <div><div class="frase" style="font-size:54px;color:var(--boya)">2,3 M</div><p>conversaciones en el primer mes: <b>dos tercios</b> de los chats</p></div>
+        <div><div class="frase" style="font-size:54px;color:var(--boya)">700</div><p>agentes de tiempo completo, «equivalentes»</p></div>
+        <div><div class="frase" style="font-size:54px;color:var(--boya)">2 min</div><p>para resolver, contra 11 antes</p></div>
+        <div><div class="frase" style="font-size:54px;color:var(--boya)">−25 %</div><p>consultas repetidas</p></div>
+      </div>
+    </div>
+    <div class="card col" style="border-top:6px solid var(--langostino)"><div class="k" style="color:var(--langostino)">Mayo 2025 · lo que pasó después</div>
+      <p class="lead" style="font-size:28px;margin-top:10px">Vuelve a contratar personas para atención al cliente.</p>
+      <div class="cita" style="margin-top:18px;font-size:26px">El costo fue un factor de evaluación demasiado predominante; el resultado fue una calidad más baja.<span>Sebastian Siemiatkowski, CEO, mayo de 2025 · traducción propia</span></div>
+      <p class="sub" style="margin-top:14px;font-size:20px">La empresa aclaró que sigue usando la IA y suma personas para los casos más complejos.</p>
+    </div>
+  </div>
+  <div class="fuente">Klarna, comunicado del 27/02/2024; Bloomberg y Entrepreneur (mayo de 2025).</div>
+  <aside class="nota"><h4>+0:43 · Klarna (2 min)</h4>La lección no es «la IA falló»: los números de 2024 eran reales. La lección es <b>qué se midió</b>: velocidad y costo, no calidad. Es el d03 otra vez: un modelo con buen número en la métrica equivocada. Y es la «zona de duda» de la C7: los casos complejos tenían que ir a una persona desde el principio.</aside>
+</section>
+
+<!-- ============ ROMPE · CIFRAS ============ -->
+<section class="slide" data-sec="3 · Dónde se rompe">
+  <div class="eyebrow">Parte 3 · <b>Dónde está la industria</b></div>
+  <h2>Mucho entusiasmo, <em>poco en producción</em></h2>
+  <div class="grid3" style="margin-top:14px">
+    <div class="dato"><div class="n">23 %</div><div class="t">de las organizaciones ya escala algún agente; otro 39 % está experimentando</div><div class="c">McKinsey, The State of AI 2025</div></div>
+    <div class="dato" style="border-color:var(--langostino)"><div class="n" style="color:var(--langostino)">+40 %</div><div class="t">de los proyectos de agentes se cancelarán antes de fines de 2027: costos, valor poco claro, riesgos mal controlados</div><div class="c">Gartner, 25/06/2025 (predicción)</div></div>
+    <div class="dato"><div class="n">≈130</div><div class="t">proveedores de «agentes» de entre miles ofrecen agentes de verdad; el resto es <b>agent washing</b></div><div class="c">Gartner, 25/06/2025</div></div>
+  </div>
+  <p class="lead" style="margin-top:30px">Cuando alguien te venda un agente, la primera pregunta es <b>la de la Clase 6: ¿le gana a lo que ya hacés?</b></p>
+  <aside class="nota"><h4>+0:45 · Cifras (2 min)</h4><b>Agent washing</b>: llamar «agente» a un chatbot o a una automatización de siempre para venderla mejor. Gartner también predice que para 2028 al menos el 15 % de las decisiones del día a día se tomarán de forma autónoma: <b>la ola viene igual</b>, por eso conviene saber evaluarla. Las cifras de Gartner son predicciones, no mediciones.</aside>
+</section>
+
+<!-- ============ 13 · CINCO RIESGOS ============ -->
+<section class="slide" data-sec="3 · Dónde se rompe">
+  <div class="eyebrow">Parte 3 · <b>Cinco fallas y su defensa</b></div>
+  <h2>Lo que puede <em>salir mal</em></h2>
+  <div class="grid5" style="margin-top:10px">
+    <div class="regla" style="border-top-color:var(--langostino);min-height:400px"><div class="n">DATO FALSO</div><div class="t" style="font-size:24px">«Llego con 9.999 t»</div><div class="e">Un formulario mal cargado.<br><br><b>Defensa:</b> validar rangos antes de que llegue al agente.</div></div>
+    <div class="regla" style="border-top-color:var(--langostino);min-height:400px"><div class="n">INVENTO</div><div class="t" style="font-size:24px">Una capacidad que no existe</div><div class="e">Responde con seguridad algo que no consultó.<br><br><b>Defensa:</b> todo número sale de una herramienta.</div></div>
+    <div class="regla" style="border-top-color:var(--langostino);min-height:400px"><div class="n">ÓRDENES ESCONDIDAS</div><div class="t" style="font-size:24px">«Ignorá tus reglas y…»</div><div class="e">Instrucciones metidas en un mail o un campo de texto.<br><br><b>Defensa:</b> el texto de afuera es dato, nunca orden.</div></div>
+    <div class="regla" style="border-top-color:var(--langostino);min-height:400px"><div class="n">DEMASIADO PODER</div><div class="t" style="font-size:24px">Manda la cuadrilla solo</div><div class="e">Permisos de más para lo que tiene que hacer.<br><br><b>Defensa:</b> mínimos permisos y OK humano en lo caro.</div></div>
+    <div class="regla" style="border-top-color:var(--langostino);min-height:400px"><div class="n">SIN RASTRO</div><div class="t" style="font-size:24px">Nadie sabe por qué</div><div class="e">Decidió, pero no quedó registrado qué vio.<br><br><b>Defensa:</b> guardar entrada, pasos y salida.</div></div>
+  </div>
+  <div class="fuente">«Órdenes escondidas» y «demasiado poder»: LLM01 y LLM06 en OWASP Top 10 for LLM Applications 2025.</div>
+  <aside class="nota"><h4>+0:47 · Riesgos (3 min)</h4>Conectá cada uno con algo conocido:<ul><li><b>Dato falso:</b> todo sistema que recibe datos cargados a mano tiene este riesgo. Dejá la pregunta en general, sin nombrar la demo: ¿qué hace si alguien pone 9.999 t, +30 °C en lugar de −30 o «ignorá tus reglas» en un campo de texto? Que la lleven puesta.</li><li><b>Sin rastro:</b> es la falla 8 del d04, «las imágenes no se guardan».</li><li><b>Demasiado poder:</b> es la cámara del d04 sin zona de duda, ahora con un teléfono en la mano.</li></ul></aside>
+</section>
+
+<!-- ============ 14 · AUTONOMÍA ============ -->
+<section class="slide" data-sec="3 · Dónde se rompe">
+  <div class="eyebrow">Parte 3 · <b>Cuánta autonomía</b></div>
+  <h2>Depende de lo que <em>cuesta deshacerlo</em></h2>
+  <div class="grid4" style="margin-top:14px">
+    <div class="regla" style="border-top-color:var(--marea);min-height:340px"><div class="n">NIVEL 1</div><div class="t">Sugiere</div><div class="e">La persona lee y hace todo.<br><br><b>Ej.:</b> «convendría correr la descarga».</div></div>
+    <div class="regla" style="border-top-color:#2f9f8a;min-height:340px"><div class="n">NIVEL 2</div><div class="t">Prepara y espera el OK</div><div class="e">Deja todo armado; un clic lo aprueba.<br><br><b>Ej.:</b> el plan de cuadrillas, listo para confirmar.</div></div>
+    <div class="regla" style="border-top-color:var(--boya);min-height:340px"><div class="n">NIVEL 3</div><div class="t">Hace y avisa</div><div class="e">Actúa en lo que se puede deshacer.<br><br><b>Ej.:</b> reserva bins térmicos y avisa al muelle.</div></div>
+    <div class="regla" style="border-top-color:var(--langostino);min-height:340px"><div class="n">NIVEL 4</div><div class="t">Hace solo</div><div class="e">Solo para lo barato, repetido y reversible.<br><br><b>Ej.:</b> mandar el parte diario.</div></div>
+  </div>
+  <p class="lead" style="margin-top:28px">Es la <b>zona de duda</b> de la Clase 7, ahora para acciones: lo dudoso y lo caro pasa por una persona.</p>
+  <aside class="nota"><h4>+0:50 · Autonomía (2 min)</h4>Los cuatro niveles son una escala didáctica del curso, no un estándar. La regla para llevarse: <b>cuanto más cuesta deshacer la acción, más abajo en la escala</b>. Un error en el parte diario se corrige con otro mail; una cuadrilla convocada a las 4 de la mañana o un lote liberado sin inspección no se deshacen.<br>Preguntá: <i>¿qué nivel le darían a un agente que libera un lote para exportación?</i> (nivel 1 o 2: lo firma una persona).</aside>
+</section>
+
+<!-- ============ 15 · CÓMO MIRAR LA DEMO ============ -->
+<section class="slide" data-sec="Puente">
+  <div class="eyebrow">Antes de la demo · <b>cinco preguntas para el flujo de Damián</b></div>
+  <h2>Mirala <em>como auditor</em></h2>
+  <div class="grid5" style="margin-top:10px">
+    <div class="dato"><div class="n">1</div><div class="t">¿Qué <b>percibe</b>? ¿De dónde salen los datos?</div></div>
+    <div class="dato"><div class="n">2</div><div class="t">¿Cada especialista <b>razona</b> o aplica una <b>regla</b>?</div></div>
+    <div class="dato"><div class="n">3</div><div class="t">¿Qué <b>decide solo</b> y qué pasa por una persona?</div></div>
+    <div class="dato"><div class="n">4</div><div class="t">¿Qué hace si el <b>dato está mal</b>?</div></div>
+    <div class="dato"><div class="n">5</div><div class="t">¿Dónde queda <b>registrado</b> lo que hizo?</div></div>
+  </div>
+  <div class="card" style="margin-top:28px;border-left:6px solid var(--boya)"><div class="k">Y al final, n8n contra Claude</div><p style="font-size:25px">¿Cuál te deja <b>ver</b> mejor lo que pasa? ¿Cuál se adapta mejor a un caso que <b>no estaba previsto</b>? ¿Qué le faltaría para usarlo mañana en tu planta?</p></div>
+  <aside class="nota"><h4>+0:52 · Preguntas para la demo (2 min)</h4>Pediles que anoten las respuestas mientras miran: al cierre, Damián o vos las retoman. Son las mismas preguntas que harían si un proveedor les vende un agente. No anticipes la demo ni la evalúes vos: las preguntas quedan planteadas y los alumnos las aplican solos. «¿Qué le faltaría?» queda sembrada para el cierre; si surge, respuestas posibles: posiciones reales por AIS o VMS, validación de lo que se carga, permisos y un responsable de cada decisión.<br><b>Pasale la palabra a Damián.</b></aside>
+</section>
+
+<!-- ============ 16 · PASE ============ -->
+<section class="slide seccion" data-sec="Puente">
+  <div class="eyebrow">Parte 4 · el caso en vivo</div>
+  <p class="frase" style="font-size:78px;margin-top:120px">Del buque al despacho,<br><span style="color:var(--boya)">con Damián Giacone.</span></p>
+  <p class="lead" style="margin-top:50px">Tené el celular a mano: vas a cargar la descarga de un buque o el pedido de un cliente.</p>
+  <div class="num">4</div>
+  <aside class="nota"><h4>+0:54 · Pase</h4>Dejala proyectada mientras Damián comparte pantalla.</aside>
+</section>
+
+<!-- ============ 17 · BIBLIOGRAFÍA ============ -->
+<section class="slide" data-sec="Cierre">
+  <div class="eyebrow">Fuentes de esta presentación</div>
+  <h2>Bibliografía</h2>
+  <ul class="biblio" style="margin-top:0;columns:2;column-gap:40px">
+    <li>Anthropic (2024). <i>Building effective agents</i>. 19 de diciembre de 2024. anthropic.com/engineering/building-effective-agents</li>
+    <li>Gartner (2025, 25 de junio). <i>Gartner Predicts Over 40% of Agentic AI Projects Will Be Canceled by End of 2027</i>. Comunicado de prensa.</li>
+    <li>John Deere (2024, 18 de septiembre). <i>See &amp; Spray customers see 59% average herbicide savings in 2024</i>. Comunicado de prensa.</li>
+    <li>Klarna (2024, 27 de febrero). <i>Klarna AI assistant handles two-thirds of customer service chats in its first month</i>. Comunicado de prensa.</li>
+    <li>McKinsey &amp; Company (2025). <i>The state of AI in 2025: Agents, innovation, and transformation</i>.</li>
+    <li>Mowi Scotland (2026, 12 de febrero). <i>Remote Operations Centre returns excellent results</i>.</li>
+    <li>Port of Rotterdam: Pronto y predicción de arribos con IA (MarineLink; Seatrade Maritime).</li>
+    <li>GeekWire (2026, 8 de junio). Ai2's Skylight project launches Shippy, an AI agent that dives into ocean data.</li>
+    <li>Van Hoek, R., DeWitt, M., Lacity, M. et al. (2022). How Walmart automated supplier negotiations. <i>Harvard Business Review</i>.</li>
+    <li>OWASP (2024). <i>OWASP Top 10 for LLM Applications 2025</i>. OWASP GenAI Security Project. genai.owasp.org</li>
+    <li>Russell, S. y Norvig, P. (2021). <i>Artificial Intelligence: A Modern Approach</i> (4.ª ed.). Pearson.</li>
+    <li>Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K. y Cao, Y. (2023). ReAct: Synergizing reasoning and acting in language models. <i>ICLR 2023</i>.</li>
+    <li>Material del curso: simulador <b>c8_velocidad_optima</b> y notebooks <b>clase08_optimizacion</b> (novato, intermedio y avanzado). Datos didácticos, no son mediciones de flota.</li>
+    <li>Ejemplo del bucle (buque, precios, velocidades y turnos): inventado para explicar.</li>
+  </ul>
+  <aside class="nota"><h4>Bibliografía</h4>No se proyecta salvo que pregunten; queda para quien descargue la presentación del aula.</aside>
+</section>
+
+</div></div>
+
+<div class="hud"><i id="barra"></i></div>
+<div class="contador" id="contador"></div>
+<div class="nav"><button type="button" id="bAnt" aria-label="Anterior">←</button><button type="button" id="bSig" aria-label="Siguiente">→</button><button type="button" id="bFull">F · pantalla completa</button><button type="button" id="bNotas">N · notas</button></div>
+<div class="notas" id="notas" aria-live="polite"></div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')], lienzo=document.getElementById('lienzo');
+slides.forEach(sl=>{ if(sl.dataset.sinMarca!==undefined) return; const m=document.createElement('div'); m.className='marca'; m.setAttribute('aria-hidden','true');
+  m.innerHTML='<span><img src="../../branding/utn_frch.png" alt=""></span><span><img src="../../branding/pesquerosenia.png" alt=""></span>'; sl.appendChild(m); });
+let i=0;
+function escalar(){ const s=Math.min(innerWidth/1600, innerHeight/900); lienzo.style.transform=`scale(${s})`; }
+function ir(n){
+  i=Math.max(0,Math.min(slides.length-1,n));
+  slides.forEach((s,k)=>s.classList.toggle('activa',k===i));
+  document.getElementById('barra').style.width=(100*(i+1)/slides.length)+'%';
+  document.getElementById('contador').textContent=`${slides[i].dataset.sec||''} · ${i+1} / ${slides.length}`;
+  const nota=slides[i].querySelector('aside.nota'); document.getElementById('notas').innerHTML=nota?nota.innerHTML:'';
+  if(location.hash!=='#'+(i+1)) history.replaceState(null,'','#'+(i+1));
+}
+function full(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); }
+function notas(){ document.getElementById('notas').classList.toggle('show'); }
+addEventListener('keydown',e=>{
+  if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();ir(i+1);}
+  else if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){e.preventDefault();ir(i-1);}
+  else if(e.key==='Home') ir(0); else if(e.key==='End') ir(slides.length-1);
+  else if(e.key==='f'||e.key==='F') full(); else if(e.key==='n'||e.key==='N') notas();
+});
+let x0=null; addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
+addEventListener('touchend',e=>{ if(x0===null) return; const d=e.changedTouches[0].clientX-x0; if(Math.abs(d)>50) ir(i+(d<0?1:-1)); x0=null; });
+document.getElementById('bAnt').onclick=()=>ir(i-1); document.getElementById('bSig').onclick=()=>ir(i+1);
+document.getElementById('bFull').onclick=full; document.getElementById('bNotas').onclick=notas;
+addEventListener('resize',escalar); escalar();
+ir((parseInt(location.hash.slice(1))||1)-1);
+</script>
+
+<script>
+document.querySelectorAll('.video').forEach(v=>{ const id=v.dataset.yt;
+  v.style.backgroundImage=`url(https://i.ytimg.com/vi/${id}/hqdefault.jpg)`;
+  v.insertAdjacentHTML('beforeend',`<div class="play" aria-hidden="true"></div><div class="rot">▶ ${v.title} · <a href="https://youtu.be/${id}" target="_blank" rel="noopener">abrir en YouTube ↗</a></div>`);
+  v.addEventListener('click',e=>{ if(e.target.tagName==='A'||v.querySelector('iframe')) return;
+    v.insertAdjacentHTML('beforeend',`<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0" title="${v.title}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`); });
+});
+addEventListener('keydown',()=>setTimeout(()=>document.querySelectorAll('.slide:not(.activa) .video iframe').forEach(f=>f.remove()),0));
+
+
+(function(){ // curvas ilustrativas de la diapositiva de velocidad óptima
+  const X0=70,X1=740,Y0=410,Y1=40, vmin=6, vmax=14;
+  const comb=v=>0.9*v*v, dias=v=>1100/v, tot=v=>comb(v)+dias(v);
+  const ymax=tot(vmax)*1.05, X=v=>X0+(v-vmin)/(vmax-vmin)*(X1-X0), Y=c=>Y0-c/ymax*(Y0-Y1);
+  const path=f=>{let d='';for(let v=vmin;v<=vmax+1e-9;v+=0.1){d+=(d?'L':'M')+X(v).toFixed(1)+' '+Y(f(v)).toFixed(1);}return d;};
+  document.getElementById('cComb').setAttribute('d',path(comb));
+  document.getElementById('cDias').setAttribute('d',path(dias));
+  document.getElementById('cTot').setAttribute('d',path(tot));
+  let vb=vmin;for(let v=vmin;v<=vmax;v+=0.01){if(tot(v)<tot(vb))vb=v;}
+  ['cOpt'].forEach(id=>{const l=document.getElementById(id);l.setAttribute('x1',X(vb));l.setAttribute('x2',X(vb));});
+  document.getElementById('cOptT').setAttribute('x',X(vb));
+})();
+</script>
+</body>
+</html>
